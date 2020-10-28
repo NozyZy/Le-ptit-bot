@@ -13,7 +13,7 @@ It is open to everyone, to use and modify it.
 
 # How to contribute
 
-1. Clone this repository
+1. Clone/Fork this repository ![alt text](https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png)
 2. Make your changes, here are the things you need to know. 
  - The main file is `bot.py`, where every commands and reaction are, you can use and add funstions in `functions.py`
  - in the `on_message(message)` function :
@@ -30,7 +30,7 @@ if Message.startswith('quoi'):
 - To add commands, the prexif is set at the beginning of the file (`bot = commands.Bot(command_prefix="--", description="Le p'tit bot !"`), so this is --)
 	Then, use `@bot.command()` to begin a new command, next line has to be `async def command_name(ctx, other_parameters):`, and then the command call will be the prexif, past top 	the 	name (so here it'll be `--command_name`)
 - Be creative, and do be affraid to add things in english, even if it's firstly programed for french users, mixity is good !
-3. When you're done, make a pull request to a branch of my repository, and hope I'll accept your cvhanges (I'm sure you'll do good stuff that I'll approve !)
+3. When you're done, make a pull request to the `dev_improve` branch of my repository, and hope I'll accept your changes (I'm sure you'll do good stuff that I'll approve !)
 
 ENJOY
 ============
