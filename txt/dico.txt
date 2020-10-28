@@ -120,6 +120,7 @@ aillent
 aillez
 aime
 aimer
+aimerait
 aimez
 ainsi
 air
@@ -193,6 +194,7 @@ amoyen
 amphi
 amphibiens
 amphis
+amsi
 amusé
 améliorations
 améliorer
@@ -312,6 +314,7 @@ arrete
 arreter
 arri
 arriere
+arrivaient
 arrivants
 arrive
 arrivent
@@ -377,6 +380,7 @@ auprès
 aura
 auraient
 aurait
+aurez
 auront
 aus
 auschwitz
@@ -1182,6 +1186,7 @@ connectent
 connecter
 connecté
 connu
+connue
 cons
 conscience
 conseil
@@ -1198,6 +1203,7 @@ console
 consoles
 constant
 constitué
+consulter
 contact
 contacte
 contacter
@@ -1579,6 +1585,7 @@ discuter
 dise
 disent
 dises
+disons
 dispo
 disposant
 disposition
@@ -1607,6 +1614,7 @@ dl
 dlc
 dlevel
 dm
+dmg
 dneo
 do
 doc
@@ -1761,6 +1769,7 @@ dénomination
 départ
 dépasse
 dépend
+déplacements
 déplacer
 déplaces
 dépose
@@ -1945,6 +1954,7 @@ error
 es
 escroc
 espaces
+esperons
 espion
 esport
 esports
@@ -1955,8 +1965,10 @@ essai
 essaie
 essaye
 essayer
+essayera
 essayes
 essayez
+essayons
 essayé
 essentiels
 essuyer
@@ -1999,7 +2011,9 @@ exact
 exactement
 exactly
 exam
+examens
 example
+exams
 exce
 excel
 excellent
@@ -2050,6 +2064,7 @@ facon
 faction
 factorisations
 facturer
+faculté
 fafarenheith
 faible
 faiblesse
@@ -2139,6 +2154,7 @@ ferai
 ferais
 ferait
 ferme
+ferment
 fermer
 fermé
 fermées
@@ -2291,9 +2307,11 @@ frere
 frero
 fresh
 friend
+friends
 friendzoned
 from
 front
+frontieres
 frr
 fruits
 frère
@@ -2315,6 +2333,7 @@ furia
 fusionne
 fusionnez
 future
+futurs
 fé
 féminins
 février
@@ -2454,6 +2473,7 @@ gro
 gros
 grosse
 grosses
+grossir
 ground
 group
 groupe
@@ -2477,6 +2497,7 @@ guts
 guy
 guys
 gzdcnj
+gâchée
 gâteau
 gère
 gé
@@ -3176,6 +3197,7 @@ macaque
 machin
 machine
 macko
+macron
 macs
 mad
 madame
@@ -3922,6 +3944,7 @@ partage
 partager
 partagez
 partagé
+partais
 partant
 partante
 parte
@@ -4123,6 +4146,7 @@ play
 playday
 player
 playing
+plaît
 please
 pleb
 plein
@@ -4377,6 +4401,7 @@ pré
 précis
 précise
 précision
+précisé
 précisément
 précédemment
 précédent
@@ -4627,6 +4652,7 @@ rec
 reccursif
 receive
 recette
+recevait
 recevoir
 rechangé
 recherche
@@ -4707,6 +4733,7 @@ reloux
 relu
 relève
 remarche
+remarquer
 remarqué
 remboursez
 remercie
@@ -4785,6 +4812,7 @@ ressemblent
 ressenti
 ressentira
 ressources
+restait
 restants
 restauration
 reste
@@ -4933,6 +4961,7 @@ régal
 régle
 régler
 réguliers
+régulièrement
 réinitialiser
 réinstaller
 réinventer
@@ -5438,6 +5467,7 @@ sujety
 sulfures
 summer
 sun
+sup
 super
 superb
 supermarché
@@ -5562,6 +5592,7 @@ tema
 temp
 tempra
 temps
+tenais
 tendus
 tennispro
 tentative
@@ -5576,6 +5607,7 @@ terraformation
 terraformer
 terrayotabg
 terre
+terrible
 tes
 test
 teste
@@ -5633,8 +5665,10 @@ totale
 totalement
 totaux
 touche
+touchés
 toujours
 tour
+tournoi
 tournée
 tous
 tousanticovid
@@ -5958,6 +5992,7 @@ zut
 équilibrer
 équipe
 équiper
+établissement
 étaient
 étais
 était
@@ -5970,6 +6005,7 @@ zut
 étudiants
 étudier
 été
+évents
 évidemment
 éviter
 évoluer

@@ -13,6 +13,7 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
 
 
+# On ready message
 @bot.event
 async def on_ready():
     print('Logged in as')
@@ -21,57 +22,24 @@ async def on_ready():
     print('------')
 
 
+# Get every message sent, stocked in 'message'
 @bot.event
 async def on_message(message):
     channel = message.channel
     Message = message.content.lower()
     rdnb = random.randint(1, 5)
 
+    # open and stock the dico, with a lot of words
     dico_file = open("txt/dico.txt", "r+")
     dico_lines = dico_file.readlines()
     dico_size = len(dico_lines)
     dico_file.close()
 
-    admin_file = open("txt/admin.txt", "r+")
-    admin = admin_file.readlines()
-    admin_file.close()
-
     if message.author == bot.user:  # we don't want the bot to repeat itself
         return
 
-    if message.author.id == 359743894042443776:
-        if Message.startswith("--shield"):
-            if 'on' in Message:
-                admin[0] = 'True' + str(message.guild.id) + '\n'
-                print("shield ON")
-                await message.add_reaction("👍")
-            else:
-                admin[0] = 'False\n'
-                print("shield OFF")
-                await message.add_reaction("👎")
-
-        if Message.startswith("--printing"):
-            if 'on' in Message:
-                admin[1] = 'True\n'
-                print("print ON")
-                await message.add_reaction("👍")
-            else:
-                admin[1] = 'False\n'
-                print("print OFF")
-                await message.add_reaction("👎")
-
-    admin_file = open("txt/admin.txt", "w+")
-    for i in admin:
-        admin_file.write(str(i))
-    admin_file.close()
-
-    if 'True' in admin[0] and str(message.guild.id) in admin[0]:
-        await message.delete()  # la commande tueuse
-
-    if 'True' in admin[1]:
-        print(message.content)
-
-    if message.author.id != 69609930770677761:  # 0
+    # expansion of the dico, with words of every messages (stock only words, never complete message)
+    if message.author.id != 696099307706777610:  # we don't what a specific bot (from a friend) to expand the dico
         if "```" in Message:
             return
         mot = ""
@@ -95,6 +63,7 @@ async def on_message(message):
             dico_file.write(i)
         dico_file.close()
 
+    # stock file full of insults (yes I know...)
     fichier_insulte = open("txt/insultes.txt", "r")
     lines_insultes = fichier_insulte.readlines()
     insultes = []
@@ -103,6 +72,7 @@ async def on_message(message):
         insultes.append(i)
     fichier_insulte.close()
 
+    # stock file full of youtube links
     fichier_ytb = open("txt/youtube.txt", "r")
     lines_ytb = fichier_ytb.readlines()
     ytb = []
@@ -110,47 +80,6 @@ async def on_message(message):
         i = i.replace("\n", "")
         ytb.append(i)
     fichier_ytb.close()
-
-    """
-        if Message.startswith('othello'):
-        # game.othello_game(channel)
-        grille = init_position(init_plateau())
-        a = len(grille)
-        for y in range(0, a):  # y = ordonées (vaut 0 en haut, et a en bas)
-            val_y = ' '
-            val_y += str(y + 1)
-            for x in range(0, a):  # x = abscisse (vaut 0 à gauche, et a à droite)
-                if x == a - 1 and y != a - 1:
-                    grille[y][x] = val_y
-        print(grille)
-        plateau = ''
-        for y in range(0, a):  # len(grille) vaut la longeur a de la fonction init_plateau
-            for x in range(0, a):
-                if x == a - 1 and y != a - 1:
-                    plateau += '   ' + str(grille[y][x]) + '\n'
-                elif x == 0:
-                    plateau += grille[y][x]
-                elif y == a - 1 and x != a - 1:
-                    plateau += str(chr(64 + x)) + '      '
-                elif (x == 0 and y == a - 1) or (x == a - 1 and y == a - 1):
-                    plateau += ' '
-                else:
-                    plateau += '      ' + str(grille[y][x])
-
-        plateau += '\n'
-        print(plateau)
-        await channel.send(plateau)
-    """
-
-    if Message.startswith('youtube shp') or Message.startswith('Youtube shp'):
-        print(ytb)
-        text = random.choice(ytb)
-        await channel.send(text)
-
-    if Message.startswith('all youtube shp') or Message.startswith('All youtube shp'):
-        print(ytb)
-        text = ytb
-        await channel.send(text)
 
     if message.content.startswith('--addYoutube'):
         print("Ajout de video...")
@@ -241,36 +170,11 @@ async def on_message(message):
 
         await channel.send(song)
 
-    fichier_shp = open("txt/ShPeu.txt", "r")
-    lines_shp = fichier_shp.readlines()
-    shp = []
-    for i in lines_shp:
-        i = i.replace("\n", "")
-        shp.append(i)
-    fichier_shp.close()
-
-    if Message.startswith('shp') or Message.startswith('ShP') or Message.startswith('ShPeu'):
-        print(shp)
-        text = random.choice(shp)
-        await channel.send(text)
-
-    if Message.startswith('ajouter shp'):
-        print("Ajout de shp...")
-        mot = str(Message)
-        mot = mot.replace("ajouter shp ", "")
-        mot = '\n' + mot
-        fichier_shp = open("txt/ShPeu.txt", "a")
-        fichier_shp.write(mot)
-        fichier_shp.close()
-        print(shp)
-        text = shp[len(shp) - 1]
-        await channel.send(text)
-
-    if Message.startswith("--appel <@") and channel.guild != "EFREI Internatial 2025":
+    # ping a people 10 time, once every 3 sec
+    if Message.startswith("--appel <@") and channel.guild != "EFREI International 2025":
         if "<@!653563141002756106>" in Message:
             await channel.send("T'es un marrant toi")
         else:
-            print(Message)
             nom = Message.replace("--appel ", "")
             liste = ["Allo ", "T'es la ? ", "Tu viens ", "On t'attend...", "Ca commence a faire long ",
                      "Tu viens un jour ??? ", "J'en ai marre de toi... ", "Allez grouille !! ",
@@ -280,6 +184,7 @@ async def on_message(message):
                 await channel.send(text)
                 time.sleep(3)
 
+    # if you tag this bot in any message (without the above command)
     if "<@!653563141002756106>" in Message and "appel" not in Message:
         user = str(message.author)
         user = user.replace(user[len(user) - 5:len(user)], "")
@@ -289,6 +194,7 @@ async def on_message(message):
             rep.append('Yo <@!747066145550368789>')
         await channel.send(random.choice(rep))
 
+    # send 5 randoms words from the dico
     if Message == "--random":
         text = ""
         rd_dico = dico_lines
@@ -302,9 +208,12 @@ async def on_message(message):
         text = text.replace(text[0], text[0].upper(), 1)
         await channel.send(text)
 
+    # send the number of words stocked in the dico
     if Message == '--dico':
         text = "J'ai actuellement " + str(len(dico_lines)) + " mots enregistrés, nickel"
         await channel.send(text)
+
+    # begginning of reaction programs, get inspired
 
     if Message.startswith("hein"):
         await channel.send("deux.")
@@ -350,6 +259,7 @@ async def on_message(message):
     if Message == '1':
         await channel.send("2")
 
+        # waits for a message valiudating further instructions
         def check(m):
             return m.content == "3" and m.channel == message.channel
 
@@ -376,7 +286,7 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
         else:
             await channel.send(finndAndReplace('o', dico_lines))
-        
+
     if Message.startswith('merci'):
         if rdnb > 3:
             reponses = ['De rien hehe', "C'est normal t'inquiète", "Je veux le cul d'la crémière avec.", 'non.',
@@ -426,7 +336,6 @@ async def on_message(message):
         await channel.send(random.choice(reponses))
 
     if 'tg' in Message:
-        print(insultes)
         await channel.send(random.choice(insultes))
 
     if Message == 'cheh' or Message == 'sheh':
@@ -444,15 +353,12 @@ async def on_message(message):
         await channel.send(random.choice(reponses))
 
     if Message.startswith('lequel') and Message[4] != 'q':
-        print('Quel')
         await channel.send('Le deuxième.')
 
     if Message.startswith('laquelle'):
-        print('Quelle')
         await channel.send('La deuxième.')
 
     if Message.startswith('miroir magique'):
-        print('miroir miroir')
         await channel.send(Message)
 
     if Message.startswith("jure"):
@@ -500,20 +406,16 @@ async def on_message(message):
         await channel.send("God looks like him.", embed=embed)
 
     if Message.startswith("hello"):
-        print("helo")
         await channel.send(file=discord.File('images/helo.jpg'))
 
     if Message == "enculé" or Message == "enculer":
-        print("teller meme")
         image = ['images/tellermeme.png', 'images/bigard.jpeg']
         await channel.send(file=discord.File(random.choice(image)))
 
     if Message == "stonks":
-        print("stonks")
         await channel.send(file=discord.File('images/stonks.png'))
 
     if Message == "parfait" or Message == "perfection":
-        print("perfection")
         await channel.send(file=discord.File('images/perfection.jpg'))
 
     if 'pute' in Message:
@@ -532,7 +434,6 @@ async def on_message(message):
         Message = ' ' + Message + ' '
         for i in range(len(Message) - 3):
             if Message[i] == ' ' and Message[i + 1] == 'p' and Message[i + 2] == 'd' and Message[i + 3] == ' ':
-                print("pd")
                 await channel.send(file=discord.File('images/pd.jpg'))
 
     if 'oof' in Message and rdnb >= 3:
@@ -542,6 +443,7 @@ async def on_message(message):
                     'https://tenor.com/view/yikes-michael-scott-the-office-my-bad-oof-gif-13450971']
         await channel.send(random.choice(reponses))
 
+    # teh help command, add commands call, but not reactions
     if Message == '--help':
         await channel.send("Commandes : \n"
                            " **F** to pay respect\n"
@@ -562,17 +464,20 @@ async def on_message(message):
                            "                         **all** *affiche toute la liste*\n"
                            "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈")
     else:
+        # allows command to process after the on_message() function call
         await bot.process_commands(message)
 
 
-@bot.command()
+# beginning of the commands
+
+@bot.command()  # delete 'nombre' messages
 async def clear(ctx, nombre: int):
     messages = await ctx.channel.history(limit=nombre + 1).flatten()
     for message in messages:
         await message.delete()
 
 
-@bot.command()
+@bot.command()  # repeat the 'text', and delete the original message
 async def repeat(ctx, *text):
     messages = await ctx.channel.history(limit=1).flatten()
     for message in messages:
@@ -580,7 +485,7 @@ async def repeat(ctx, *text):
     await ctx.send(" ".join(text))
 
 
-@bot.command()
+@bot.command()  # show the number of people in the server, and its name
 async def serverinfo(ctx):
     server = ctx.guild
     nbUsers = server.member_count
@@ -588,12 +493,12 @@ async def serverinfo(ctx):
     await ctx.send(text)
 
 
-@bot.command()
+@bot.command()  # same, with a capital letter
 async def serverInfo(ctx):
     await serverinfo(ctx)
 
 
-@bot.command()
+@bot.command()  # send the 26 possibilites of a ceasar un/decryption
 async def crypt(ctx, *text):
     mot = " ".join(text)
     messages = await ctx.channel.history(limit=1).flatten()
@@ -602,7 +507,7 @@ async def crypt(ctx, *text):
     await ctx.send("||" + mot + "|| :\n" + crypting(mot))
 
 
-@bot.command()
+@bot.command()  # send a random integer between two numbers, or 1 and 0
 async def randint(ctx, *text):
     tab = []
     Message = "".join(text)
@@ -636,12 +541,12 @@ async def randint(ctx, *text):
     await ctx.send(rd)
 
 
-@bot.command()
+@bot.command()  # same, with a capital letter
 async def randInt(ctx, *text):
     await randint(ctx, *text)
 
 
-@bot.command()
+@bot.command()  # send a random word from the dico, the first to write it wins
 async def game(ctx):
     dico_file = open("txt/dico.txt", "r+")
     dico_lines = dico_file.readlines()
@@ -665,75 +570,7 @@ async def game(ctx):
     await ctx.send(text)
 
 
-@bot.command()
-async def AmongUs(ctx):
-    ids = [321216514986606592, 135784465065574401, 349548485797871617, 359743894042443776]
-    print(ctx.message.author.id)
-    if ctx.author.id not in ids:
-        await ctx.send("Tu n'as pas les permissions 😶")
-        return
-    f_name = open("txt/names.txt", "r+")
-    all_names = f_name.readlines()
-    random.shuffle(all_names)
-    f_name.close()
-    random.shuffle(all_names)
-
-    text = "**C'est partie ! On joue avec " + str(len(all_names)) + " joueurs !**"
-    await ctx.send(text)
-    tour = 0
-    modos = ['NozZy', 'Trivarius', 'Skiep', 'Cybonix', 'BlackSterben']
-    while 1:
-        tour += 1
-        f_name = open("txt/names.txt", "r+")
-        all_names = f_name.readlines()
-        random.shuffle(all_names)
-        f_name.close()
-        random.shuffle(all_names)
-
-        random.shuffle(modos)
-        """
-        for j in range(-9, -5):
-            size = -j
-            if len(all_names)%size == 0:
-                print(size)
-                break
-                    
-        for i in range(0, len(all_names)//size):
-            names.append([''] * size)            
-            
-            for j in range(size):
-                all_names[i*size+j] = all_names[i*size+j].replace("\n", "")
-                names[i][j] = all_names[i*size+j]
-        """
-        names = equal_games(all_names)
-        # print("Equipes : ", names)
-
-        color = [0x0000ff, 0x740001, 0x458b74, 0x18eeff, 0xeae4d3, 0xff8100, 0x9098ff, 0xff90fa, 0xff1443, 0xff1414,
-                 0x7fffd4, 0x05ff3c, 0x05ffa1]
-        text = "**Partie n°" + str(tour) + "**"
-        await ctx.send(text)
-        for i in range(len(names)):
-            if i < len(modos):
-                mod = modos[i]
-            else:
-                mod = "sans modo"
-            embed = discord.Embed(title=("**Equipe " + mod + "**"), color=random.choice(color))
-            embed.set_thumbnail(url="https://i.redd.it/1y3vw360an031.png")
-            for y in range(0, len(names[i])):
-                embed.add_field(name=("Joueur " + str(y + 1)), value=names[i][y], inline=True)
-            await ctx.send(embed=embed)
-
-        def check(m):
-            id_list = [321216514986606592, 359743894042443776, 135784465065574401, 349548485797871617]
-            return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
-
-        msg = await bot.wait_for('message', check=check)
-        if msg.content == "END":
-            await ctx.send("**Fin de la partie...**")
-            break
-
-
-@bot.command()
+@bot.command()  # do a simple calcul of 2 numbers and 1 operator (or a fractionnal)
 async def calcul(ctx, *text):
     tab = []
     symbols = ['-', '+', '/', '*', '^', '!']
@@ -766,7 +603,7 @@ async def calcul(ctx, *text):
     nb1 = strToInt(tab)
 
     if symb == '!':
-        if nb1 > 806:
+        if nb1 > 806:  # can't go above 806 recursion deepth
             await ctx.send("806! maximum, désolé 🤷‍♂️")
             return
         rd = facto(nb1)
@@ -801,7 +638,7 @@ async def calcul(ctx, *text):
     await ctx.send(text)
 
 
-@bot.command()
+@bot.command()  # create a reaction poll with a question, and max 10 propositions
 async def poll(ctx, *text):
     tab = []
     Message = " ".join(text)
@@ -845,10 +682,8 @@ async def poll(ctx, *text):
             text += "\n9️⃣"
         elif i == 10:
             text += "\n🔟"
-        print(tab[i])
         text += tab[i]
 
-    print(text)
     reponse = await ctx.send(text)
     for i in range(len(tab)):
         if i == 1:
@@ -873,7 +708,7 @@ async def poll(ctx, *text):
             await reponse.add_reaction("🔟 ")
 
 
-@bot.command()
+@bot.command()  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
 async def prime(ctx, nb: int):
     if nb < 2:
         await ctx.send("Tu sais ce que ca veut dire 'prime number' ?")
@@ -894,14 +729,14 @@ async def prime(ctx, nb: int):
         Fprime = open("txt/primes.txt", "a+")
         Fprime.write(text)
         Fprime.close()
-    if nb > 14064991:
+    if nb > 14064991:  # 8Mb file limit
         text = "Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
         await ctx.send(text)
     text = "Tous les nombres premiers jusqu'a 14064991"
     await ctx.send(text, file=discord.File("txt/prime.txt"))
 
 
-@bot.command()
+@bot.command()  # find if 'nb' is a prime number, reacts to the message
 async def isPrime(ctx, nb: int):
     if is_prime(nb):
         await ctx.message.add_reaction("👍")
@@ -909,7 +744,7 @@ async def isPrime(ctx, nb: int):
         await ctx.message.add_reaction("👎")
 
 
-@bot.command()
+@bot.command()  # send 'nb' random words of the dico, can repeat itself
 async def randomWord(ctx, nb: int):
     dico_file = open("txt/dico.txt", "r+")
     dico_lines = dico_file.readlines()
@@ -926,13 +761,13 @@ async def randomWord(ctx, nb: int):
     await ctx.send(text)
 
 
-@bot.command()
+@bot.command()  # join the vocal channel fo the caller
 async def join(ctx):
     channel = ctx.author.voice.channel
     await channel.connect()
 
 
-@bot.command()
+@bot.command()  # leaves it
 async def leave(ctx):
     await ctx.voice_client.disconnect()
 
@@ -941,6 +776,7 @@ musics = {}
 ytdl = youtube_dl.YoutubeDL()
 
 
+# class of youtube videos (from youtube_dl)
 class Video:
     def __init__(self, link):
         video = ytdl.extract_info(link, download=False)
@@ -949,6 +785,7 @@ class Video:
         self.stream_url = video_format["url"]
 
 
+# plays a song in the vocal channel
 def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(song.stream_url,
@@ -965,7 +802,7 @@ def playSong(clt, queue, song):
     clt.play(source, after=next)
 
 
-@bot.command()
+@bot.command()  # play theyoutube song attached to the URL (TO FIX)
 async def play(ctx, url):
     clt = ctx.guild.voice_client
 
@@ -985,4 +822,5 @@ async def say(ctx, number, *text):
         await ctx.send(" ".join(text))
 """
 
+# runs the bot (if you have a TOKEN hahaha)
 bot.run(TOKEN)
