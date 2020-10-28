@@ -247,6 +247,9 @@ async def on_message(message):
     if Message == '❤':
         await channel.send('❤')
 
+    if Message == "Ben":
+        await channel.send("je suis sa pute")
+
     if Message == '1':
         await channel.send("2")
 
