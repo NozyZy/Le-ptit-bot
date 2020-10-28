@@ -72,15 +72,6 @@ async def on_message(message):
         insultes.append(i)
     fichier_insulte.close()
 
-    # stock file full of youtube links
-    fichier_ytb = open("txt/youtube.txt", "r")
-    lines_ytb = fichier_ytb.readlines()
-    ytb = []
-    for i in lines_ytb:
-        i = i.replace("\n", "")
-        ytb.append(i)
-    fichier_ytb.close()
-
     if message.content.startswith('--addYoutube'):
         print("Ajout de video...")
         mot = str(Message)

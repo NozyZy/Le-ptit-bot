@@ -4,14 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e07fe4c-69dc-45ef-959e-0324382cbe98" name="Default Changelist" comment="Initial commit">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="3e07fe4c-69dc-45ef-959e-0324382cbe98" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/txt/ShPeu.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/txt/admin.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/txt/dico.txt" beforeDir="false" afterPath="$PROJECT_DIR$/txt/dico.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/txt/mots.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/txt/names.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -194,7 +188,7 @@
       <workItem from="1603887342418" duration="1401000" />
       <workItem from="1603910093736" duration="509000" />
       <workItem from="1603910624914" duration="319000" />
-      <workItem from="1603910967683" duration="4728000" />
+      <workItem from="1603910967683" duration="5211000" />
     </task>
     <task id="LOCAL-00001" summary="Token regenerated">
       <created>1602597228049</created>
@@ -322,7 +316,14 @@
       <option name="project" value="LOCAL" />
       <updated>1603911889025</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Removal personal use&#10;Comments added">
+      <created>1603926605621</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1603926605621</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -340,7 +341,8 @@
     <MESSAGE value="moved to discord.py 1.5.1&#10;god updated&#10;youtube --play added, not totally functional&#10;--join &amp; --leave added and working&#10;syntax updated" />
     <MESSAGE value="oh/ah added&#10;some upgrade" />
     <MESSAGE value="Initial commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit" />
+    <MESSAGE value="Removal personal use&#10;Comments added" />
+    <option name="LAST_COMMIT_MESSAGE" value="Removal personal use&#10;Comments added" />
   </component>
   <component name="WindowStateProjectService">
     <state x="586" y="198" key="#Inspections" timestamp="1603454070244">
@@ -351,11 +353,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="174" width="1092" height="811" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1603910906677" />
-    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2" timestamp="1603925518146">
+    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2" timestamp="1603926604378">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="585" y="112" key="CommitChangelistDialog2/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597220299" />
-    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1603925518146" />
+    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1603926604378" />
     <state x="184" y="85" width="1536" height="861" key="DiffContextDialog" timestamp="1602843175476">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -412,11 +414,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="828" y="97" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1603911838205" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1603911924073">
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1603926625407">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597239792" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1603911924073" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1603926625407" />
     <state x="92" y="92" width="1736" height="856" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1602706718894">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
