@@ -13,7 +13,7 @@ It is open to everyone, to use and modify it.
 
 # How to contribute
 
-1. Clone/Fork this repository ![alt text](https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png)
+1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
 2. Make your changes, here are the things you need to know. 
  - The main file is `bot.py`, where every commands and reaction are, you can use and add funstions in `functions.py`
  - in the `on_message(message)` function :
