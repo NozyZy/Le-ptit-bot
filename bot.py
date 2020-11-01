@@ -281,6 +281,13 @@ async def on_message(message):
         else:
             await channel.send(finndAndReplace('o', dico_lines))
 
+    if Message == 'eh':
+        if rdnb >= 4:
+            reponses = ['hehehehehe', 'oh']
+            await channel.send(random.choice(reponses))
+        else:
+            await channel.send(finndAndReplace('é', dico_lines))
+
     if Message.startswith('merci'):
         if rdnb > 3:
             reponses = ['De rien hehe', "C'est normal t'inquiète", "Je veux le cul d'la crémière avec.", 'non.',
@@ -430,12 +437,18 @@ async def on_message(message):
             if Message[i] == ' ' and Message[i + 1] == 'p' and Message[i + 2] == 'd' and Message[i + 3] == ' ':
                 await channel.send(file=discord.File('images/pd.jpg'))
 
-    if 'oof' in Message and rdnb >= 3:
+    if 'oof' in Message and rdnb >= 2:
         reponses = ['https://tenor.com/view/oh-snap-surprise-shocked-johncena-gif-5026702',
                     'https://tenor.com/view/oof-damn-wow-ow-size-gif-16490485',
                     'https://tenor.com/view/oof-simpsons-gif-14031953',
                     'https://tenor.com/view/yikes-michael-scott-the-office-my-bad-oof-gif-13450971']
         await channel.send(random.choice(reponses))
+
+    if ('money' in Message or 'argent' in Message) and rdnb >= 2:
+    	reponses = ['https://tenor.com/view/6m-rain-wallstreet-makeitrain-gif-8203989',
+    				'https://tenor.com/view/money-makeitrain-rain-guap-dollar-gif-7391084',
+    				'https://tenor.com/view/taka-money-gif-10114852']
+    	await channel.send(random.choice(reponses))
 
     # teh help command, add commands call, but not reactions
     if Message == '--help':
