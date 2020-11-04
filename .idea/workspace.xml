@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e07fe4c-69dc-45ef-959e-0324382cbe98" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/txt/dico.txt" beforeDir="false" afterPath="$PROJECT_DIR$/txt/dico.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -195,7 +193,6 @@
       <workItem from="1603910967683" duration="6017000" />
       <workItem from="1604260505649" duration="2442000" />
       <workItem from="1604507271307" duration="3105000" />
-      <workItem from="1604511678174" duration="359000" />
     </task>
     <task id="LOCAL-00001" summary="Token regenerated">
       <created>1602597228049</created>
@@ -404,22 +401,6 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="787" y="223" key="Github.UntrackedFilesDialog/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597029567" />
-    <state width="1240" height="249" key="GridCell.Tab.0.bottom" timestamp="1604511655747">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1240" height="249" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1604511655747" />
-    <state width="1240" height="249" key="GridCell.Tab.0.center" timestamp="1604511655747">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1240" height="249" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1604511655747" />
-    <state width="1240" height="249" key="GridCell.Tab.0.left" timestamp="1604511655746">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1240" height="249" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1604511655746" />
-    <state width="1240" height="249" key="GridCell.Tab.0.right" timestamp="1604511655747">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="1240" height="249" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604511655747" />
     <state width="938" height="347" key="GridCell.Tab.1.bottom" timestamp="1604263373097">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

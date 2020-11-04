@@ -2,6 +2,7 @@ import asyncio
 import discord
 import time
 import youtube_dl
+import os
 
 from discord.ext import commands
 from fonctions import *
@@ -9,6 +10,8 @@ from fonctions import *
 # ID : 653563141002756106
 # https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8
 
+intents = discord.Intents.default()
+intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
 
@@ -247,6 +250,9 @@ async def on_message(message):
     if Message == '❤':
         await channel.send('❤')
 
+    if Message == "ben":
+        await channel.send("je suis sa pute")
+
     if Message == '1':
         await channel.send("2")
 
@@ -277,6 +283,13 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
         else:
             await channel.send(finndAndReplace('o', dico_lines))
+
+    if Message == 'eh':
+        if rdnb >= 4:
+            reponses = ['hehehehehe', 'oh']
+            await channel.send(random.choice(reponses))
+        else:
+            await channel.send(finndAndReplace('é', dico_lines))
 
     if Message.startswith('merci'):
         if rdnb > 3:
@@ -316,8 +329,9 @@ async def on_message(message):
     if Message.startswith("lourd") and rdnb >= 4:
         await channel.send("Sku sku")
 
-    if '<@!321216514986606592>' in Message:
-        await channel.send("Encore lui ?")
+    if '<@!321216514986606592>' in Message and rdnb >= 4:
+        reponses = ['Le VP numéro 2', 'Encore lui ?', 'fasstin']
+        await channel.send(random.choice(reponses))
 
     if '<@!761898936364695573>' in Message:
         await channel.send("Tu parles comment de mon pote là ?")
@@ -427,11 +441,17 @@ async def on_message(message):
             if Message[i] == ' ' and Message[i + 1] == 'p' and Message[i + 2] == 'd' and Message[i + 3] == ' ':
                 await channel.send(file=discord.File('images/pd.jpg'))
 
-    if 'oof' in Message and rdnb >= 3:
+    if 'oof' in Message and rdnb >= 2:
         reponses = ['https://tenor.com/view/oh-snap-surprise-shocked-johncena-gif-5026702',
                     'https://tenor.com/view/oof-damn-wow-ow-size-gif-16490485',
                     'https://tenor.com/view/oof-simpsons-gif-14031953',
                     'https://tenor.com/view/yikes-michael-scott-the-office-my-bad-oof-gif-13450971']
+        await channel.send(random.choice(reponses))
+
+    if ('money' in Message or 'argent' in Message) and rdnb >= 2:
+        reponses = ['https://tenor.com/view/6m-rain-wallstreet-makeitrain-gif-8203989',
+                    'https://tenor.com/view/money-makeitrain-rain-guap-dollar-gif-7391084',
+                    'https://tenor.com/view/taka-money-gif-10114852']
         await channel.send(random.choice(reponses))
 
     # teh help command, add commands call, but not reactions
@@ -824,74 +844,6 @@ async def arbres(ctx, *ex):
         await ctx.send(text)
     else:
         await ctx.send("Nope, j'ai pas trouvé, désolé mon bro !")
-
-
-@bot.command()  # PERSONAL COMMAND ONLY
-async def AmongUs(ctx):
-    ids = [321216514986606592, 135784465065574401, 349548485797871617, 359743894042443776]
-    print(ctx.message.author.id)
-    if ctx.author.id not in ids:
-        await ctx.send("Tu n'as pas les permissions 😶")
-        return
-    f_name = open("txt/names.txt", "r+")
-    all_names = f_name.readlines()
-    random.shuffle(all_names)
-    f_name.close()
-    random.shuffle(all_names)
-
-    text = "**C'est partie ! On joue avec " + str(len(all_names)) + " joueurs !**"
-    await ctx.send(text)
-    tour = 0
-    modos = ['NozZy', 'Trivarius', 'Skiep', 'Cybonix', 'BlackSterben']
-    while 1:
-        tour += 1
-        f_name = open("txt/names.txt", "r+")
-        all_names = f_name.readlines()
-        random.shuffle(all_names)
-        f_name.close()
-        random.shuffle(all_names)
-
-        random.shuffle(modos)
-        """
-        for j in range(-9, -5):
-            size = -j
-            if len(all_names)%size == 0:
-                print(size)
-                break
-
-        for i in range(0, len(all_names)//size):
-            names.append([''] * size)            
-
-            for j in range(size):
-                all_names[i*size+j] = all_names[i*size+j].replace("\n", "")
-                names[i][j] = all_names[i*size+j]
-        """
-        names = equal_games(all_names)
-        # print("Equipes : ", names)
-
-        color = [0x0000ff, 0x740001, 0x458b74, 0x18eeff, 0xeae4d3, 0xff8100, 0x9098ff, 0xff90fa, 0xff1443, 0xff1414,
-                 0x7fffd4, 0x05ff3c, 0x05ffa1]
-        text = "**Partie n°" + str(tour) + "**"
-        await ctx.send(text)
-        for i in range(len(names)):
-            if i < len(modos):
-                mod = modos[i]
-            else:
-                mod = "sans modo"
-            embed = discord.Embed(title=("**Equipe " + mod + "**"), color=random.choice(color))
-            embed.set_thumbnail(url="https://i.redd.it/1y3vw360an031.png")
-            for y in range(0, len(names[i])):
-                embed.add_field(name=("Joueur " + str(y + 1)), value=names[i][y], inline=True)
-            await ctx.send(embed=embed)
-
-        def check(m):
-            id_list = [321216514986606592, 359743894042443776, 135784465065574401, 349548485797871617]
-            return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
-
-        msg = await bot.wait_for('message', check=check)
-        if msg.content == "END":
-            await ctx.send("**Fin de la partie...**")
-            break
 
 
 @bot.command()
