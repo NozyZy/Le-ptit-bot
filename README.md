@@ -1,5 +1,5 @@
 # Le-ptit-bot
-The best discord python bot
+The best discord python bot :100:
 
 ![alt text](https://cdn.discordapp.com/attachments/754976677808832512/771094907996733460/unknown.png)
 
@@ -12,6 +12,12 @@ It is open to everyone, to use and modify it.
 -> [Invite link](/https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8)
 
 # How to contribute
+
+At this time, using:
+- **python 3.9.0**
+- **pip 20.2.4**
+- **discord.py 1.5.1**
+- **youtube-dl 2020.6.16.1**
 
 1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
 2. Make your changes, here are the things you need to know. 
