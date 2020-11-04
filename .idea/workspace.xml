@@ -5,10 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e07fe4c-69dc-45ef-959e-0324382cbe98" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_04_11_2020_18_39__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_04_11_2020_18_39__Default_Changelist_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_04_11_2020_18_46__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_04_11_2020_18_46__Default_Changelist_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_29_10_2020_01_10__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_29_10_2020_01_10__Default_Changelist_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_11_2020_21_21__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_01_11_2020_21_21__Default_Changelist_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
     </list>
@@ -351,7 +347,14 @@
       <option name="project" value="LOCAL" />
       <updated>1604262234408</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="added reactions &quot;eh&quot;, &quot;money&quot;">
+      <created>1604513473876</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1604513473876</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -383,11 +386,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="174" width="1092" height="835" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604260539340" />
-    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2" timestamp="1604262233554">
+    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2" timestamp="1604513472577">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="585" y="112" key="CommitChangelistDialog2/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597220299" />
-    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1604262233554" />
+    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1604513472577" />
     <state x="184" y="85" width="1536" height="861" key="DiffContextDialog" timestamp="1604262216658">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -404,22 +407,22 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="787" y="223" key="Github.UntrackedFilesDialog/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597029567" />
-    <state width="1877" height="249" key="GridCell.Tab.0.bottom" timestamp="1604510728659">
+    <state width="1877" height="384" key="GridCell.Tab.0.bottom" timestamp="1604513575618">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="249" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1604510728659" />
-    <state width="1877" height="249" key="GridCell.Tab.0.center" timestamp="1604510728657">
+    <state width="1877" height="384" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575618" />
+    <state width="1877" height="384" key="GridCell.Tab.0.center" timestamp="1604513575615">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="249" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1604510728657" />
-    <state width="1877" height="249" key="GridCell.Tab.0.left" timestamp="1604510728655">
+    <state width="1877" height="384" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575615" />
+    <state width="1877" height="384" key="GridCell.Tab.0.left" timestamp="1604513575614">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="249" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1604510728655" />
-    <state width="1877" height="249" key="GridCell.Tab.0.right" timestamp="1604510728658">
+    <state width="1877" height="384" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575614" />
+    <state width="1877" height="384" key="GridCell.Tab.0.right" timestamp="1604513575617">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="249" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604510728658" />
+    <state width="1877" height="384" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575617" />
     <state width="938" height="347" key="GridCell.Tab.1.bottom" timestamp="1604263373097">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -477,6 +480,6 @@
     <SUITE FILE_PATH="coverage/Bot$bot.coverage" NAME="bot Coverage Results" MODIFIED="1603184308725" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Bot$test.coverage" NAME="test Coverage Results" MODIFIED="1598208724350" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Bot$bordel.coverage" NAME="bordel Coverage Results" MODIFIED="1584636536820" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../ProjetTranverse1" />
-    <SUITE FILE_PATH="coverage/bot_py$bot.coverage" NAME="bot Coverage Results" MODIFIED="1604510728635" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/bot_py$bot.coverage" NAME="bot Coverage Results" MODIFIED="1604513575587" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
