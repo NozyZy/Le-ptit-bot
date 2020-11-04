@@ -17,7 +17,7 @@ At this time, using:
 - **python 3.9.0**
 - **pip 20.2.4**
 - **discord.py 1.5.1**
-- **youtube-dl 2020.6.16.1**
+- **youtube-dl 2020.11.1.1**
 
 1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
 	- All the packages should be in the `venv/Scripts` folder, but if not, thy are quoted above
