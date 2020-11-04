@@ -796,7 +796,7 @@ class Video:
         self.stream_url = video_format["url"]
 
 
-# plays a song in the vocal channel
+# plays a song in the vocal channel [TO FIX]
 def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(song.stream_url,
@@ -824,26 +824,6 @@ async def play(ctx, url):
         video = Video(url)
         musics[ctx.guild] = []
         playSong(clt, musics[ctx.guild], video)
-
-
-@bot.command()
-async def arbres(ctx, *ex):
-    exo = "".join(ex)
-    f_arbes = open("D:/Quentin/Documents/Cours/L2/Info/C/arbres/main.c", "r+")
-    arbres_lines = f_arbes.readlines()
-    f_arbes.close()
-    text = ""
-    for i in range(len(arbres_lines)):
-        if exo in arbres_lines[i]:
-            while "end" not in arbres_lines[i]:
-                text += arbres_lines[i]
-                i += 1
-            break
-    if len(text) > 0:
-        text = "```" + text + "```"
-        await ctx.send(text)
-    else:
-        await ctx.send("Nope, j'ai pas trouvé, désolé mon bro !")
 
 
 @bot.command()
