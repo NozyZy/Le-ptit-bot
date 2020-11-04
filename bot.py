@@ -14,7 +14,6 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-TOKEN = 'NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.BV3KsYEnlGdqJ-JzWC-jw62D1hY'
 
 
 # On ready message
@@ -38,88 +37,6 @@ async def on_message(message):
     dico_lines = dico_file.readlines()
     dico_size = len(dico_lines)
     dico_file.close()
-
-    # PERSONAL USE ONLY
-    admin_file = open("txt/admin.txt", "r+")
-    admin = admin_file.readlines()
-    admin_file.close()
-
-    if message.author.id == 359743894042443776:
-        if Message.startswith("--shield"):
-            if 'on' in Message:
-                admin[0] = 'True' + str(message.guild.id) + '\n'
-                print("shield ON")
-                await message.add_reaction("👍")
-            else:
-                admin[0] = 'False\n'
-                print("shield OFF")
-                await message.add_reaction("👎")
-
-        if Message.startswith("--printing"):
-            if 'on' in Message:
-                admin[1] = 'True\n'
-                print("print ON")
-                await message.add_reaction("👍")
-            else:
-                admin[1] = 'False\n'
-                print("print OFF")
-                await message.add_reaction("👎")
-
-    admin_file = open("txt/admin.txt", "w+")
-    for i in admin:
-        admin_file.write(str(i))
-    admin_file.close()
-
-    if 'True' in admin[0] and str(message.guild.id) in admin[0]:
-        await message.delete()  # la commande tueuse
-
-    if 'True' in admin[1]:
-        print(message.content)
-
-    # stock file full of youtube links
-    fichier_ytb = open("txt/youtube.txt", "r")
-    lines_ytb = fichier_ytb.readlines()
-    ytb = []
-    for i in lines_ytb:
-        i = i.replace("\n", "")
-        ytb.append(i)
-    fichier_ytb.close()
-
-    fichier_shp = open("txt/ShPeu.txt", "r")
-    lines_shp = fichier_shp.readlines()
-    shp = []
-    for i in lines_shp:
-        i = i.replace("\n", "")
-        shp.append(i)
-    fichier_shp.close()
-
-    if Message.startswith('youtube shp') or Message.startswith('Youtube shp'):
-        print(ytb)
-        text = random.choice(ytb)
-        await channel.send(text)
-
-    if Message.startswith('all youtube shp') or Message.startswith('All youtube shp'):
-        print(ytb)
-        text = ytb
-        await channel.send(text)
-
-    if Message.startswith('shp') or Message.startswith('ShP') or Message.startswith('ShPeu'):
-        print(shp)
-        text = random.choice(shp)
-        await channel.send(text)
-
-    if Message.startswith('ajouter shp'):
-        print("Ajout de shp...")
-        mot = str(Message)
-        mot = mot.replace("ajouter shp ", "")
-        mot = '\n' + mot
-        fichier_shp = open("txt/ShPeu.txt", "a")
-        fichier_shp.write(mot)
-        fichier_shp.close()
-        print(shp)
-        text = shp[len(shp) - 1]
-        await channel.send(text)
-    # END OF PERSONAL USE
 
     if message.author == bot.user:  # we don't want the bot to repeat itself
         return
@@ -927,74 +844,6 @@ async def arbres(ctx, *ex):
         await ctx.send(text)
     else:
         await ctx.send("Nope, j'ai pas trouvé, désolé mon bro !")
-
-
-@bot.command()  # PERSONAL COMMAND ONLY
-async def AmongUs(ctx):
-    ids = [321216514986606592, 135784465065574401, 349548485797871617, 359743894042443776]
-    print(ctx.message.author.id)
-    if ctx.author.id not in ids:
-        await ctx.send("Tu n'as pas les permissions 😶")
-        return
-    f_name = open("txt/names.txt", "r+")
-    all_names = f_name.readlines()
-    random.shuffle(all_names)
-    f_name.close()
-    random.shuffle(all_names)
-
-    text = "**C'est partie ! On joue avec " + str(len(all_names)) + " joueurs !**"
-    await ctx.send(text)
-    tour = 0
-    modos = ['NozZy', 'Trivarius', 'Skiep', 'Cybonix', 'BlackSterben']
-    while 1:
-        tour += 1
-        f_name = open("txt/names.txt", "r+")
-        all_names = f_name.readlines()
-        random.shuffle(all_names)
-        f_name.close()
-        random.shuffle(all_names)
-
-        random.shuffle(modos)
-        """
-        for j in range(-9, -5):
-            size = -j
-            if len(all_names)%size == 0:
-                print(size)
-                break
-
-        for i in range(0, len(all_names)//size):
-            names.append([''] * size)            
-
-            for j in range(size):
-                all_names[i*size+j] = all_names[i*size+j].replace("\n", "")
-                names[i][j] = all_names[i*size+j]
-        """
-        names = equal_games(all_names)
-        # print("Equipes : ", names)
-
-        color = [0x0000ff, 0x740001, 0x458b74, 0x18eeff, 0xeae4d3, 0xff8100, 0x9098ff, 0xff90fa, 0xff1443, 0xff1414,
-                 0x7fffd4, 0x05ff3c, 0x05ffa1]
-        text = "**Partie n°" + str(tour) + "**"
-        await ctx.send(text)
-        for i in range(len(names)):
-            if i < len(modos):
-                mod = modos[i]
-            else:
-                mod = "sans modo"
-            embed = discord.Embed(title=("**Equipe " + mod + "**"), color=random.choice(color))
-            embed.set_thumbnail(url="https://i.redd.it/1y3vw360an031.png")
-            for y in range(0, len(names[i])):
-                embed.add_field(name=("Joueur " + str(y + 1)), value=names[i][y], inline=True)
-            await ctx.send(embed=embed)
-
-        def check(m):
-            id_list = [321216514986606592, 359743894042443776, 135784465065574401, 349548485797871617]
-            return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
-
-        msg = await bot.wait_for('message', check=check)
-        if msg.content == "END":
-            await ctx.send("**Fin de la partie...**")
-            break
 
 
 @bot.command()
