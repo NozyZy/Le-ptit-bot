@@ -12,8 +12,7 @@ from fonctions import *
 
 intents = discord.Intents.default()
 intents.members = True
-client = discord.Client()
-bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
+bot = commands.Bot(command_prefix="--", description="Le p'tit bot !", intents = intents)
 
 
 # On ready message
