@@ -4,9 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3e07fe4c-69dc-45ef-959e-0324382cbe98" name="Default Changelist" comment="">
+    <list default="true" id="3e07fe4c-69dc-45ef-959e-0324382cbe98" name="Default Changelist" comment="re update">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_29_10_2020_01_10_[Default_Changelist]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_29_10_2020_01_10__Default_Changelist_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/txt/dico.txt" beforeDir="false" afterPath="$PROJECT_DIR$/txt/dico.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/txt/insultes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/txt/insultes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/txt/prime.txt" beforeDir="false" afterPath="$PROJECT_DIR$/txt/prime.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -192,6 +198,7 @@
       <workItem from="1603910967683" duration="6017000" />
       <workItem from="1604260505649" duration="2442000" />
       <workItem from="1604507271307" duration="3105000" />
+      <workItem from="1604829561445" duration="424000" />
     </task>
     <task id="LOCAL-00001" summary="Token regenerated">
       <created>1602597228049</created>
@@ -354,7 +361,14 @@
       <option name="project" value="LOCAL" />
       <updated>1604513473876</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="re update">
+      <created>1604513704309</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1604513704309</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -375,7 +389,8 @@
     <MESSAGE value="Removal personal use&#10;Comments added" />
     <MESSAGE value="Removal personal use" />
     <MESSAGE value="added reactions &quot;eh&quot;, &quot;money&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="added reactions &quot;eh&quot;, &quot;money&quot;" />
+    <MESSAGE value="re update" />
+    <option name="LAST_COMMIT_MESSAGE" value="re update" />
   </component>
   <component name="WindowStateProjectService">
     <state x="586" y="198" key="#Inspections" timestamp="1603454070244">
@@ -386,11 +401,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="174" width="1092" height="835" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1604260539340" />
-    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2" timestamp="1604513472577">
+    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2" timestamp="1604514058131">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="585" y="112" key="CommitChangelistDialog2/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597220299" />
-    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1604513472577" />
+    <state x="244" y="112" width="1090" height="870" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1604514058131" />
     <state x="184" y="85" width="1536" height="861" key="DiffContextDialog" timestamp="1604262216658">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -407,22 +422,22 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="787" y="223" key="Github.UntrackedFilesDialog/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597029567" />
-    <state width="1877" height="384" key="GridCell.Tab.0.bottom" timestamp="1604513575618">
+    <state width="1877" height="249" key="GridCell.Tab.0.bottom" timestamp="1604829989234">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="384" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575618" />
-    <state width="1877" height="384" key="GridCell.Tab.0.center" timestamp="1604513575615">
+    <state width="1877" height="249" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1604829989234" />
+    <state width="1877" height="249" key="GridCell.Tab.0.center" timestamp="1604829989234">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="384" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575615" />
-    <state width="1877" height="384" key="GridCell.Tab.0.left" timestamp="1604513575614">
+    <state width="1877" height="249" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1604829989234" />
+    <state width="1877" height="249" key="GridCell.Tab.0.left" timestamp="1604829989234">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="384" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575614" />
-    <state width="1877" height="384" key="GridCell.Tab.0.right" timestamp="1604513575617">
+    <state width="1877" height="249" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1604829989234" />
+    <state width="1877" height="249" key="GridCell.Tab.0.right" timestamp="1604829989234">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="384" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604513575617" />
+    <state width="1877" height="249" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1604829989234" />
     <state width="938" height="347" key="GridCell.Tab.1.bottom" timestamp="1604263373097">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -447,11 +462,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="828" y="97" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1603911838205" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1604262246944">
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1604513674499">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.219.1920.1080@0.0.1920.1040" timestamp="1602597239792" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1604262246944" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1604513674499" />
     <state x="92" y="92" width="1736" height="856" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1602706718894">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -480,6 +495,6 @@
     <SUITE FILE_PATH="coverage/Bot$bot.coverage" NAME="bot Coverage Results" MODIFIED="1603184308725" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Bot$test.coverage" NAME="test Coverage Results" MODIFIED="1598208724350" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Bot$bordel.coverage" NAME="bordel Coverage Results" MODIFIED="1584636536820" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../ProjetTranverse1" />
-    <SUITE FILE_PATH="coverage/bot_py$bot.coverage" NAME="bot Coverage Results" MODIFIED="1604513575587" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/bot_py$bot.coverage" NAME="bot Coverage Results" MODIFIED="1604829989224" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
