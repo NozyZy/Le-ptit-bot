@@ -17,7 +17,6 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
 
 
-
 # On ready message
 @bot.event
 async def on_ready():
