@@ -1,5 +1,6 @@
 import random
 
+
 def addition(a, b):
     return a + b
 
@@ -43,6 +44,7 @@ def finndAndReplace(letter, dico):
     reponse = reponse.replace(reponse[0], "", 1)
     return reponse
 
+
 def equal_games(liste):
     # Il vaut mieux que la liste soit déjà mélangée, mais on peut le faire ici aussi.
     # Le programme renvoie une liste 2D composant les équipes
@@ -77,7 +79,7 @@ def equal_games(liste):
 
 
 def facto(n):
-    if (n == 0):
+    if n == 0:
         return 1
     return n * facto(n - 1)
 
@@ -459,4 +461,3 @@ def winner(grille):
         print("Le joueur", " noir ", "gagne !", sep="")
     else:
         print("Le joueur", " rouge ", "gagne !", sep="")
-
