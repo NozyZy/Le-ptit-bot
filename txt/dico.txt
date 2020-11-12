@@ -595,6 +595,7 @@ beaux
 because
 been
 begay
+begin
 beginner
 beh
 being
@@ -771,6 +772,7 @@ bracket
 brain
 branch
 branche
+branches
 branle
 branler
 branles
@@ -895,6 +897,7 @@ cap
 capable
 capables
 capacité
+capitalisme
 capitaliste
 cappés
 caprté
@@ -1611,6 +1614,7 @@ dat
 data
 date
 dates
+dawn
 day
 dcp
 de
@@ -2235,6 +2239,7 @@ envoyés
 envulé
 ep
 epingle
+epingler
 epinglé
 eps
 equations
@@ -2307,6 +2312,7 @@ ever
 every
 everything
 evidemment
+evidemmernt
 eviter
 evolue
 ex
@@ -2357,6 +2363,7 @@ exprés
 expérimenter
 extension
 extracted
+extrait
 extremement
 exécuter
 ez
@@ -2471,6 +2478,7 @@ fell
 fellation
 femme
 femmes
+fenetre
 feokz
 fer
 fera
@@ -2520,6 +2528,7 @@ final
 finalement
 find
 finds
+fine
 fini
 finie
 finir
@@ -2649,6 +2658,7 @@ franéaos
 frapper
 frappes
 frappé
+fraudes
 frederico
 free
 freebox
@@ -2782,6 +2792,7 @@ githup
 give
 gj
 gl
+gland
 glicth
 gliser
 glisse
@@ -2800,6 +2811,7 @@ goal
 god
 gode
 godless
+gods
 going
 goka
 golden
@@ -3239,6 +3251,7 @@ interjection
 internatial
 international
 internet
+interro
 interroge
 interrogé
 intestinal
@@ -3760,6 +3773,7 @@ major
 majoritaire
 majorité
 majors
+makefile
 mal
 malade
 malaisie
@@ -3808,6 +3822,7 @@ marchait
 marchands
 marchant
 marche
+marchent
 marcher
 marchera
 marché
@@ -3844,6 +3859,7 @@ match
 mate
 maternelle
 math
+mathbot
 maths
 mathématique
 mathématiquement
@@ -3944,6 +3960,7 @@ mettent
 mettera
 mettes
 mettez
+mettiez
 mettings
 metto
 mettrai
@@ -4127,6 +4144,7 @@ much
 multi
 multiples
 multiproduits
+multisim
 mundus
 mur
 murder
@@ -4206,6 +4224,7 @@ need
 needs
 neiges
 neni
+neon
 nerfs
 net
 netflix
@@ -4382,6 +4401,7 @@ oit
 ok
 okami
 okay
+oke
 oki
 okioki
 okix
@@ -4478,9 +4498,11 @@ ouf
 ouh
 ouhh
 ouhla
+ouhlala
 oui
 ouiblié
 ouienh
+ouifren
 ouiu
 oula
 oulah
@@ -4565,6 +4587,7 @@ pariel
 paris
 park
 parking
+parkway
 parlais
 parlait
 parlant
@@ -4770,6 +4793,7 @@ pipr
 pique
 piquent
 piqueur
+piquez
 pire
 pires
 pirrikk
@@ -4846,6 +4870,7 @@ po
 poeme
 pog
 poids
+poigne
 poil
 point
 pointeur
@@ -5846,6 +5871,7 @@ safe
 sag
 sah
 said
+saignant
 saingier
 saint
 sais
@@ -6217,6 +6243,7 @@ spam
 spams
 spanning
 speak
+speaking
 spectateur
 spectateurs
 spectre
@@ -6495,6 +6522,7 @@ teamviewer
 teasé
 tech
 technique
+techniquement
 technologie
 ted
 tel
@@ -6540,6 +6568,7 @@ textes
 textuel
 tfacon
 tg
+thank
 thanks
 that
 the
@@ -6618,6 +6647,7 @@ tqthéhé
 trace
 tracking
 traduction
+trahi
 train
 traitre
 tralala
@@ -6810,6 +6840,7 @@ viendra
 viennes
 viens
 vient
+vieux
 viewers
 vigénére
 villejuif
@@ -6818,6 +6849,7 @@ vin
 vincere
 violent
 virgule
+virgules
 virtuspro
 viré
 virés
@@ -6925,6 +6957,7 @@ windows
 winners
 winows
 winstrike
+with
 wl
 wlh
 wo

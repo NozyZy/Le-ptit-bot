@@ -1,9 +1,11 @@
+import googletrans
 import asyncio
 import discord
 import time
 import youtube_dl
 import os
 
+from googletrans import Translator
 from discord.ext import commands
 from datetime import date
 from fonctions import *
@@ -221,254 +223,255 @@ async def on_message(message):
         return
 
     # begginning of reaction programs, get inspired
+    if not Message.startswith('--'):
+        print("ca c'est sur")
+        if Message.startswith("hein"):
+            await channel.send("deux.")
 
-    if Message.startswith("hein"):
-        await channel.send("deux.")
-
-    if Message == 'pas mal':
-        reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
-        await channel.send(random.choice(reponses))
-
-    if Message == "ez" or Message == "easy":
-        reponses = ["https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918"]
-        await channel.send(random.choice(reponses))
-
-    if Message == 'bite' or Message == 'zizi':
-        text = "8" + '=' * random.randint(0, 9) + "D"
-        await channel.send(text)
-
-    if 'yanis' in Message and rdnb == 5:
-        await channel.send("La Bretagne c'est pas ouf.")
-
-    if Message.startswith("stop") or Message.startswith("arrête") or Message.startswith("arrete"):
-        await channel.send("https://tenor.com/view/stop-it-get-some-help-gif-7929301")
-
-    if Message.startswith("exact"):
-        reponses = ["Je dirais même plus, exact.", "Il est vrai", "AH BON ??!", "C'est cela", "Plat-il ?", "Jure ?"]
-        await channel.send(random.choice(reponses))
-
-    if Message == '<3':
-        reponses = ["Nique ta tante (pardon)", "<3", "luv luv", "moi aussi je t'aime ❤"]
-        await channel.send(random.choice(reponses))
-
-    if Message == 'toi-même' or Message == "toi-meme" or Message == "toi même" or Message == "toi meme":
-        reponses = ["Je ne vous permet pas", "Miroir magique", "C'est celui qui dit qui l'est"]
-        await channel.send(random.choice(reponses))
-
-    if "<@!747066145550368789>" in message.content:
-        reponses = ['bae', 'Ah oui, cette sous-race de <@!747066145550368789>', "il a moins de bits que moi",
-                    "son pere est un con", "ca se dit grand mais tout le monde sait que...."]
-        await channel.send(random.choice(reponses))
-
-    if Message == '❤':
-        await channel.send('❤')
-
-    if Message == "ben":
-        await channel.send("je suis sa pute")
-
-    if Message == '1':
-        await channel.send("2")
-
-        # waits for a message valiudating further instructions
-        def check(m):
-            return m.content == "3" and m.channel == message.channel
-
-        await bot.wait_for('message', check=check)
-        await channel.send("SOLEIL !")
-
-    if Message == 'a':
-        def check(m):
-            return m.content == "b" and m.channel == message.channel
-
-        await bot.wait_for('message', check=check)
-        await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
-
-    if Message == 'ah':
-        if rdnb >= 4:
-            reponses = ["Oh", "Bh"]
+        if Message == 'pas mal':
+            reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
             await channel.send(random.choice(reponses))
-        else:
-            await channel.send(finndAndReplace('a', dico_lines))
 
-    if Message == 'oh':
-        if rdnb >= 4:
-            reponses = ['Quoi ?', 'p', 'ah', ':o']
+        if Message == "ez" or Message == "easy":
+            reponses = ["https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918"]
             await channel.send(random.choice(reponses))
-        else:
-            await channel.send(finndAndReplace('o', dico_lines))
 
-    if Message == 'eh':
-        if rdnb >= 4:
-            reponses = ['hehehehehe', 'oh']
-            await channel.send(random.choice(reponses))
-        else:
-            await channel.send(finndAndReplace('é', dico_lines))
+        if Message == 'bite' or Message == 'zizi':
+            text = "8" + '=' * random.randint(0, 9) + "D"
+            await channel.send(text)
 
-    if Message.startswith('merci'):
-        if rdnb > 3:
-            reponses = ['De rien hehe', "C'est normal t'inquiète", "Je veux le cul d'la crémière avec.", 'non.',
-                        'Excuse toi non ?', 'Au plaisir']
+        if 'yanis' in Message and rdnb == 5:
+            await channel.send("La Bretagne c'est pas ouf.")
+
+        if Message.startswith("stop") or Message.startswith("arrête") or Message.startswith("arrete"):
+            await channel.send("https://tenor.com/view/stop-it-get-some-help-gif-7929301")
+
+        if Message.startswith("exact"):
+            reponses = ["Je dirais même plus, exact.", "Il est vrai", "AH BON ??!", "C'est cela", "Plat-il ?", "Jure ?"]
             await channel.send(random.choice(reponses))
-        else:
+
+        if Message == '<3':
+            reponses = ["Nique ta tante (pardon)", "<3", "luv luv", "moi aussi je t'aime ❤"]
+            await channel.send(random.choice(reponses))
+
+        if Message == 'toi-même' or Message == "toi-meme" or Message == "toi même" or Message == "toi meme":
+            reponses = ["Je ne vous permet pas", "Miroir magique", "C'est celui qui dit qui l'est"]
+            await channel.send(random.choice(reponses))
+
+        if "<@!747066145550368789>" in message.content:
+            reponses = ['bae', 'Ah oui, cette sous-race de <@!747066145550368789>', "il a moins de bits que moi",
+                        "son pere est un con", "ca se dit grand mais tout le monde sait que...."]
+            await channel.send(random.choice(reponses))
+
+        if Message == '❤':
+            await channel.send('❤')
+
+        if Message == "ben":
+            await channel.send("je suis sa pute")
+
+        if Message == '1':
+            await channel.send("2")
+
+            # waits for a message valiudating further instructions
+            def check(m):
+                return m.content == "3" and m.channel == message.channel
+
+            await bot.wait_for('message', check=check)
+            await channel.send("SOLEIL !")
+
+        if Message == 'a':
+            def check(m):
+                return m.content == "b" and m.channel == message.channel
+
+            await bot.wait_for('message', check=check)
+            await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
+
+        if Message == 'ah':
+            if rdnb >= 4:
+                reponses = ["Oh", "Bh"]
+                await channel.send(random.choice(reponses))
+            else:
+                await channel.send(finndAndReplace('a', dico_lines))
+
+        if Message == 'oh':
+            if rdnb >= 4:
+                reponses = ['Quoi ?', 'p', 'ah', ':o']
+                await channel.send(random.choice(reponses))
+            else:
+                await channel.send(finndAndReplace('o', dico_lines))
+
+        if Message == 'eh':
+            if rdnb >= 4:
+                reponses = ['hehehehehe', 'oh']
+                await channel.send(random.choice(reponses))
+            else:
+                await channel.send(finndAndReplace('é', dico_lines))
+
+        if Message.startswith('merci'):
+            if rdnb > 3:
+                reponses = ['De rien hehe', "C'est normal t'inquiète", "Je veux le cul d'la crémière avec.", 'non.',
+                            'Excuse toi non ?', 'Au plaisir']
+                await channel.send(random.choice(reponses))
+            else:
+                await message.add_reaction("🥰")
+
+        if Message == 'skusku' or Message == 'sku sku':
+            await channel.send("KICÉKIJOUE ????")
+
+        if ('😢' in Message or '😭' in Message) and rdnb >= 3:
+            reponses = ['cheh', 'dur dur', "dommage mon p'tit pote", "balec"]
+            await channel.send(random.choice(reponses))
+
+        if Message.startswith('tu veux'):
+            reponses = ['Ouais gros', 'Carrément ma poule', 'Mais jamais tes fou ptdr', 'Oui.']
+            await channel.send(random.choice(reponses))
+
+        if Message.startswith('quoi'):
+            reponses = ['feur', 'hein ?', 'nan laisse', 'oublie', 'rien']
+            await channel.send(random.choice(reponses))
+
+        if Message.startswith('pourquoi'):
+            reponses = ['PARCEQUEEEE', 'Aucune idée.', 'Demande au voisin', 'Pourquoi tu demandes ça ?']
+            await channel.send(random.choice(reponses))
+
+        if Message.startswith("t'es sur"):
+            reponses = ['Ouais gros', 'Nan pas du tout', 'Qui ne tente rien...']
+            await channel.send(random.choice(reponses))
+
+        if Message.startswith("ah ouais") or Message.startswith("ah bon"):
+            reponses = ['Ouais gros', 'Nan ptdr', 'Je sais pas écoute...']
+            await channel.send(random.choice(reponses))
+
+        if Message.startswith("lourd") and rdnb >= 4:
+            await channel.send("Sku sku")
+
+        if '<@!321216514986606592>' in Message and rdnb >= 4:
+            reponses = ['Le VP numéro 2', 'Encore lui ?', 'fasstin']
+            await channel.send(random.choice(reponses))
+
+        if '<@!761898936364695573>' in Message:
+            await channel.send("Tu parles comment de mon pote là ?")
+
+        if '<@!392746536888696834>' in Message:
+            reponses = ['Ce trouduc.', 'Ce connard.', 'Ce petit con.', 'Cette petite pute.']
+            await channel.send(random.choice(reponses))
+
+        if 'tg' in Message:
+            await channel.send(random.choice(insultes))
+
+        if Message == 'cheh' or Message == 'sheh':
+            if rdnb >= 3:
+                reponses = ["Oh tu t'excuses", "Cheh", "C'est pas gentil ça", "🙁"]
+                await channel.send(random.choice(reponses))
+            else:
+                await message.add_reaction("🥰")
+
+        if "el ali" in Message or "ali oula" in Message:
+            await channel.send("💩")
+
+        if Message == 'non':
+            reponses = ['si.', "ah bah ca c'est sur", "SÉRIEUX ??", "logique aussi", "jure ?"]
+            await channel.send(random.choice(reponses))
+
+        if Message.startswith('lequel') and Message[4] != 'q':
+            await channel.send('Le deuxième.')
+
+        if Message.startswith('laquelle'):
+            await channel.send('La deuxième.')
+
+        if Message.startswith('miroir magique'):
+            await channel.send(Message)
+
+        if Message.startswith("jure"):
+            if "wola" in Message:
+                await channel.send("Wola")
+            elif "wallah" in Message:
+                await channel.send("Wallah")
+
+        if "☹" in Message or "😞" in Message or "😦" in Message:
             await message.add_reaction("🥰")
 
-    if Message == 'skusku' or Message == 'sku sku':
-        await channel.send("KICÉKIJOUE ????")
+        if Message == 'bv':
+            await channel.send("Tes parents t'ont appris la politesse, alors on dit MERCI")
 
-    if ('😢' in Message or '😭' in Message) and rdnb >= 3:
-        reponses = ['cheh', 'dur dur', "dommage mon p'tit pote", "balec"]
-        await channel.send(random.choice(reponses))
+        if Message == 'f' or Message == 'rip':
+            await channel.send("#####\n#\n#\n####\n#\n#\n#       to pay respect")
 
-    if Message.startswith('tu veux'):
-        reponses = ['Ouais gros', 'Carrément ma poule', 'Mais jamais tes fou ptdr', 'Oui.']
-        await channel.send(random.choice(reponses))
+        if ('quentin' in Message or 'quent1' in Message) and rdnb >= 3:
+            await channel.send("Papa ! 🤗")
 
-    if Message.startswith('quoi'):
-        reponses = ['feur', 'hein ?', 'nan laisse', 'oublie', 'rien']
-        await channel.send(random.choice(reponses))
+        if Message.startswith("god"):
+            day = today.strftime("%d")
+            month = today.strftime("%m")
+            Message = Message.replace("god", "")
 
-    if Message.startswith('pourquoi'):
-        reponses = ['PARCEQUEEEE', 'Aucune idée.', 'Demande au voisin', 'Pourquoi tu demandes ça ?']
-        await channel.send(random.choice(reponses))
+            userID = ""
+            if "<@!" not in Message:
+                userID = int(message.author.id)
+            else:
+                i = 0
+                for i in range(len(Message)):
+                    if Message[i] == '<' and Message[i + 1] == '@' and Message[i + 2] == '!':
+                        i += 3
+                        userID = ""
+                        break
+                while Message[i] != '>' and i < len(Message):
+                    userID += Message[i]
+                    i += 1
+                userID = int(userID)
+            if userID % 5 != (int(day) + int(month)) % 5:
+                await channel.send("Nope, not him.")
+                return
+            user = await message.guild.fetch_member(userID)
+            pfp = user.avatar_url
+            embed = discord.Embed(title="This is God", description='<@%s> is god.' % userID, color=0xecce8b)
+            embed.set_thumbnail(url=pfp)
 
-    if Message.startswith("t'es sur"):
-        reponses = ['Ouais gros', 'Nan pas du tout', 'Qui ne tente rien...']
-        await channel.send(random.choice(reponses))
+            await channel.send("God looks like him.", embed=embed)
 
-    if Message.startswith("ah ouais") or Message.startswith("ah bon"):
-        reponses = ['Ouais gros', 'Nan ptdr', 'Je sais pas écoute...']
-        await channel.send(random.choice(reponses))
+        if Message.startswith("hello"):
+            await channel.send(file=discord.File('images/helo.jpg'))
 
-    if Message.startswith("lourd") and rdnb >= 4:
-        await channel.send("Sku sku")
+        if Message == "enculé" or Message == "enculer":
+            image = ['images/tellermeme.png', 'images/bigard.jpeg']
+            await channel.send(file=discord.File(random.choice(image)))
 
-    if '<@!321216514986606592>' in Message and rdnb >= 4:
-        reponses = ['Le VP numéro 2', 'Encore lui ?', 'fasstin']
-        await channel.send(random.choice(reponses))
+        if Message == "stonks":
+            await channel.send(file=discord.File('images/stonks.png'))
 
-    if '<@!761898936364695573>' in Message:
-        await channel.send("Tu parles comment de mon pote là ?")
+        if Message == "parfait" or Message == "perfection":
+            await channel.send(file=discord.File('images/perfection.jpg'))
 
-    if '<@!392746536888696834>' in Message:
-        reponses = ['Ce trouduc.', 'Ce connard.', 'Ce petit con.', 'Cette petite pute.']
-        await channel.send(random.choice(reponses))
-
-    if 'tg' in Message:
-        await channel.send(random.choice(insultes))
-
-    if Message == 'cheh' or Message == 'sheh':
-        if rdnb >= 3:
-            reponses = ["Oh tu t'excuses", "Cheh", "C'est pas gentil ça", "🙁"]
+        if 'pute' in Message:
+            reponses = ["https://tenor.com/view/mom-gif-10756105",
+                        "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
+                        "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg"]
             await channel.send(random.choice(reponses))
-        else:
-            await message.add_reaction("🥰")
 
-    if "el ali" in Message or "ali oula" in Message:
-        await channel.send("💩")
+        if "guillotine" in Message:
+            reponses = ['https://tenor.com/view/guillatene-behead-lego-gif-12352396',
+                        'https://tenor.com/view/guillotine-gulp-worried-scared-slug-riot-gif-11539046',
+                        'https://tenor.com/view/revolution-guillotine-marie-antoinette-off-with-their-heads-behead-gif-12604431']
+            await channel.send(random.choice(reponses))
 
-    if Message == 'non':
-        reponses = ['si.', "ah bah ca c'est sur", "SÉRIEUX ??", "logique aussi", "jure ?"]
-        await channel.send(random.choice(reponses))
+        if 'pd' in Message:
+            Message = ' ' + Message + ' '
+            for i in range(len(Message) - 3):
+                if Message[i] == ' ' and Message[i + 1] == 'p' and Message[i + 2] == 'd' and Message[i + 3] == ' ':
+                    await channel.send(file=discord.File('images/pd.jpg'))
 
-    if Message.startswith('lequel') and Message[4] != 'q':
-        await channel.send('Le deuxième.')
+        if 'oof' in Message and rdnb >= 2:
+            reponses = ['https://tenor.com/view/oh-snap-surprise-shocked-johncena-gif-5026702',
+                        'https://tenor.com/view/oof-damn-wow-ow-size-gif-16490485',
+                        'https://tenor.com/view/oof-simpsons-gif-14031953',
+                        'https://tenor.com/view/yikes-michael-scott-the-office-my-bad-oof-gif-13450971']
+            await channel.send(random.choice(reponses))
 
-    if Message.startswith('laquelle'):
-        await channel.send('La deuxième.')
-
-    if Message.startswith('miroir magique'):
-        await channel.send(Message)
-
-    if Message.startswith("jure"):
-        if "wola" in Message:
-            await channel.send("Wola")
-        elif "wallah" in Message:
-            await channel.send("Wallah")
-
-    if "☹" in Message or "😞" in Message or "😦" in Message:
-        await message.add_reaction("🥰")
-
-    if Message == 'bv':
-        await channel.send("Tes parents t'ont appris la politesse, alors on dit MERCI")
-
-    if Message == 'f' or Message == 'rip':
-        await channel.send("#####\n#\n#\n####\n#\n#\n#       to pay respect")
-
-    if ('quentin' in Message or 'quent1' in Message) and rdnb >= 3:
-        await channel.send("Papa ! 🤗")
-
-    if Message.startswith("god"):
-        day = today.strftime("%d")
-        month = today.strftime("%m")
-        Message = Message.replace("god", "")
-
-        userID = ""
-        if "<@!" not in Message:
-            userID = int(message.author.id)
-        else:
-            i = 0
-            for i in range(len(Message)):
-                if Message[i] == '<' and Message[i + 1] == '@' and Message[i + 2] == '!':
-                    i += 3
-                    userID = ""
-                    break
-            while Message[i] != '>' and i < len(Message):
-                userID += Message[i]
-                i += 1
-            userID = int(userID)
-        if userID % 5 != (int(day) + int(month)) % 5:
-            await channel.send("Nope, not him.")
-            return
-        user = await message.guild.fetch_member(userID)
-        pfp = user.avatar_url
-        embed = discord.Embed(title="This is God", description='<@%s> is god.' % userID, color=0xecce8b)
-        embed.set_thumbnail(url=pfp)
-
-        await channel.send("God looks like him.", embed=embed)
-
-    if Message.startswith("hello"):
-        await channel.send(file=discord.File('images/helo.jpg'))
-
-    if Message == "enculé" or Message == "enculer":
-        image = ['images/tellermeme.png', 'images/bigard.jpeg']
-        await channel.send(file=discord.File(random.choice(image)))
-
-    if Message == "stonks":
-        await channel.send(file=discord.File('images/stonks.png'))
-
-    if Message == "parfait" or Message == "perfection":
-        await channel.send(file=discord.File('images/perfection.jpg'))
-
-    if 'pute' in Message:
-        reponses = ["https://tenor.com/view/mom-gif-10756105",
-                    "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
-                    "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg"]
-        await channel.send(random.choice(reponses))
-
-    if "guillotine" in Message:
-        reponses = ['https://tenor.com/view/guillatene-behead-lego-gif-12352396',
-                    'https://tenor.com/view/guillotine-gulp-worried-scared-slug-riot-gif-11539046',
-                    'https://tenor.com/view/revolution-guillotine-marie-antoinette-off-with-their-heads-behead-gif-12604431']
-        await channel.send(random.choice(reponses))
-
-    if 'pd' in Message:
-        Message = ' ' + Message + ' '
-        for i in range(len(Message) - 3):
-            if Message[i] == ' ' and Message[i + 1] == 'p' and Message[i + 2] == 'd' and Message[i + 3] == ' ':
-                await channel.send(file=discord.File('images/pd.jpg'))
-
-    if 'oof' in Message and rdnb >= 2:
-        reponses = ['https://tenor.com/view/oh-snap-surprise-shocked-johncena-gif-5026702',
-                    'https://tenor.com/view/oof-damn-wow-ow-size-gif-16490485',
-                    'https://tenor.com/view/oof-simpsons-gif-14031953',
-                    'https://tenor.com/view/yikes-michael-scott-the-office-my-bad-oof-gif-13450971']
-        await channel.send(random.choice(reponses))
-
-    if ('money' in Message or 'argent' in Message) and rdnb >= 2:
-        reponses = ['https://tenor.com/view/6m-rain-wallstreet-makeitrain-gif-8203989',
-                    'https://tenor.com/view/money-makeitrain-rain-guap-dollar-gif-7391084',
-                    'https://tenor.com/view/taka-money-gif-10114852']
-        await channel.send(random.choice(reponses))
+        if ('money' in Message or 'argent' in Message) and rdnb >= 2:
+            reponses = ['https://tenor.com/view/6m-rain-wallstreet-makeitrain-gif-8203989',
+                        'https://tenor.com/view/money-makeitrain-rain-guap-dollar-gif-7391084',
+                        'https://tenor.com/view/taka-money-gif-10114852']
+            await channel.send(random.choice(reponses))
 
     # teh help command, add commands call, but not reactions
     if Message == '--help':
@@ -868,6 +871,26 @@ async def dl(ctx, *text):
     print("Downloading...", link)
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([link])
+
+
+@bot.command()
+async def translate(ctx, *text):
+    translator = Translator()
+    text = " ".join(text).lower()
+    text = text.split(',')
+    if (text[0] == "showall"):
+        text[0] = googletrans.LANGUAGES
+        await ctx.send(text[0])
+        return
+    toTranslate = text[0]
+    fromLang = text[1].replace(" ", "")
+    toLang = text[2].replace(" ", "")
+    try:
+        textTranslated = translator.translate(toTranslate, src=fromLang, dest=toLang)
+        text = toTranslate + ' (' + textTranslated.src + ') -> ' + textTranslated.text + ' (' + textTranslated.dest + ')'
+    except:
+        text = "Nope, sorry !"
+    await ctx.send(text)
 
 
 """
