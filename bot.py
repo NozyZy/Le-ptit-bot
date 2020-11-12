@@ -19,6 +19,7 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
 
 
+
 # On ready message
 @bot.event
 async def on_ready():
@@ -850,29 +851,6 @@ async def reboot(ctx):
 
 
 @bot.command()
-async def dl(ctx, *text):
-    link = "".join(text)
-    text = link.split(',')
-
-    path = "D:/Quentin/Music/" + text[0]
-    link = text[1]
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'flac',
-            'preferredquality': '192',
-        }],
-        'outtmpl': path + '/%(title)s.%(ext)s',
-    }
-
-    print("Downloading...", link)
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([link])
-
-
-@bot.command()
 async def translate(ctx, *text):
     translator = Translator()
     text = " ".join(text).lower()
@@ -890,6 +868,7 @@ async def translate(ctx, *text):
     except:
         text = "Nope, sorry !"
     await ctx.send(text)
+
 
 
 """
