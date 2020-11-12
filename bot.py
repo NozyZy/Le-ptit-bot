@@ -17,6 +17,7 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
 
 
+
 # On ready message
 @bot.event
 async def on_ready():
@@ -847,36 +848,12 @@ async def reboot(ctx):
     os.system("python bot.py")
 
 
-@bot.command()
-async def dl(ctx, *text):
-    link = "".join(text)
-    text = link.split(',')
-
-    path = text[0]
-    link = text[1]
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'flac',
-            'preferredquality': '192',
-        }],
-        'outtmpl': path + '/%(title)s.%(ext)s',
-    }
-
-    print("Downloading...", link)
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([link])
-
-
 """
 @bot.command()
 async def say(ctx, number, *text):
     for i in range(int(number)):
         await ctx.send(" ".join(text))
 """
-
 
 # runs the bot (if you have a TOKEN hahaha)
 bot.run(TOKEN)
