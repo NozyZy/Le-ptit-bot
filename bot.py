@@ -5,6 +5,7 @@ import youtube_dl
 import os
 
 from discord.ext import commands
+from datetime import date
 from fonctions import *
 
 # ID : 653563141002756106
@@ -30,6 +31,7 @@ async def on_message(message):
     channel = message.channel
     Message = message.content.lower()
     rdnb = random.randint(1, 5)
+    today = date.today()
 
     # open and stock the dico, with a lot of words
     dico_file = open("txt/dico.txt", "r+")
@@ -189,6 +191,7 @@ async def on_message(message):
             rep.append('Oui bb ?')
             rep.append('Yo <@!747066145550368789>')
         await channel.send(random.choice(rep))
+        return
 
     # send 5 randoms words from the dico
     if Message == "--random":
@@ -208,6 +211,16 @@ async def on_message(message):
     if Message == '--dico':
         text = "J'ai actuellement " + str(len(dico_lines)) + " mots enregistrés, nickel"
         await channel.send(text)
+
+    if Message.startswith("--isdico "):
+        text = Message.replace("--isdico ", "")
+        text = text.replace(" ", "")
+        text += "\n"
+        if text in dico_lines:
+            await message.add_reaction("👍")
+        else:
+            await message.add_reaction("👎")
+        return
 
     # begginning of reaction programs, get inspired
 
@@ -387,10 +400,10 @@ async def on_message(message):
         await channel.send("Papa ! 🤗")
 
     if Message.startswith("god"):
+        day = today.strftime("%d")
+        month = today.strftime("%m")
         Message = Message.replace("god", "")
-        if rdnb >= 3:
-            await channel.send("Nope, not him.")
-            return
+
         userID = ""
         if "<@!" not in Message:
             userID = int(message.author.id)
@@ -405,6 +418,9 @@ async def on_message(message):
                 userID += Message[i]
                 i += 1
             userID = int(userID)
+        if userID % 5 != (int(day) + int(month)) % 5:
+            await channel.send("Nope, not him.")
+            return
         user = await message.guild.fetch_member(userID)
         pfp = user.avatar_url
         embed = discord.Embed(title="This is God", description='<@%s> is god.' % userID, color=0xecce8b)
@@ -863,10 +879,12 @@ async def say(ctx, number, *text):
         await ctx.send(" ".join(text))
 """
 
+
 # on ajoute les extension du bot  (pour l'instant il n'y a que addYoutube searchYoutube et addInsult)
 for file in os.listdir('./cogs'):
     if file.endswith('.py'):
         bot.load_extension(f'cogs.{file[:-3]}')
+
 
 # runs the bot (if you have a TOKEN hahaha)
 bot.run(TOKEN)
