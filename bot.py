@@ -13,8 +13,7 @@ from fonctions import *
 
 intents = discord.Intents.default()
 intents.members = True
-client = discord.Client()
-bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
+bot = commands.Bot(command_prefix="--", description="Le p'tit bot !", intents = intents)
 
 
 # On ready message
@@ -77,6 +76,7 @@ async def on_message(message):
         insultes.append(i)
     fichier_insulte.close()
 
+    """ ces fonctions sont dans le fichier cogs/youtube.py
     if message.content.startswith('--addYoutube'):
         print("Ajout de video...")
         mot = str(Message)
@@ -111,7 +111,8 @@ async def on_message(message):
                     text = i
                     await channel.send(text)
         fichier_youtube.close()
-
+    """
+    """ commande ajoutée dans cogs/insulte.py
     if message.content.startswith('--addInsult'):
         print("Ajout d'insulte...")
         mot = str(message.content)
@@ -125,6 +126,7 @@ async def on_message(message):
         fichier_insulte.close()
         text = insultes[len(insultes) - 1]
         await channel.send(text)
+    """
 
     if Message.startswith("--song"):
         fichier_music = open("txt/music.txt", "r")
@@ -876,6 +878,12 @@ async def say(ctx, number, *text):
     for i in range(int(number)):
         await ctx.send(" ".join(text))
 """
+
+
+# on ajoute les extension du bot  (pour l'instant il n'y a que addYoutube searchYoutube et addInsult)
+for file in os.listdir('./cogs'):
+    if file.endswith('.py'):
+        bot.load_extension(f'cogs.{file[:-3]}')
 
 
 # runs the bot (if you have a TOKEN hahaha)
