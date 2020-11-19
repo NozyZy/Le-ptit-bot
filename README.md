@@ -1,7 +1,7 @@
 # Le-ptit-bot
 The best discord python bot :100:
 
-![alt text](https://cdn.discordapp.com/attachments/754976677808832512/771094907996733460/unknown.png)
+<img src="https://cdn.discordapp.com/attachments/754976677808832512/771094907996733460/unknown.png" width="400"/>
 
 # What is Le ptit bot
 
@@ -9,15 +9,16 @@ This is a discord chatbot, made in Python, that reacts to some message, and can 
 
 It is open to everyone, to use and modify it.
 
--> [Invite link](/https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8)
+-> [<font color="green">Invite link</font>](/https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8)
 
 # How to contribute
 
 At this time, using:
-- **python 3.9.0**
-- **pip 20.2.4**
-- **discord.py 1.5.1**
-- **youtube-dl 2020.11.1.1**
+
+ - **python 3.9.0**
+ - **pip 20.2.4**
+ - **discord.py 1.5.1**
+ - **youtube-dl 2020.11.1.1**
 
 1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
 	- All the packages should be in the `venv/Scripts` folder, but if not, thy are quoted above
@@ -28,7 +29,7 @@ At this time, using:
  				- `Message` is the variable where the content of the message sent is stocked, but in lowercase. Use `message.content` if you want to match the case.
 				- `rdnb` is a random int variable, between 1 and 5, it is used to add probabilities of each reaction to happen (ex : `if rdnb > 3` => 2/5 chance to happen)
  	- To add reactions, take the example inside of the `on_message()` function, here is one :
-```
+```python
 if Message.startswith('quoi'):
 	reponses = ['feur', 'hein ?', 'nan laisse', 'oublie', 'rien']
 	await channel.send(random.choice(reponses))

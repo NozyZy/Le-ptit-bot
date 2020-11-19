@@ -3,7 +3,6 @@ import asyncio
 import discord
 import time
 import youtube_dl
-import os
 
 from googletrans import Translator
 from discord.ext import commands
@@ -17,7 +16,6 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-
 
 
 # On ready message
@@ -79,41 +77,6 @@ async def on_message(message):
         i = i.replace("\n", "")
         insultes.append(i)
     fichier_insulte.close()
-
-    if message.content.startswith('--addYoutube'):
-        print("Ajout de video...")
-        mot = str(Message)
-        mot = mot.replace("--addyoutube ", "")
-        mot = '\n' + mot
-        fichier_youtube = open("txt/youtube.txt", "a")
-        fichier_youtube.write(mot)
-        fichier_youtube.close()
-        print(ytb)
-        text = ytb[len(ytb) - 1]
-        await channel.send(text)
-
-    if message.content.startswith('--searchYoutube'):
-        print("Recherche de video...")
-        Message = message.content
-        mot = str(Message)
-        mot = mot.replace("--searchyoutube ", "")
-        mots = [mot[0]]
-        k = 0
-        for i in range(1, len(mot)):
-            if mot[i] == ' ':
-                k += 1
-                mots.append("")
-            else:
-                mots[k] += mot[i]
-        fichier_youtube = open('txt/youtube.txt')
-        youtubes_lines = fichier_youtube.readlines()
-        for i in youtubes_lines:
-            for k in mots:
-                print(k, " ", i)
-                if k in i:
-                    text = i
-                    await channel.send(text)
-        fichier_youtube.close()
 
     if message.content.startswith('--addInsult'):
         print("Ajout d'insulte...")
@@ -225,19 +188,34 @@ async def on_message(message):
 
     # begginning of reaction programs, get inspired
     if not Message.startswith('--'):
+
+        if "enerv" in Message or "énerv" in Message and rdnb >= 3:
+            await channel.send("(╯°□°）╯︵ ┻━┻")
+
+        if "(╯°□°）╯︵ ┻━┻" in Message:
+            await channel.send("┬─┬ ノ( ゜-゜ノ)")
+
         if Message.startswith("hein"):
             await channel.send("deux.")
+
+            # waits for a message valiudating further instructions
+            def check(m):
+                return ("3" in m.content or "trois" in m.content) and m.channel == message.channel
+
+            await bot.wait_for('message', check=check)
+            reponses = ["BRAVO TU SAIS COMPTER !", "SOLEIL !", "4, 5, 6, 7.... oh et puis merde", "HAHAHAHAH non.", "stop."]
+            await channel.send(random.choice(reponses))
 
         if Message == 'pas mal':
             reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
             await channel.send(random.choice(reponses))
 
-        if Message == "ez" or Message == "easy":
+        if (Message == "ez" or Message == "easy") and rdnb >= 3:
             reponses = ["https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918"]
             await channel.send(random.choice(reponses))
 
-        if Message == 'bite' or Message == 'zizi':
-            text = "8" + '=' * random.randint(0, 9) + "D"
+        if Message in ['bite','zizi',"teub","zboub","penis", "chybre", "chybrax", "chibre"]:
+            text = "8" + '=' * random.randint(0, int(today.strftime("%d"))) + "D"
             await channel.send(text)
 
         if 'yanis' in Message and rdnb == 5:
@@ -420,7 +398,7 @@ async def on_message(message):
                     i += 1
                 userID = int(userID)
             if userID % 5 != (int(day) + int(month)) % 5:
-                await channel.send("Nope, not him.")
+                await channel.send("Not today (☞ﾟヮﾟ)☞")
                 return
             user = await message.guild.fetch_member(userID)
             pfp = user.avatar_url
@@ -846,11 +824,6 @@ async def play(ctx, url):
 
 
 @bot.command()
-async def reboot(ctx):
-    os.system("python bot.py")
-
-
-@bot.command()
 async def translate(ctx, *text):
     translator = Translator()
     text = " ".join(text).lower()
@@ -868,8 +841,6 @@ async def translate(ctx, *text):
     except:
         text = "Nope, sorry !"
     await ctx.send(text)
-
-
 
 """
 @bot.command()
