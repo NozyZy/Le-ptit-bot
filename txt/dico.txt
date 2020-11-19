@@ -554,7 +554,6 @@ axone
 aya
 ayah
 ayant
-ayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayayay
 ayez
 ayman
 aze
@@ -857,7 +856,7 @@ bracket
 brain
 branch
 branche
-brancher
+branche
 branches
 branle
 branler
@@ -1797,7 +1796,6 @@ dat
 data
 date
 dates
-dats
 dawn
 day
 daze
@@ -3142,7 +3140,6 @@ god
 gode
 godless
 gods
-gogogogog
 going
 goka
 golden
@@ -4924,7 +4921,6 @@ oit
 ok
 okami
 okay
-okayy
 oke
 oki
 okidok
