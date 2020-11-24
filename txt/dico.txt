@@ -919,6 +919,7 @@ burnes
 buro
 but
 bute
+buvais
 buzz
 bv
 bvbg
@@ -1197,6 +1198,7 @@ chialer
 chiant
 chiante
 chiasse
+chibrax
 chibre
 chie
 chien
@@ -1542,6 +1544,7 @@ contains
 conte
 content
 contente
+contents
 contenu
 contenue
 contexte
@@ -1911,6 +1914,7 @@ destiné
 detailed
 details
 detecte
+deter
 determinant
 deterministe
 deteste
@@ -1986,6 +1990,7 @@ diggo
 digne
 dimanche
 diminuer
+din
 dingue
 dinguerie
 dingueries
@@ -2500,6 +2505,7 @@ ep
 epingle
 epingler
 epinglé
+episode
 eps
 eq
 equations
@@ -2857,6 +2863,7 @@ flex
 flip
 flippant
 flood
+flotte
 flou
 floue
 flow
@@ -3318,6 +3325,7 @@ hellfest
 hello
 help
 hem
+hen
 hentai
 hephaistos
 her
@@ -3645,6 +3653,7 @@ intregal
 intro
 introductif
 introduit
+introduits
 ints
 intx
 intz
@@ -3873,6 +3882,7 @@ karma
 karmated
 kartofel
 kartofen
+kata
 katakanas
 kayak
 kdo
@@ -4250,6 +4260,7 @@ maman
 mamba
 mammifére
 man
+mandalore
 mandalorian
 mandalorien
 mandela
@@ -4451,6 +4462,7 @@ michigan
 micro
 microsoft
 midi
+midichloriens
 mien
 mienne
 miennes
@@ -4936,6 +4948,7 @@ olymp
 om
 ombelliféres
 ombre
+ombres
 omg
 ompat
 on
@@ -5884,6 +5897,7 @@ quatre
 quatrieme
 quaznd
 que
+quedal
 quel
 quelconque
 quelle
@@ -6878,6 +6892,7 @@ sois
 soit
 sol
 soldat
+soldats
 soldier
 soleil
 solennel
@@ -7464,8 +7479,10 @@ trié
 trkl
 tro
 trois
+troll
 trompe
 trompé
+troopers
 trop
 troubler
 trouvables
@@ -7842,6 +7859,7 @@ yet
 yeux
 yl
 yo
+yoda
 yonban
 yotabg
 you
