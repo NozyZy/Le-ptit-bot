@@ -16,6 +16,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
+TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.IPewIhAtTeUHUbqJcQf9tuU7ZtM"
 
 
 # On ready message
