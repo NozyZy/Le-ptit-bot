@@ -202,9 +202,13 @@ async def on_message(message):
             def check(m):
                 return ("3" in m.content or "trois" in m.content) and m.channel == message.channel
 
-            await bot.wait_for('message', check=check)
-            reponses = ["BRAVO TU SAIS COMPTER !", "SOLEIL !", "4, 5, 6, 7.... oh et puis merde", "HAHAHAHAH non.", "stop."]
-            await channel.send(random.choice(reponses))
+            try:
+                await bot.wait_for('message', timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await message.add_reaction("☹")
+            else:
+                reponses = ["BRAVO TU SAIS COMPTER !", "SOLEIL !", "4, 5, 6, 7.... oh et puis merde", "HAHAHAHAH non.", "stop."]
+                await channel.send(random.choice(reponses))
 
         if Message == 'pas mal':
             reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
@@ -253,16 +257,22 @@ async def on_message(message):
             # waits for a message valiudating further instructions
             def check(m):
                 return m.content == "3" and m.channel == message.channel
-
-            await bot.wait_for('message', check=check)
-            await channel.send("SOLEIL !")
+            try:
+                await bot.wait_for('message', timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await message.add_reaction("☹")
+            else:
+                await channel.send("SOLEIL !")
 
         if Message == 'a':
             def check(m):
                 return m.content == "b" and m.channel == message.channel
-
-            await bot.wait_for('message', check=check)
-            await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
+            try:
+                await bot.wait_for('message', timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await message.add_reaction("☹")
+            else:
+                await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
         if Message == 'ah':
             if rdnb >= 4:
@@ -563,7 +573,7 @@ async def game(ctx):
     mot = random.choice(dico_lines)
     mot = mot.replace('\n', '')
     text = 'Le premier à écrire **' + mot + '** a gagné'
-    await ctx.send(text)
+    reponse = await ctx.send(text)
 
     if ctx.author == bot.user:
         return
@@ -571,11 +581,15 @@ async def game(ctx):
     def check(m):
         return m.content == mot and m.channel == ctx.channel
 
-    msg = await bot.wait_for('message', check=check)
-    user = str(msg.author)
-    user = user.replace(user[len(user) - 5:len(user)], "")
-    text = '**' + user + '** a gagné !'
-    await ctx.send(text)
+    try:
+        msg = await bot.wait_for('message', timeout=60.0, check=check)
+    except asyncio.TimeoutError:
+        await reponse.add_reaction("☹")
+    else:
+        user = str(msg.author)
+        user = user.replace(user[len(user) - 5:len(user)], "")
+        text = f"**{user}** a gagné !"
+        await ctx.send(text)
 
 
 @bot.command()  # do a simple calcul of 2 numbers and 1 operator (or a fractionnal)

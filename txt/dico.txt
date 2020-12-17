@@ -882,7 +882,6 @@ bitbot
 bitch
 bitches
 bite
-bitebitebitebiebitebitebitebitbeitebitebitebitebitebiteitbietbietbitebitebitebitebitebitebite
 biteenfr
 bitefren
 bitejambon
@@ -1127,8 +1126,6 @@ buzz
 bv
 bvbg
 bvv
-bwaahahahah
-bwahahahahahhahahah
 by
 bye
 byebye
@@ -1267,7 +1264,6 @@ cases
 cash
 casket
 caspar
-casparnotredieuatous
 casq
 casque
 casques
@@ -3114,7 +3110,7 @@ envois
 envoit
 envoye
 envoyer
-envoyé
+envoy
 envoyé
 envoyée
 envoyés
@@ -4257,7 +4253,6 @@ house
 how
 however
 hq
-hqzfkhqzklsfhqkel
 hrii
 hs
 ht
@@ -7356,6 +7351,7 @@ quatre
 quatrieme
 quaznd
 que
+quedal
 queen
 quel
 quelconque
@@ -9549,7 +9545,6 @@ vente
 venu
 venue
 venus
-veoavdosndbslqbdbsoelqlso
 vera
 verbe
 verbes
@@ -9616,7 +9611,6 @@ violent
 virgule
 virgules
 virtual
-virtualdesktop
 virtuelle
 virtuels
 virtuspro
@@ -9870,7 +9864,7 @@ yeux
 yl
 yo
 yoda
-yodsa
+yodsa 
 yonban
 yop
 yos
