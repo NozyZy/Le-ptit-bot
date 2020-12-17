@@ -44,7 +44,7 @@ async def on_message(message):
     if message.author == bot.user:  # we don't want the bot to repeat itself
         return
 
-   # expansion of the dico, with words of every messages (stock only words, never complete message)
+    # expansion of the dico, with words of every messages (stock only words, never complete message)
     if message.author.id != 696099307706777610:  # we don't what a specific bot (from a friend) to expand the dico
         if "```" in Message:
             return
