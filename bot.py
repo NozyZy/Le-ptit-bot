@@ -16,7 +16,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-
+TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.4u9cuFeL99YMh5xGK13_G7KlvRs"
 
 # On ready message
 @bot.event
@@ -841,6 +841,7 @@ async def translate(ctx, *text):
     except:
         text = "Nope, sorry !"
     await ctx.send(text)
+
 
 """
 @bot.command()
