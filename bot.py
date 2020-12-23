@@ -873,8 +873,8 @@ async def master(ctx, *text):
                 text = ["add terms", "between", "1 and 20 chars"]
     img = Image.open('images/master.jpg')
 
-    fonts = [ImageFont.truetype("impact.ttf", 26), ImageFont.truetype("impact.ttf", 18),
-             ImageFont.truetype("impact.ttf", 22)]
+    fonts = [ImageFont.truetype("fonts/Impact.ttf", 26), ImageFont.truetype("fonts/Impact.ttf", 18),
+             ImageFont.truetype("fonts/Impact.ttf", 22)]
 
     sizes = []
 
