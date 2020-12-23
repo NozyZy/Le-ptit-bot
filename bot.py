@@ -8,6 +8,7 @@ from googletrans import Translator
 from discord.ext import commands
 from datetime import date
 from fonctions import *
+from PIL import Image, ImageFont, ImageDraw
 
 # ID : 653563141002756106
 # https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8
@@ -16,7 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.4u9cuFeL99YMh5xGK13_G7KlvRs"
+
 
 # On ready message
 @bot.event
@@ -207,7 +208,8 @@ async def on_message(message):
             except asyncio.TimeoutError:
                 await message.add_reaction("☹")
             else:
-                reponses = ["BRAVO TU SAIS COMPTER !", "SOLEIL !", "4, 5, 6, 7.... oh et puis merde", "HAHAHAHAH non.", "stop."]
+                reponses = ["BRAVO TU SAIS COMPTER !", "SOLEIL !", "4, 5, 6, 7.... oh et puis merde", "HAHAHAHAH non.",
+                            "stop."]
                 await channel.send(random.choice(reponses))
 
         if Message == 'pas mal':
@@ -218,7 +220,7 @@ async def on_message(message):
             reponses = ["https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918"]
             await channel.send(random.choice(reponses))
 
-        if Message in ['bite','zizi',"teub","zboub","penis", "chybre", "chybrax", "chibre"]:
+        if Message in ['bite', 'zizi', "teub", "zboub", "penis", "chybre", "chybrax", "chibre"]:
             text = "8" + '=' * random.randint(0, int(today.strftime("%d"))) + "D"
             await channel.send(text)
 
@@ -257,6 +259,7 @@ async def on_message(message):
             # waits for a message valiudating further instructions
             def check(m):
                 return m.content == "3" and m.channel == message.channel
+
             try:
                 await bot.wait_for('message', timeout=60.0, check=check)
             except asyncio.TimeoutError:
@@ -267,6 +270,7 @@ async def on_message(message):
         if Message == 'a':
             def check(m):
                 return m.content == "b" and m.channel == message.channel
+
             try:
                 await bot.wait_for('message', timeout=60.0, check=check)
             except asyncio.TimeoutError:
@@ -855,6 +859,36 @@ async def translate(ctx, *text):
     except:
         text = "Nope, sorry !"
     await ctx.send(text)
+
+
+@bot.command()
+async def master(ctx, *text):
+    text = " ".join(text)
+    if not len(text) or text.count(',') != 2:
+        text = ["add 3", "f*cking terms", "splited by ,"]
+    else:
+        text = text.split(',')
+        for term in text:
+            if len(term) not in range(1, 20):
+                text = ["add terms", "between", "1 and 20 chars"]
+    img = Image.open('images/master.jpg')
+
+    fonts = [ImageFont.truetype("impact.ttf", 26), ImageFont.truetype("impact.ttf", 18),
+             ImageFont.truetype("impact.ttf", 22)]
+
+    sizes = []
+
+    for i in range(len(fonts)):
+        sizes.append(fonts[i].getsize(text[i])[0])
+
+    draw = ImageDraw.Draw(img)
+
+    draw.text(xy=(170 - (sizes[0]) / 2, 100), text=text[0], fill=(255, 255, 255), font=fonts[0])
+    draw.text(xy=(250 - (sizes[1]) / 2, 190), text=text[1], fill=(255, 255, 255), font=fonts[1])
+    draw.text(xy=(330 - (sizes[2]) / 2, 280), text=text[2], fill=(255, 255, 255), font=fonts[2])
+
+    img.save("images/mastermeme.jpg")
+    await ctx.send(file=discord.File("images/mastermeme.jpg"))
 
 
 """

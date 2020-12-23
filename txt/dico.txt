@@ -563,6 +563,7 @@ attendre
 attendrons
 attends
 attendue
+attens
 attente
 attention
 attester
@@ -904,6 +905,7 @@ black
 blackdragons
 blackstebbern
 blacksterben
+blag
 blague
 blagues
 blairer
@@ -1023,6 +1025,7 @@ boulot
 boum
 bound
 bourge
+bourgogne
 bourrent
 bourré
 bourré
@@ -1199,6 +1202,7 @@ camarades
 camera
 caml
 camp
+campagzn
 campus
 caméra
 can
@@ -1274,6 +1278,7 @@ cassera
 casso
 cassé
 cassée
+cass�
 castle
 catastrophe
 catching
@@ -1404,6 +1409,7 @@ charitables
 charlotte
 charm
 charme
+chars
 chasse
 chasseur
 chat
@@ -2072,6 +2078,7 @@ cree
 creepy
 creer
 creme
+cremes
 crevette
 crew
 crewmate
@@ -2930,6 +2937,7 @@ ect
 editer
 edition
 editor
+edt
 ee
 eea
 eeda
@@ -2948,6 +2956,7 @@ eg
 egain
 egal
 egale
+ego
 egzy
 eh
 eheh
@@ -3108,9 +3117,9 @@ envoient
 envoies
 envois
 envoit
+envoy
 envoye
 envoyer
-envoy
 envoyé
 envoyée
 envoyés
@@ -3284,6 +3293,7 @@ exposure
 exposé
 expres
 expression
+expressions
 exprimé
 exprès
 exprés
@@ -3370,6 +3380,7 @@ fameux
 familiaris
 familier
 famille
+famosa
 famoso
 famélique
 fan
@@ -4125,6 +4136,7 @@ hanf
 hang
 haolrd
 happend
+happened
 happening
 happy
 harceler
@@ -4842,6 +4854,7 @@ kan
 kance
 kantan
 kappa
+karen
 karma
 karmated
 kartofel
@@ -4886,6 +4899,7 @@ kiribati
 kk
 kla
 klappe
+klourd
 knights
 know
 known
@@ -5233,6 +5247,7 @@ légèrement
 légérement
 léo
 lésion
+l�
 m
 ma
 maade
@@ -5381,6 +5396,7 @@ marchent
 marcher
 marchera
 marché
+march�
 mardi
 marge
 marie
@@ -5408,6 +5424,7 @@ masako
 mascapone
 mashallah
 masi
+masq
 masque
 masquer
 masques
@@ -5898,6 +5915,7 @@ méthodologoe
 métier
 métiers
 métro
+m�re
 n
 na
 naan
@@ -6661,6 +6679,8 @@ phases
 phi
 philo
 philosophie
+pho
+phobie
 phone
 phonxioné
 photo
@@ -6734,6 +6754,7 @@ plagiat
 plagie
 plaie
 plaindre
+plaingne
 plains
 plaint
 plainte
@@ -7131,6 +7152,7 @@ proposition
 propositions
 propositiosn
 proposé
+propos�
 propre
 proprement
 propres
@@ -7737,7 +7759,9 @@ rentrés
 renvoie
 renvoyer
 rep
+repar
 reparlera
+repars
 reparti
 repartir
 repartira
@@ -7775,6 +7799,7 @@ représentation
 représente
 republic
 repérer
+rep�res
 request
 requets
 required
@@ -7899,6 +7924,7 @@ rfjguiefhguie
 rftg
 rhada
 rhey
+rheys
 rhodes
 rhouya
 rhythm
@@ -8148,6 +8174,7 @@ rézals
 rézizi
 rézo
 réécris
+r�par
 s
 sa
 saber
@@ -8882,6 +8909,7 @@ surprenant
 sursauté
 surtout
 surveillant
+survendu
 survienne
 survive
 sus
@@ -8905,6 +8933,7 @@ swim
 switch
 switches
 switchs
+sword
 symbolique
 sympa
 sympas
@@ -9005,6 +9034,7 @@ tapettes
 tappote
 tard
 tarder
+tartez
 tartine
 taré
 tas
@@ -9664,6 +9694,7 @@ voix
 vokal
 vol
 volaitre
+voler
 vollontaire
 volontaire
 volontaires
@@ -10040,3 +10071,5 @@ zé
 évènement
 événement
 événements
+�a
+�norme
