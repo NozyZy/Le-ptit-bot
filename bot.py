@@ -22,6 +22,7 @@ bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
 # On ready message
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game(name="dis tg pour voir ?"))
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
