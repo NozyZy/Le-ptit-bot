@@ -674,7 +674,7 @@ azier
 azrfduisdfg
 azy
 aée
-aà¯e
+aïe
 b
 ba
 baabekyu
@@ -1097,7 +1097,7 @@ brun
 brune
 brut
 brute
-brà»ler
+brûler
 bs
 bsl
 bst
@@ -1534,7 +1534,7 @@ chosiir
 chou
 chouettes
 choupi
-chouà¯a
+chouïa
 chqaue
 chqua
 chr
@@ -2069,7 +2069,7 @@ couça
 cover
 covid
 cowana
-coà»t
+coût
 cp
 cpafacil
 cpp
@@ -2937,7 +2937,7 @@ déviation
 déçois
 déçu
 déçus
-dà»
+dû
 e
 each
 eah
@@ -3629,8 +3629,8 @@ flut
 flute
 flux
 fléche
-flà»te
-flà»tes
+flûte
+flûtes
 fm
 fml
 fnac
@@ -3892,8 +3892,6 @@ gauss
 gaussienne
 gave
 gaves
-gd
-gdapà»yfazui
 gdb
 ge
 geant
@@ -5051,7 +5049,7 @@ laucnher
 launch
 launcher
 laurence
-laà¯fe
+laïfe
 ldc
 ldr
 le
@@ -8622,7 +8620,7 @@ sinphi
 sinscrit
 sinus
 sinusoid
-sinusoà¯de
+sinusoïde
 sipos
 siqnm
 sisi
@@ -9098,9 +9096,9 @@ sérieux
 sérieux
 sévère
 sévères
-sà»r
-sà»remebnt
-sà»rement
+sûr
+sûremebnt
+sûrement
 t
 ta
 tab
