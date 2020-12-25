@@ -279,7 +279,8 @@ async def on_message(message):
             "chybrax",
             "chibre",
         ]:
-            text = "8" + "=" * random.randint(0, int(today.strftime("%d"))) + "D"
+            text = "8" + "=" * \
+                random.randint(0, int(today.strftime("%d"))) + "D"
             await channel.send(text)
 
         if "yanis" in Message and rdnb == 5:
@@ -956,8 +957,7 @@ def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(
             song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         ))
 
     def next(_):
