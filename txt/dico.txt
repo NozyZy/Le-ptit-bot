@@ -166,9 +166,6 @@ ahahahaha
 ahahahahah
 ahahahahaha
 ahahahahahah
-ahahahahahaha
-ahahahahahahahahahahaha
-ahahh
 ahemm
 ahh
 ahhahahahah
@@ -3895,8 +3892,6 @@ gauss
 gaussienne
 gave
 gaves
-gd
-gdapûyfazui
 gdb
 ge
 geant
@@ -5629,7 +5624,6 @@ mes
 mesages
 mess
 message
-messagecontentlower
 messages
 messenger
 messi
@@ -6377,7 +6371,6 @@ orh
 original
 ornithologue
 orthotypo
-orvdwq
 ose
 osef
 osekour
@@ -6678,7 +6671,6 @@ pendant
 pending
 pendre
 penetration
-penisjpg
 pens
 pensais
 pense
@@ -7884,7 +7876,6 @@ repond
 repondre
 repondu
 reponse
-reponseparcontre
 reponses
 report
 reporté
@@ -9811,7 +9802,6 @@ vivement
 vla
 vm
 vmware
-vnjfjvhjkfg
 vo
 voal
 voar
@@ -9965,8 +9955,6 @@ winstrike
 wir
 wise
 with
-wl
-wlh
 wo
 woa
 wola
@@ -9999,22 +9987,12 @@ wynx
 x
 xavier
 xbox
-xd
-xdd
-xde
-xi
-xnkzloso
-xy
-xz
-xé
-y
 ya
 yanis
 yann
 yannick
 yao
 yaoi
-yaovzofhofaiy
 yapa
 yas
 yass
@@ -10034,7 +10012,6 @@ yeslife
 yess
 yet
 yeux
-yl
 yo
 yoda
 yodsa
@@ -10053,7 +10030,7 @@ ytb
 yup
 yuri
 yvait
-yy
+y
 z
 zalamea
 zamis
@@ -10085,14 +10062,6 @@ zut
 zuut
 zweite
 zyva
-zé
-{o
-�
-àa
-âge
-âs
-ça
-çça
 é
 é
 é
@@ -10197,7 +10166,6 @@ zé
 étudier
 étudies
 étudié
-été
 été
 éval
 évaluer

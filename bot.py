@@ -873,7 +873,7 @@ async def poll(ctx, *text):
         elif i == 9:
             await reponse.add_reaction("9️⃣")
         elif i == 10:
-            await reponse.add_reaction("🔟 ")
+            await reponse.add_reaction("🔟")
 
 
 @bot.command(
