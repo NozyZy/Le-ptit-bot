@@ -1,14 +1,15 @@
-import googletrans
 import asyncio
-import discord
 import time
-import youtube_dl
-
-from googletrans import Translator
-from discord.ext import commands
 from datetime import date
+
+import discord
+import googletrans
+import youtube_dl
+from discord.ext import commands
+from googletrans import Translator
+from PIL import Image, ImageDraw, ImageFont
+
 from fonctions import *
-from PIL import Image, ImageFont, ImageDraw
 
 # ID : 653563141002756106
 # https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8
