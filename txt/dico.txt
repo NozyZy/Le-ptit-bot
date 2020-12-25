@@ -2836,7 +2836,7 @@ dégâts
 dégénéré
 déja
 déjeuner
-déjà
+déj�
 déjé
 délai
 délicatesse
@@ -5287,7 +5287,7 @@ lycées
 lydia
 lyric
 lz
-là
+l�
 lâche
 lâchez
 lé
@@ -6417,8 +6417,8 @@ ouisticram
 ouiu
 oula
 oulah
-oulà
-oulàlà
+oul�
+oulàl�
 oulé
 ouo
 ouppss
@@ -9760,7 +9760,7 @@ vilains
 villa
 villejuid
 villejuif
-vilà
+vil�
 vim
 vin
 vincent
@@ -9812,7 +9812,7 @@ voici
 void
 voies
 voila
-voilà
+voil�
 voilé
 voir
 voire
