@@ -49,14 +49,16 @@ async def on_message(message):
         return
 
     # expansion of the dico, with words of every messages (stock only words, never complete message)
-    if message.author.id != 696099307706777610:  # we don't what a specific bot (from a friend) to expand the dico
+    # we don't what a specific bot (from a friend) to expand the dico
+    if message.author.id != 696099307706777610:
         if "```" in Message:
             return
         mot = ""
         for i in range(len(Message)):
             mot += Message[i]
             if Message[i] == " " or i == len(Message) - 1:
-                ponctuation = [" ", ".", ",", ";", "!", "?", "(", ")", "[", "]", ":", "*"]
+                ponctuation = [" ", ".", ",", ";", "!",
+                               "?", "(", ")", "[", "]", ":", "*"]
                 for j in ponctuation:
                     mot = mot.replace(j, " ")
                 if verifAlphabet(mot) and 0 < len(mot) < 27:
@@ -154,7 +156,8 @@ async def on_message(message):
     if "<@!653563141002756106>" in Message and "appel" not in Message:
         user = str(message.author)
         user = user.replace(user[len(user) - 5:len(user)], "")
-        rep = ["ya quoi ?!", "Qu'est ce que tu as " + user + " ?", "Oui c'est moi", "Présent !", "*Oui ma bicheuh <3*"]
+        rep = ["ya quoi ?!", "Qu'est ce que tu as " + user + " ?",
+               "Oui c'est moi", "Présent !", "*Oui ma bicheuh <3*"]
         if user == "Le Grand bot":
             rep.append('Oui bb ?')
             rep.append('Yo <@!747066145550368789>')
@@ -177,7 +180,8 @@ async def on_message(message):
 
     # send the number of words stocked in the dico
     if Message == '--dico':
-        text = "J'ai actuellement " + str(len(dico_lines)) + " mots enregistrés, nickel"
+        text = "J'ai actuellement " + \
+            str(len(dico_lines)) + " mots enregistrés, nickel"
         await channel.send(text)
 
     if Message.startswith("--isdico "):
@@ -220,11 +224,13 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if (Message == "ez" or Message == "easy") and rdnb >= 3:
-            reponses = ["https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918"]
+            reponses = [
+                "https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918"]
             await channel.send(random.choice(reponses))
 
         if Message in ['bite', 'zizi', "teub", "zboub", "penis", "chybre", "chybrax", "chibre"]:
-            text = "8" + '=' * random.randint(0, int(today.strftime("%d"))) + "D"
+            text = "8" + '=' * \
+                random.randint(0, int(today.strftime("%d"))) + "D"
             await channel.send(text)
 
         if 'yanis' in Message and rdnb == 5:
@@ -234,15 +240,18 @@ async def on_message(message):
             await channel.send("https://tenor.com/view/stop-it-get-some-help-gif-7929301")
 
         if Message.startswith("exact"):
-            reponses = ["Je dirais même plus, exact.", "Il est vrai", "AH BON ??!", "C'est cela", "Plat-il ?", "Jure ?"]
+            reponses = ["Je dirais même plus, exact.", "Il est vrai",
+                        "AH BON ??!", "C'est cela", "Plat-il ?", "Jure ?"]
             await channel.send(random.choice(reponses))
 
         if Message == '<3':
-            reponses = ["Nique ta tante (pardon)", "<3", "luv luv", "moi aussi je t'aime ❤"]
+            reponses = [
+                "Nique ta tante (pardon)", "<3", "luv luv", "moi aussi je t'aime ❤"]
             await channel.send(random.choice(reponses))
 
         if Message == 'toi-même' or Message == "toi-meme" or Message == "toi même" or Message == "toi meme":
-            reponses = ["Je ne vous permet pas", "Miroir magique", "C'est celui qui dit qui l'est"]
+            reponses = ["Je ne vous permet pas",
+                        "Miroir magique", "C'est celui qui dit qui l'est"]
             await channel.send(random.choice(reponses))
 
         if "<@!747066145550368789>" in message.content:
@@ -318,7 +327,8 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if Message.startswith('tu veux'):
-            reponses = ['Ouais gros', 'Carrément ma poule', 'Mais jamais tes fou ptdr', 'Oui.']
+            reponses = ['Ouais gros', 'Carrément ma poule',
+                        'Mais jamais tes fou ptdr', 'Oui.']
             await channel.send(random.choice(reponses))
 
         if Message.startswith('quoi'):
@@ -326,11 +336,13 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if Message.startswith('pourquoi'):
-            reponses = ['PARCEQUEEEE', 'Aucune idée.', 'Demande au voisin', 'Pourquoi tu demandes ça ?']
+            reponses = ['PARCEQUEEEE', 'Aucune idée.',
+                        'Demande au voisin', 'Pourquoi tu demandes ça ?']
             await channel.send(random.choice(reponses))
 
         if Message.startswith("t'es sur"):
-            reponses = ['Ouais gros', 'Nan pas du tout', 'Qui ne tente rien...']
+            reponses = ['Ouais gros', 'Nan pas du tout',
+                        'Qui ne tente rien...']
             await channel.send(random.choice(reponses))
 
         if Message.startswith("ah ouais") or Message.startswith("ah bon"):
@@ -348,7 +360,8 @@ async def on_message(message):
             await channel.send("Tu parles comment de mon pote là ?")
 
         if '<@!392746536888696834>' in Message:
-            reponses = ['Ce trouduc.', 'Ce connard.', 'Ce petit con.', 'Cette petite pute.']
+            reponses = ['Ce trouduc.', 'Ce connard.',
+                        'Ce petit con.', 'Cette petite pute.']
             await channel.send(random.choice(reponses))
 
         if 'tg' in Message:
@@ -359,7 +372,8 @@ async def on_message(message):
 
         if Message == 'cheh' or Message == 'sheh':
             if rdnb >= 3:
-                reponses = ["Oh tu t'excuses", "Cheh", "C'est pas gentil ça", "🙁"]
+                reponses = ["Oh tu t'excuses", "Cheh",
+                            "C'est pas gentil ça", "🙁"]
                 await channel.send(random.choice(reponses))
             else:
                 await message.add_reaction("🥰")
@@ -368,7 +382,8 @@ async def on_message(message):
             await channel.send("💩")
 
         if Message == 'non':
-            reponses = ['si.', "ah bah ca c'est sur", "SÉRIEUX ??", "logique aussi", "jure ?"]
+            reponses = ['si.', "ah bah ca c'est sur",
+                        "SÉRIEUX ??", "logique aussi", "jure ?"]
             await channel.send(random.choice(reponses))
 
         if Message.startswith('lequel') and Message[4] != 'q':
@@ -422,7 +437,8 @@ async def on_message(message):
                 return
             user = await message.guild.fetch_member(userID)
             pfp = user.avatar_url
-            embed = discord.Embed(title="This is God", description='<@%s> is god.' % userID, color=0xecce8b)
+            embed = discord.Embed(
+                title="This is God", description='<@%s> is god.' % userID, color=0xecce8b)
             embed.set_thumbnail(url=pfp)
 
             await channel.send("God looks like him.", embed=embed)
@@ -860,8 +876,10 @@ async def translate(ctx, *text):
     fromLang = text[1].replace(" ", "")
     toLang = text[2].replace(" ", "")
     try:
-        textTranslated = translator.translate(toTranslate, src=fromLang, dest=toLang)
-        text = toTranslate + ' (' + textTranslated.src + ') -> ' + textTranslated.text + ' (' + textTranslated.dest + ')'
+        textTranslated = translator.translate(
+            toTranslate, src=fromLang, dest=toLang)
+        text = toTranslate + ' (' + textTranslated.src + ') -> ' + \
+            textTranslated.text + ' (' + textTranslated.dest + ')'
     except:
         text = "Nope, sorry !"
     await ctx.send(text)
@@ -889,9 +907,12 @@ async def master(ctx, *text):
 
     draw = ImageDraw.Draw(img)
 
-    draw.text(xy=(170 - (sizes[0]) / 2, 100), text=text[0], fill=(255, 255, 255), font=fonts[0])
-    draw.text(xy=(250 - (sizes[1]) / 2, 190), text=text[1], fill=(255, 255, 255), font=fonts[1])
-    draw.text(xy=(330 - (sizes[2]) / 2, 280), text=text[2], fill=(255, 255, 255), font=fonts[2])
+    draw.text(xy=(170 - (sizes[0]) / 2, 100),
+              text=text[0], fill=(255, 255, 255), font=fonts[0])
+    draw.text(xy=(250 - (sizes[1]) / 2, 190),
+              text=text[1], fill=(255, 255, 255), font=fonts[1])
+    draw.text(xy=(330 - (sizes[2]) / 2, 280),
+              text=text[2], fill=(255, 255, 255), font=fonts[2])
 
     img.save("images/mastermeme.jpg")
     await ctx.send(file=discord.File("images/mastermeme.jpg"))
