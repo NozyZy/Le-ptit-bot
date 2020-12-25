@@ -17,6 +17,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
+nbtg: int = 0
 
 
 # On ready message
@@ -32,6 +33,7 @@ async def on_ready():
 # Get every message sent, stocked in 'message'
 @bot.event
 async def on_message(message):
+    global nbtg
     channel = message.channel
     Message = message.content.lower()
     rdnb = random.randint(1, 5)
@@ -350,6 +352,9 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if 'tg' in Message:
+            nbtg += 1
+            activity = 'insulter {} personnes'.format(nbtg)
+            await bot.change_presence(activity=discord.Game(name=activity))
             await channel.send(random.choice(insultes))
 
         if Message == 'cheh' or Message == 'sheh':
