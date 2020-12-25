@@ -270,16 +270,17 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if Message in [
-            "bite",
-            "zizi",
-            "teub",
-            "zboub",
-            "penis",
-            "chybre",
-            "chybrax",
-            "chibre",
+                "bite",
+                "zizi",
+                "teub",
+                "zboub",
+                "penis",
+                "chybre",
+                "chybrax",
+                "chibre",
         ]:
-            text = "8" + "=" * random.randint(0, int(today.strftime("%d"))) + "D"
+            text = "8" + "=" * random.randint(0, int(
+                today.strftime("%d"))) + "D"
             await channel.send(text)
 
         if "yanis" in Message and rdnb == 5:
@@ -795,13 +796,14 @@ async def calcul(ctx, *text):
             return
         rd = float(nb1 / nb2)
     elif symb == "^":
-        rd = nb1 ** nb2
+        rd = nb1**nb2
     text = str(nb1) + str(symb) + str(nb2) + "=" + str(rd)
     print(text, rd)
     await ctx.send(text)
 
 
-@bot.command()  # create a reaction poll with a question, and max 10 propositions
+@bot.command(
+)  # create a reaction poll with a question, and max 10 propositions
 async def poll(ctx, *text):
     tab = []
     Message = " ".join(text)
@@ -874,7 +876,8 @@ async def poll(ctx, *text):
             await reponse.add_reaction("🔟")
 
 
-@bot.command()  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
+@bot.command(
+)  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
 async def prime(ctx, nb: int):
     if nb < 2:
         await ctx.send("Tu sais ce que ca veut dire 'prime number' ?")
