@@ -674,8 +674,13 @@ azi
 azier
 azrfduisdfg
 azy
+<<<<<<< HEAD
 aà¯e
 aée
+=======
+aée
+aïe
+>>>>>>> ec58da1902153f583f59cc9a33983e62a4d0122e
 b
 ba
 baabekyu
@@ -1102,7 +1107,7 @@ brun
 brune
 brut
 brute
-brà»ler
+brûler
 bs
 bsl
 bst
@@ -1541,7 +1546,7 @@ chosiir
 chou
 chouettes
 choupi
-chouà¯a
+chouïa
 chqaue
 chqua
 chr
@@ -2081,7 +2086,7 @@ couça
 cover
 covid
 cowana
-coà»t
+coût
 cp
 cpafacil
 cpp
@@ -2862,7 +2867,7 @@ dégâts
 dégénéré
 déja
 déjeuner
-déjà
+déj�
 déjé
 délai
 délicatesse
@@ -2963,6 +2968,10 @@ déviation
 déçois
 déçu
 déçus
+<<<<<<< HEAD
+=======
+dû
+>>>>>>> ec58da1902153f583f59cc9a33983e62a4d0122e
 e
 each
 eah
@@ -3656,9 +3665,15 @@ fluide
 flut
 flute
 flux
+<<<<<<< HEAD
 flà»te
 flà»tes
 fléche
+=======
+fléche
+flûte
+flûtes
+>>>>>>> ec58da1902153f583f59cc9a33983e62a4d0122e
 fm
 fml
 fnac
@@ -3921,8 +3936,6 @@ gauss
 gaussienne
 gave
 gaves
-gd
-gdapà»yfazui
 gdb
 ge
 geant
@@ -5094,7 +5107,7 @@ laucnher
 launch
 launcher
 laurence
-laà¯fe
+laïfe
 ldc
 ldr
 le
@@ -5334,7 +5347,7 @@ lycées
 lydia
 lyric
 lz
-là
+l�
 lâche
 lâchez
 lé
@@ -6480,8 +6493,8 @@ ouisticram
 ouiu
 oula
 oulah
-oulà
-oulàlà
+oul�
+oulàl�
 oulé
 ouo
 ouppss
@@ -8701,8 +8714,12 @@ sinphi
 sinscrit
 sinus
 sinusoid
+<<<<<<< HEAD
 sinusoà¯de
 sio
+=======
+sinusoïde
+>>>>>>> ec58da1902153f583f59cc9a33983e62a4d0122e
 sipos
 siqnm
 sisi
@@ -9188,7 +9205,12 @@ sérénité
 sévère
 sévères
 sûr
+<<<<<<< HEAD
 sûre
+=======
+sûremebnt
+sûrement
+>>>>>>> ec58da1902153f583f59cc9a33983e62a4d0122e
 t
 ta
 tab
@@ -9856,7 +9878,7 @@ vilains
 villa
 villejuid
 villejuif
-vilà
+vil�
 vim
 vin
 vincent
@@ -9910,7 +9932,7 @@ voici
 void
 voies
 voila
-voilà
+voil�
 voilé
 voir
 voire
