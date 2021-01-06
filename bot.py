@@ -51,7 +51,7 @@ async def on_message(message):
         return
 
     # expansion of the dico, with words of every messages (stock only words, never complete message)
-    # we don't what a specific bot (from a friend) to expand the dico
+    # we don't want a specific bot (from a friend) to expand the dico
     if message.author.id != 696099307706777610:
         if "```" in MESSAGE:
             return
