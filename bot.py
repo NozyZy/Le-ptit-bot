@@ -1067,7 +1067,7 @@ async def presentation(ctx, *base):
     text = [""]
     count = j = 0
     for i in range(len(base)):
-        if (j > 25 and base[i] == " ") or j > 40:
+        if (j > 20 and base[i] == " ") or j > 30:
             text.append(base[i])
             count += 1
             j = 0
@@ -1083,7 +1083,7 @@ async def presentation(ctx, *base):
     for i in range(len(text)):
         size = font.getsize(text[i])
         draw.text(
-            xy=(325 - size[0] / 2, 170 + i * size[1] - 10 * count),
+            xy=(335 - size[0] / 2, 170 + i * size[1] - 10 * count),
             text=text[i],
             fill=(0, 0, 0),
             font=font,
@@ -1099,6 +1099,33 @@ async def say(ctx, number, *text):
     for i in range(int(number)):
         await ctx.send(" ".join(text))
 """
+
+
+@bot.command()
+async def dl(ctx, *text):
+    import os
+    os.system("pip install --upgrade youtube-dl")
+    link = " ".join(text)
+    text = link.split(',')
+
+    path = "D:/Quentin/Music/" + text[0]
+    link = text[1].replace(" ", "")
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'flac',
+            'preferredquality': '192',
+        }],
+        'outtmpl': path + '/%(title)s.%(ext)s',
+    }
+
+    print("Downloading...", link)
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([link])
+    ctx.add_reaction("👍")
+
 
 # runs the bot (if you have a TOKEN hahaha)
 bot.run(TOKEN)
