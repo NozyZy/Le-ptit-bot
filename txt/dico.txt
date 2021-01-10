@@ -764,6 +764,7 @@ battre
 battu
 baut
 bave
+bavoo
 bazar
 bb
 bblblblb
@@ -2253,6 +2254,7 @@ dawn
 dawson
 day
 daze
+dazigzdciyouadzàçz
 dbar
 dcd
 dcp
@@ -6191,6 +6193,7 @@ noyer
 nozyzy
 nozzy
 np
+npn
 npnp
 npourtant
 npous
@@ -8227,6 +8230,7 @@ réelle
 réessaye
 réexecution
 réf
+réflechi
 réflechir
 réflex
 réfléchir
@@ -9312,6 +9316,7 @@ test
 testc
 teste
 tester
+testeur
 testh
 testing
 tests
@@ -9671,6 +9676,7 @@ urgent
 urodéle
 urodéles
 us
+use
 useful
 useless
 user
@@ -10088,6 +10094,7 @@ yes
 yesai
 yeslife
 yess
+yessay
 yet
 yeux
 yey
