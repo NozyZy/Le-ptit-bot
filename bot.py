@@ -22,6 +22,7 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
 nbtg: int = 0
 
+
 # On ready message
 @bot.event
 async def on_ready():
@@ -176,8 +177,8 @@ async def on_message(message):
                 "ALLOOOOOOOOOOOOOOOOOOOOOOOOOO ",
             ]
             random.shuffle(liste)
-            for i in range(10):
-                text = liste[i] + nom
+            for mot in liste:
+                text = mot + nom
                 await channel.send(text)
                 time.sleep(3)
 
