@@ -1056,6 +1056,43 @@ async def master(ctx, *text):
     await ctx.send(file=discord.File("images/mastermeme.jpg"))
 
 
+@bot.command()
+async def presentation(ctx, *base):
+    base = " ".join(base)
+    if not len(base):
+        base = "add something dude"
+    elif len(base) > 200:
+        base = "less text bro, i'm not Word"
+
+    text = [""]
+    count = j = 0
+    for i in range(len(base)):
+        if (j > 25 and base[i] == " ") or j > 40:
+            text.append(base[i])
+            count += 1
+            j = 0
+        else:
+            j += 1
+
+        text[count] += base[i]
+    img = Image.open("images/presentation.png")
+
+    font = ImageFont.truetype("fonts/Impact.ttf", 28)
+    count += 1
+    draw = ImageDraw.Draw(img)
+    for i in range(len(text)):
+        size = font.getsize(text[i])
+        draw.text(
+            xy=(325 - size[0] / 2, 170 + i * size[1] - 10 * count),
+            text=text[i],
+            fill=(0, 0, 0),
+            font=font,
+        )
+
+    img.save("images/presentationmeme.png")
+    await ctx.send(file=discord.File("images/presentationmeme.png"))
+
+
 """
 @bot.command()
 async def say(ctx, number, *text):
