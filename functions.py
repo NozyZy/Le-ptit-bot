@@ -87,7 +87,7 @@ def facto(n):
 def strToInt(list):
     nb = 0
     for j in range(len(list)):
-        nb += (ord(list[j]) - 48) * 10 ** (len(list) - j - 1)
+        nb += (ord(list[j]) - 48) * 10**(len(list) - j - 1)
     return nb
 
 
@@ -107,7 +107,9 @@ def verifAlphabet(string):
             if string[i] == string[i + 1] and string[i] == string[i + 2]:
                 return False
         if ord(string[i]) < 97 or 97 + 26 < ord(string[i]):
-            if string[i] not in ["é", "è", "à", "ï", "ø", "â", "ñ", "î", "û", "ç"]:
+            if string[i] not in [
+                    "é", "è", "à", "ï", "ø", "â", "ñ", "î", "û", "ç"
+            ]:
                 return False
     return True
 
@@ -199,9 +201,8 @@ def init_position(grille):
 
 
 def saisi_position(grille, tour):
-    if (
-        tour % 2 == 0
-    ):  # sera pair pour le joueur 1 Noir, et impair pour le joueur 2 Blanc
+    if (tour % 2 == 0
+        ):  # sera pair pour le joueur 1 Noir, et impair pour le joueur 2 Blanc
         joueur = 1
         caractere = " O"
         inv_caractere = " X"
@@ -213,9 +214,8 @@ def saisi_position(grille, tour):
     coups_possibles = verif_coup(grille, caractere, inv_caractere)
     # coups possibles du prochain tour
     coups_possibles_inverse = verif_coup(grille, inv_caractere, caractere)
-    if (
-        len(coups_possibles) == 0 and len(coups_possibles_inverse) == 0
-    ):  # s'il n'y a pas de coups à ce tour et au tour prochain, fin de jeu
+    if (len(coups_possibles) == 0 and len(coups_possibles_inverse) == 0
+        ):  # s'il n'y a pas de coups à ce tour et au tour prochain, fin de jeu
         print("Aucun coups possible.", end="")
         return arreter_partie()  # return True
     else:
@@ -291,9 +291,8 @@ def saisi_position(grille, tour):
 
         y = y_cst
 
-        while (
-            grille[y - 1][x + 1] == inv_caractere
-        ):  # retourne case diagonale bas gauche
+        while (grille[y - 1][x + 1] == inv_caractere
+               ):  # retourne case diagonale bas gauche
             y += -1
             x += 1
         x += 1
@@ -307,9 +306,8 @@ def saisi_position(grille, tour):
         y = y_cst
         x = x_cst
 
-        while (
-            grille[y - 1][x - 1] == inv_caractere
-        ):  # retourne case diagonale bas droite
+        while (grille[y - 1][x - 1] == inv_caractere
+               ):  # retourne case diagonale bas droite
             y += -1
             x += -1
         x += -1
@@ -324,9 +322,8 @@ def saisi_position(grille, tour):
         y = y_cst
         x = x_cst
 
-        while (
-            grille[y + 1][x - 1] == inv_caractere
-        ):  # retourne case diagonale haut droite
+        while (grille[y + 1][x - 1] == inv_caractere
+               ):  # retourne case diagonale haut droite
             y += 1
             x += -1
         y += 1
@@ -340,9 +337,8 @@ def saisi_position(grille, tour):
         y = y_cst
         x = x_cst
 
-        while (
-            grille[y + 1][x + 1] == inv_caractere
-        ):  # retourne case diagonale haut gauche
+        while (grille[y + 1][x + 1] == inv_caractere
+               ):  # retourne case diagonale haut gauche
             y += 1
             x += 1
         y += 1
@@ -366,7 +362,8 @@ def liste_sans_doublon(liste):
             if liste[i] == new_liste[j]:
                 double = True
             j += 1
-        if double == False and j == len(new_liste) and new_liste[0] != liste[i]:
+        if double == False and j == len(
+                new_liste) and new_liste[0] != liste[i]:
             new_liste.append(liste[i])
     return new_liste
 
@@ -377,8 +374,7 @@ def verif_coup(grille, caractere, inv_caractere):
         # liste 2D pour récréer la grille
         all_coups.append(["."] * (len(grille) - 1))
     coups_possibles = (
-        []
-    )  # liste contenant tous les coups jouables, en fonction du joueur
+        [])  # liste contenant tous les coups jouables, en fonction du joueur
     for i in range(0, len(grille) - 1):
         val_y = i + 1  # commence à 1
         for j in range(0, len(grille) - 1):
@@ -418,51 +414,50 @@ def verif_coup(grille, caractere, inv_caractere):
 
                 y = y_cst
 
-                while (
-                    grille[y - 1][x + 1] == inv_caractere
-                ):  # case diagonale haut droite
+                while (grille[y - 1][x + 1] == inv_caractere
+                       ):  # case diagonale haut droite
                     y += -1
                     x += 1
-                if grille[y][x] == inv_caractere and grille[y - 1][x + 1] == " .":
+                if grille[y][x] == inv_caractere and grille[y - 1][x +
+                                                                   1] == " .":
                     coups_possibles.append(all_coups[y - 1][x + 1])
 
                 y = y_cst
                 x = x_cst
 
-                while (
-                    grille[y - 1][x - 1] == inv_caractere
-                ):  # case diagonale haut gauche
+                while (grille[y - 1][x - 1] == inv_caractere
+                       ):  # case diagonale haut gauche
                     y += -1
                     x += -1
-                if grille[y][x] == inv_caractere and grille[y - 1][x - 1] == " .":
+                if grille[y][x] == inv_caractere and grille[y - 1][x -
+                                                                   1] == " .":
                     coups_possibles.append(all_coups[y - 1][x - 1])
 
                 y = y_cst
                 x = x_cst
 
-                while (
-                    grille[y + 1][x - 1] == inv_caractere
-                ):  # case diagonale bas gauche
+                while (grille[y + 1][x - 1] == inv_caractere
+                       ):  # case diagonale bas gauche
                     y += 1
                     x += -1
-                if grille[y][x] == inv_caractere and grille[y + 1][x - 1] == " .":
+                if grille[y][x] == inv_caractere and grille[y + 1][x -
+                                                                   1] == " .":
                     coups_possibles.append(all_coups[y + 1][x - 1])
 
                 y = y_cst
                 x = x_cst
 
-                while (
-                    grille[y + 1][x + 1] == inv_caractere
-                ):  # case diagonale bas droite
+                while (grille[y + 1][x + 1] == inv_caractere
+                       ):  # case diagonale bas droite
                     y += 1
                     x += 1
-                if grille[y][x] == inv_caractere and grille[y + 1][x + 1] == " .":
+                if grille[y][x] == inv_caractere and grille[y + 1][x +
+                                                                   1] == " .":
                     coups_possibles.append(all_coups[y + 1][x + 1])
                 y = y_cst
                 x = x_cst
-    if (
-        len(coups_possibles) != 0
-    ):  # si la liste n'est pas vide, on enlèves tous les doublons
+    if (len(coups_possibles) !=
+            0):  # si la liste n'est pas vide, on enlèves tous les doublons
         coups_possibles = liste_sans_doublon(coups_possibles)
     return coups_possibles
 
@@ -477,9 +472,8 @@ def liste_coups_valides(coups_possibles):
 
 def ecrire_case(grille, position, caractere):
     try:
-        grille[int(f"{position[1]}{position[2]}") - 1][
-            abscisse[position[0]]
-        ] = caractere  # on test si l'ordonée est à 2 chiffres (>10)
+        grille[int(f"{position[1]}{position[2]}") - 1][abscisse[position[
+            0]]] = caractere  # on test si l'ordonée est à 2 chiffres (>10)
 
     except IndexError:
         grille[int(position[1]) - 1][abscisse[position[0]]] = caractere
