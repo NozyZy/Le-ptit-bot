@@ -11,7 +11,7 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-from fonctions import *
+from functions import *
 
 # ID : 653563141002756106
 # https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8
