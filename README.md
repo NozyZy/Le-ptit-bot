@@ -1,44 +1,53 @@
 # Le-ptit-bot
+![GitHub](https://img.shields.io/github/license/NozyZy/Le-ptit-bot?style=flat)
+
 The best discord python bot :100:
 
 <img src="https://cdn.discordapp.com/attachments/754976677808832512/771094907996733460/unknown.png" width="400"/>
 
-# What is Le ptit bot
+### What is Le ptit bot
 
 This is a discord chatbot, made in Python, that reacts to some message, and can do a few things useful.
 
 It is open to everyone, to use and modify it.
 
--> [<font color="green">Invite link</font>](/https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8)
+Here's the [invite link](/https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8).
 
-# How to contribute
+### How to contribute
 
-At this time, using:
+Core dependancies:
 
- - **python 3.9.0**
- - **pip 20.2.4**
- - **discord.py 1.5.1**
- - **youtube-dl 2020.11.1.1**
+ - python 3.9.0
+ - pip 20.2.4
+ - discord.py 1.5.1
+ - youtube-dl 2020.11.1.1
 
-1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
-	- All the packages should be in the `venv/Scripts` folder, but if not, thy are quoted above
-2. Make your changes, here are the things you need to know. 
- 	- The main file is `bot.py`, where every commands and reaction are, you can use and add funstions in `functions.py`
- 	- in the `on_message(message)` function :
- 				- `channel` is thje variable of the channel, use `await channel.send(text)` to send message containing `text`
- 				- `Message` is the variable where the content of the message sent is stocked, but in lowercase. Use `message.content` if you want to match the case.
-				- `rdnb` is a random int variable, between 1 and 5, it is used to add probabilities of each reaction to happen (ex : `if rdnb > 3` => 2/5 chance to happen)
- 	- To add reactions, take the example inside of the `on_message()` function, here is one :
-```python
-if Message.startswith('quoi'):
-	reponses = ['feur', 'hein ?', 'nan laisse', 'oublie', 'rien']
-	await channel.send(random.choice(reponses))
-```
-				
-- To add commands, the prexif is set at the beginning of the file (`bot = commands.Bot(command_prefix="--", description="Le p'tit bot !"`), so this is --)
-	Then, use `@bot.command()` to begin a new command, next line has to be `async def command_name(ctx, other_parameters):`, and then the command call will be the prexif, past top 	the 	name (so here it'll be `--command_name`)
-- Be creative, and do be affraid to add things in english, even if it's firstly programed for french users, mixity is good !
-3. When you're done, make a pull request to the `dev_improve` branch of my repository, and hope I'll accept your changes (I'm sure you'll do good stuff that I'll approve !)
+ 
+ However, if you would want to install the full list, run `pip install -r requirements.txt` in your virtual environment. 
 
-ENJOY
-============
+
+1. Clone/Fork this repository:
+	- All the packages should be in the `venv/Scripts` folder, run `source venv/Scripts/activate` to activate your virtual environment. If they are not in there by any chance, run the command above to install all the dependencies. 
+
+
+2. Make your changes and commits, but here are some other tips that might be helpful:
+	- The main file is `bot.py`, where every commands and reaction are, you can add/change functions in `functions.py`
+	- In the `on_message(message)` function :
+		- `channel` is a variable defining the channel, use `await channel.send(text)` to send message containing `text`. Unless it's in a command, then use `await ctx.send(text)`
+		- `Message` is the variable containing the message sent by a user in lowercase. Use `message.content` if you want to match the case of the original message.
+		- `rdnb` stores a random int, between 1 and 5, it is used to determine the probablity of each reaction happening (eg: `if rdnb > 3` then there is a 2/5 chance of happen)
+		- To add message reactions, here's an example from the `on_message()` function:
+			```python
+			if Message.startswith('quoi'):
+			reponses = ['feur', 'hein ?', 'nan laisse', 'oublie', 'rien']
+			await channel.send(random.choice(reponses))
+			```
+	- Then, use `@bot.command()` to begin a new command, next line has to be `async def command_name(ctx, other_parameters):`
+	- Last but not least, be creative with your commands and do be afraid to add things in english, even if it's intent was for french users, a mix of it is good!
+
+3. When you're done, make a pull request to the `dev_improve` branch of my repository, and hope I'll accept your changes (I'm sure you'll do good stuff that I'll approve of!)
+
+### Have fun and Enjoy!
+
+## License 
+MIT - see [LICENSE](https://github.com/NozyZy/Le-ptit-bot/blob/main/LICENSE) file for more details.
