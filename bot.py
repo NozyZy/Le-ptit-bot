@@ -599,28 +599,6 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-    # teh help command, add commands call, but not reactions
-    if Message == "--help":
-        await channel.send(
-            "Commandes : \n"
-            " **F** to pay respect\n"
-            " **--serverInfo** pour connaître les infos du server\n"
-            " **--addInsult** pour ajouter des insultes et **tg** pour te faire insulter\n"
-            " **--addWord** pour ajouter un mot au jeu, et **--game** pour jouer au jeu du **clap**\n"
-            " **--repeat** pour que je répète ce qui vient après l'espace\n"
-            " **--appel** puis le pseudo de ton pote pour l'appeler\n"
-            " **--crypt** pour chiffrer/déchiffrer un message César (décalage)\n"
-            " **--random** pour écrire 5 mots aléatoires\n"
-            " **--randint *nb1*, *nb2* ** pour avoir un nombre aléatoire entre ***nb1*** et ***nb2***\n"
-            " **--calcul *nb1* (+, -, /, *, ^, !) *nb2* ** pour avoir un calcul adéquat \n"
-            " **--isPrime** *nb* pour tester si *nb* est premier\n"
-            " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
-            " **--poll *question*, *prop1*, *prop2*,..., *prop10* ** pour avoir un sondage de max 10 propositions\n"
-            " **--song** puis : **add** *ajoute un morceau à la liste ([URL youtube] - [titre] - [artiste])*\n"
-            "                         **random** *choisit un morceau dans la liste*\n"
-            "                         **all** *affiche toute la liste*\n"
-            "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈"
-        )
     else:
         # allows command to process after the on_message() function call
         await bot.process_commands(message)
@@ -959,8 +937,7 @@ def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(
             song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         ))
 
     def next(_):
