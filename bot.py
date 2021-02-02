@@ -1101,31 +1101,5 @@ async def say(ctx, number, *text):
 """
 
 
-@bot.command()
-async def dl(ctx, *text):
-    import os
-    os.system("pip install --upgrade youtube-dl")
-    link = " ".join(text)
-    text = link.split(',')
-
-    path = "D:/Quentin/Music/" + text[0]
-    link = text[1].replace(" ", "")
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'flac',
-            'preferredquality': '192',
-        }],
-        'outtmpl': path + '/%(title)s.%(ext)s',
-    }
-
-    print("Downloading...", link)
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([link])
-    ctx.add_reaction("👍")
-
-
 # runs the bot (if you have a TOKEN hahaha)
 bot.run(TOKEN)
