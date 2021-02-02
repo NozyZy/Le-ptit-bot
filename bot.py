@@ -20,6 +20,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
+TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.CuO_cK8DdbiACO9owIB-q3bUiHg"
 nbtg: int = 0
 
 
@@ -884,24 +885,32 @@ async def prime(ctx, nb: int):
     Fprime = open("txt/primes.txt", "r+")
     primes = Fprime.readlines()
     Fprime.close()
-    n_max = int(primes[len(primes) - 1].replace("\n", ""))
-    print(n_max)
+    biggest = int(primes[len(primes) - 1].replace("\n", ""))
     text = ""
-    await ctx.message.add_reaction("👍")
-    if n_max < nb:
-        if n_max % 2 == 0:
-            n_max -= 1
-        for i in range(n_max, nb + 1, 2):
-            if is_prime(i):
-                text += str(i) + "\n"
-        Fprime = open("txt/primes.txt", "a+")
-        Fprime.write(text)
-        Fprime.close()
-    if nb > 14064991:  # 8Mb file limit
-        text = "Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
-        await ctx.send(text)
-    text = "Tous les nombres premiers jusqu'a 14064991"
-    await ctx.send(text, file=discord.File("txt/prime.txt"))
+    ratio_max = 1.02
+    n_max = int(biggest * ratio_max)
+    print(biggest, n_max)
+
+    if nb > biggest:
+        if biggest % 2 == 0:
+            biggest -= 1
+        if nb <= n_max:
+            await ctx.send("Donne moi quelques minutes bro...")
+            for i in range(biggest, nb + 1, 2):
+                if is_prime(i):
+                    text += str(i) + "\n"
+            Fprime = open("txt/primes.txt", "a+")
+            Fprime.write(text)
+            Fprime.close()
+            if nb > 14064991:  # 8Mb file limit
+                text = f"Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
+                await ctx.send(text)
+        else:
+            text = f"Ca va me prendre trop de temps, on y va petit à petit, ok ? (max : {int(n_max)})"
+            await ctx.send(text)
+    else:
+        text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
+        await ctx.send(text, file=discord.File("txt/prime.txt"))
 
 
 @bot.command()  # find if 'nb' is a prime number, reacts to the message
