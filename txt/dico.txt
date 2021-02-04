@@ -697,6 +697,7 @@ badboy
 bae
 bagarre
 bagnole
+baguette
 bah
 bahaah
 bahah
@@ -1718,6 +1719,7 @@ collombet
 collègue
 collègues
 collé
+coloc
 colombet
 colère
 colére
@@ -3284,6 +3286,7 @@ espagnol
 espere
 esperons
 espion
+espoir
 esport
 esports
 espèce
@@ -3855,6 +3858,7 @@ frappes
 frappé
 fraude
 fraudes
+freddies
 frederico
 free
 freebox
@@ -4119,6 +4123,7 @@ gpalu
 gpd
 gpeur
 gplay
+gps
 gpu
 gr
 graal
@@ -5406,6 +5411,7 @@ lours
 loustics
 lov
 love
+loyer
 lpb
 lpl
 lpour
@@ -5471,6 +5477,7 @@ maade
 mac
 macandcheese
 macaque
+macdo
 macher
 machin
 machine
@@ -7821,6 +7828,7 @@ ranger
 rangé
 rank
 rape
+rapelle
 raph
 raphael
 raphaelcadillat
@@ -9289,6 +9297,7 @@ surnom
 surnote
 surprenant
 surpris
+sursaut
 sursauté
 surtout
 surveillant
@@ -9761,6 +9770,7 @@ tromper
 trompeur
 trompé
 trompée
+trompés
 trooper
 troopers
 trop

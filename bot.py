@@ -20,7 +20,6 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.CuO_cK8DdbiACO9owIB-q3bUiHg"
 nbtg: int = 0
 
 
@@ -1101,6 +1100,9 @@ async def presentation(ctx, *base):
     img.save("images/presentationmeme.png")
     await ctx.send(file=discord.File("images/presentationmeme.png"))
 
+@bot.command()
+async def invite(ctx):
+	await ctx.send("Invitez-moi !\nhttps://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8")
 
 """
 @bot.command()
