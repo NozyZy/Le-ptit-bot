@@ -1,4 +1,5 @@
 import asyncio
+import os
 import time
 from datetime import date
 
@@ -20,6 +21,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
+TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.sA9fVUB7cBLH-aNsinf6q6SpOx"
 nbtg: int = 0
 
 
@@ -158,8 +160,7 @@ async def on_message(message):
         await channel.send(song)
 
     # ping a people 10 time, once every 3 sec
-    if MESSAGE.startswith(
-            "--appel <@") and channel.guild != "EFREI International 2025":
+    if MESSAGE.startswith("--appel <@") and channel.guild != "EFREI International 2025":
         if "<@!653563141002756106>" in MESSAGE:
             await channel.send("T'es un marrant toi")
         else:
@@ -1100,9 +1101,16 @@ async def presentation(ctx, *base):
     img.save("images/presentationmeme.png")
     await ctx.send(file=discord.File("images/presentationmeme.png"))
 
+
 @bot.command()
 async def invite(ctx):
-	await ctx.send("Invitez-moi !\nhttps://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8")
+    await ctx.send(
+        "Invitez-moi !\nhttps://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8")
+
+
+@bot.command()
+async def reboot(ctx):
+    os.system("python bot.py")
 
 """
 @bot.command()
@@ -1110,7 +1118,6 @@ async def say(ctx, number, *text):
     for i in range(int(number)):
         await ctx.send(" ".join(text))
 """
-
 
 # runs the bot (if you have a TOKEN hahaha)
 bot.run(TOKEN)
