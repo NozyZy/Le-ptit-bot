@@ -2273,6 +2273,7 @@ dac
 dacc
 daccord
 dacdac
+dacodacc
 dada
 dadaa
 dafuck
@@ -2752,6 +2753,7 @@ down
 download
 downs
 doxygen
+dpgazuhdaziyguoihlk
 dpygiazkbhiou
 dr
 dragonborn
@@ -4990,6 +4992,7 @@ jsplus
 jspr
 jsui
 jsuis
+jsus
 jsute
 jte
 jtm
@@ -5078,6 +5081,7 @@ kelh
 kelhaf
 kelhome
 ken
+kentin
 keske
 keskil
 kestuveuxdireparla
@@ -5454,6 +5458,7 @@ lz
 là
 lâche
 lâchez
+lç
 lé
 lé
 lécher
@@ -9421,6 +9426,7 @@ talon
 talons
 tambien
 tamere
+tamvq
 tandis
 tangente
 tant
@@ -10393,6 +10399,7 @@ zyzy
 éa
 ébloui
 échanger
+échauffement
 échecs
 éclate
 éclaté
