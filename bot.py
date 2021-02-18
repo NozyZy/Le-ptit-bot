@@ -21,11 +21,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-<<<<<<< HEAD
-TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40GW.sA9fVUB7cBLH-aNsinf6q6SpOxY"
-=======
-TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.sA9fVUB7cBLH-aNsinf6q6SpOx"
->>>>>>> b49d21d8149eb1a96ab4956cc11b3204e53138c8
+TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.sA9fVUB7cBLH-aNsinf6q6SpOxY"
 nbtg: int = 0
 
 
@@ -1108,22 +1104,13 @@ async def presentation(ctx, *base):
 
 @bot.command()
 async def invite(ctx):
-<<<<<<< HEAD
 	await ctx.send("Invitez-moi !\nhttps://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8")
 	
 	
 @bot.command()
 async def reboot(ctx):
 	os.system("python3 bot.py")
-=======
-    await ctx.send(
-        "Invitez-moi !\nhttps://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8")
 
-
-@bot.command()
-async def reboot(ctx):
-    os.system("python bot.py")
->>>>>>> b49d21d8149eb1a96ab4956cc11b3204e53138c8
 
 """
 @bot.command()
