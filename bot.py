@@ -444,13 +444,16 @@ async def on_message(message):
             await channel.send("Tu parles comment de mon pote là ?")
 
         if "tg" in MESSAGE:
-            nbtg += 1
-            activity = "insulter {} personnes".format(nbtg)
-            await bot.change_presence(activity=discord.Game(name=activity))
-            await channel.send(random.choice(insultes))
-            if rdnb >= 4:
-                await message.add_reaction('🇹')
-                await message.add_reaction('🇬')
+            MESSAGE = " " + MESSAGE + " "
+            for i in range(len(MESSAGE) - 3):
+                if MESSAGE[i] == " " and MESSAGE[i + 1] == "t" and MESSAGE[i + 2] == "g" and MESSAGE[i + 3] == " ":
+                    nbtg += 1
+                    activity = "insulter {} personnes".format(nbtg)
+                    await bot.change_presence(activity=discord.Game(name=activity))
+                    await channel.send(random.choice(insultes))
+                    if rdnb >= 4:
+                        await message.add_reaction('🇹')
+                        await message.add_reaction('🇬')
 
         if MESSAGE == "cheh" or MESSAGE == "sheh":
             if rdnb >= 3:
@@ -495,10 +498,6 @@ async def on_message(message):
 
         if "☹" in MESSAGE or "😞" in MESSAGE or "😦" in MESSAGE:
             await message.add_reaction("🥰")
-
-        if MESSAGE == "bv":
-            await channel.send(
-                "Tes parents t'ont appris la politesse, alors on dit MERCI")
 
         if MESSAGE == "f" or MESSAGE == "rip":
             await channel.send(
