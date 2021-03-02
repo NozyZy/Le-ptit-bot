@@ -48,7 +48,15 @@ async def on_message(message):
     dicoSize = len(dicoLines)
     dicoFile.close()
 
+    bansFile = open("txt/bans.txt", "r+")
+    bansLines = bansFile.readlines()
+    bansFile.close()
+
     if message.author == bot.user:  # we don't want the bot to repeat itself
+        return
+
+    if (str(channel.id) + "\n") in bansLines:     # option to ban reactions from some channels
+        await bot.process_commands(message)
         return
 
     # expansion of the dico, with words of every messages (stock only words, never complete message)
@@ -398,9 +406,10 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE in ["facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"]\
+        if MESSAGE in ["facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"] \
                 or MESSAGE.startswith("pff") or MESSAGE.startswith("no.."):
-            await channel.send("https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif")
+            await channel.send(
+                "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif")
 
         if MESSAGE.startswith("t'es sur") or MESSAGE.startswith("t sur"):
             reponses = [
@@ -1098,6 +1107,50 @@ async def presentation(ctx, *base):
 
 
 @bot.command()
+async def ban(ctx):
+    if not ctx.author.guild_permissions.administrator:
+        await ctx.send("T'es pas admin, nananananère 😜")
+        return
+    bansFile = open("txt/bans.txt", "r+")
+    bansLines = bansFile.readlines()
+    bansFile.close()
+    chanID = str(ctx.channel.id) + "\n"
+    if chanID in bansLines:
+        await ctx.send("Jsuis déjà ban, du calme...")
+    else:
+        bansFile = open("txt/bans.txt", "a+")
+        bansFile.write(chanID)
+        bansFile.close()
+        await ctx.send("D'accord, j'arrete de vous embeter ici... mais les commandes sont toujours dispos")
+
+
+@bot.command()
+async def unban(ctx):
+    if not ctx.author.guild_permissions.administrator:
+        await ctx.send("T'es pas admin, nananananère 😜")
+        return
+    bansFile = open("txt/bans.txt", "r+")
+    bansLines = bansFile.readlines()
+    bansFile.close()
+    chanID = str(ctx.channel.id) + "\n"
+    if chanID not in bansLines:
+        await ctx.send("D'accord, mais j'suis pas ban, hehe.")
+    else:
+        bansFile = open("txt/bans.txt", "w+")
+        bansFile.write("")
+        bansFile.close()
+        bansFile = open("txt/bans.txt", "a+")
+        for id in bansLines:
+            if id == chanID:
+                bansLines.remove(id)
+                await ctx.send("JE SUIS LIIIIIIBRE")
+            else:
+                bansFile.write(id)
+        bansFile.close()
+
+
+
+@bot.command()
 async def invite(ctx):
     await ctx.send(
         "Invitez-moi 🥵 !\nhttps://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8")
@@ -1109,6 +1162,7 @@ async def say(ctx, number, *text):
     for i in range(int(number)):
         await ctx.send(" ".join(text))
 """
+
 
 # runs the bot (if you have a TOKEN hahaha)
 bot.run(TOKEN)
