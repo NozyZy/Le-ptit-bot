@@ -1165,4 +1165,85 @@ async def say(ctx, number, *text):
 
 
 # runs the bot (if you have a TOKEN hahaha)
+
+@bot.command()  # PERSONAL USE ONLY
+async def AmongUs(ctx):
+    #if not ctx.author.guild_permissions.administrator:
+    #    await ctx.send("Nope, t'es pas admin désolé...")
+    #    return
+
+    """
+    f_name = open("txt/names.txt", "r+")
+    all_names = f_name.readlines()
+    random.shuffle(all_names)
+    f_name.close()
+    random.shuffle(all_names)
+    """
+    tour = 0
+    #TODO boucler ça, lister les joueurs, es ranger, les pings
+    while 1:
+        tour += 1
+        test = await ctx.send("On joue ? Réagis pour jouer, sinon tant pis")
+        yes = "✅"
+
+        await test.add_reaction(yes)
+
+        time.sleep(10)
+
+        test = await test.channel.fetch_message(test.id)
+        users = set()
+        for reaction in test.reactions:
+
+            if str(reaction.emoji) == yes:
+                async for user in reaction.users():
+                    print(reaction)
+                    users.add(user)
+        """for user in users:
+            text = "<@!" + str(user.id) + ">"
+            await ctx.send(text)"""
+
+        ids = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21",]
+        for user in users:
+            if user.id != 653563141002756106:
+                ids.append(user.id)
+        random.shuffle(ids)
+        if len(ids) < 5:
+            await ctx.send("En dessous de 5 joueurs on va avoir du mal...")
+        else:
+            playersID = equal_games(ids)
+            color = [
+                0x0000ff,
+                0x740001,
+                0x458b74,
+                0x18eeff,
+                0xeae4d3,
+                0xff8100,
+                0x9098ff,
+                0xff90fa,
+                0xff1443,
+                0xff1414,
+                0x7fffd4,
+                0x05ff3c,
+                0x05ffa1
+            ]
+            text = "**Partie n°" + str(tour) + "**"
+            await ctx.send(text)
+            for i in range(len(playersID)):
+                y = 0
+                embed = discord.Embed(title=("**Equipe n°" + str(i + 1) + "**"), color=random.choice(color))
+                embed.set_thumbnail(url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
+                for user in playersID[i]:
+                    y += 1
+                    embed.add_field(name=("Joueur " + str(y)), value="<@!" + str(user) + ">", inline=True)
+                await ctx.send(embed=embed)
+
+        def check(m):
+            id_list = [321216514986606592, 359743894042443776, 135784465065574401, 349548485797871617]
+            return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
+
+        msg = await bot.wait_for('message', check=check)
+        if msg.content == "END":
+            await ctx.send("**Fin de la partie...**")
+            break
+
 bot.run(TOKEN)
