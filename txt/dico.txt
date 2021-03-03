@@ -102,6 +102,7 @@ adapte
 adaptent
 adapter
 adapté
+adaptée
 adaptées
 add
 addcaaton
@@ -179,6 +180,7 @@ ahhahahahah
 ahiso
 ahlala
 ahlalala
+ahok
 ahoui
 ahsoka
 ahut
@@ -205,6 +207,7 @@ aimerait
 aimez
 aimé
 ainsi
+ainés
 air
 aire
 airpods
@@ -343,6 +346,7 @@ améliorations
 améliorer
 amélioré
 américaine
+américains
 an
 anakin
 anal
@@ -355,6 +359,7 @@ anarchiste
 anche
 anches
 anciens
+ancre
 and
 andorre
 android
@@ -559,6 +564,9 @@ arthur
 article
 articles
 artisanal
+artistes
+artistique
+artistiquement
 aruni
 arès
 as
@@ -576,6 +584,7 @@ aspect
 ass
 assemblé
 assez
+assezé
 asshole
 assi
 assist
@@ -763,6 +772,7 @@ bahahahah
 bahahahaha
 bahahahahah
 bahahahahaha
+bahahahahahah
 bahahahahahahahahahah
 bahahahha
 bahahhaahhaahhahahaha
@@ -1501,6 +1511,7 @@ chaint
 chainé
 chainée
 chaipa
+chaises
 chakal
 chakaux
 chakchouk
@@ -2120,6 +2131,7 @@ continuité
 contour
 contracture
 contradiction
+contraintes
 contraire
 contraposée
 contrast
@@ -2524,6 +2536,7 @@ deguelasse
 degueu
 degueulasse
 dehors
+dej
 deja
 dekcs
 dekz
@@ -2611,6 +2624,7 @@ descente
 description
 design
 designer
+desinstallé
 deso
 desole
 despi
@@ -2731,10 +2745,12 @@ dimanche
 diminuer
 din
 dinde
+dindo
 diner
 dingue
 dinguerie
 dingueries
+dinguos
 dinwos
 diplome
 diplomes
@@ -2973,6 +2989,7 @@ dude
 due
 duel
 dues
+duhazokjcdaziyuk
 duhiazvuiyduazli
 dumb
 dungeon
@@ -3067,6 +3084,7 @@ déconcentrer
 déconcentrée
 déconfinement
 déconne
+déconner
 déconnes
 décor
 décos
@@ -3161,6 +3179,7 @@ dépeche
 dépend
 dépend
 dépendant
+dépense
 dépité
 déplacements
 déplacer
@@ -3556,6 +3575,7 @@ euc
 eug
 euh
 euhh
+euhs
 eum
 euphorisme
 europe
@@ -3673,6 +3693,7 @@ facepalm
 fache
 facile
 facilement
+facilemnt
 faciles
 facilite
 facilites
@@ -4256,6 +4277,7 @@ generator
 genial
 genie
 genocide
+genou
 genoux
 genre
 genres
@@ -4336,6 +4358,7 @@ gods
 gof
 gog
 gogh
+gogogogogo
 going
 goka
 golden
@@ -4413,6 +4436,7 @@ gresille
 greve
 grevious
 grid
+grillé
 grillée
 grincement
 grips
@@ -4720,6 +4744,7 @@ humour
 hunt
 huv
 hybride
+hydrater
 hydroalcoolique
 hydrohalcolique
 hygiène
@@ -4770,6 +4795,7 @@ idkhow
 idkwhy
 idl
 idqldf
+idzuhlakziaduouadzi
 idé
 idéalement
 idée
@@ -4877,6 +4903,7 @@ impérativement
 in
 inaccessibles
 inadvertance
+inatendu
 inattendu
 incapable
 incapables
@@ -4956,12 +4983,14 @@ inimitable
 init
 initiales
 initialiser
+initiative
 injouable
 injuste
 injustice
 innocence
 innocent
 innocenty
+inouïe
 input
 inquietez
 inrcroyaabme
@@ -5203,6 +5232,7 @@ jeuts
 jeux
 jfais
 jhe
+jihk
 jijiji
 jinn
 jiojiuhy
@@ -5652,6 +5682,7 @@ livreé
 livrés
 lié
 liées
+liégeois
 liés
 lka
 lke
@@ -5731,6 +5762,7 @@ loustics
 loutre
 lov
 love
+lover
 loyer
 lpb
 lpl
@@ -5864,6 +5896,7 @@ maisok
 maison
 maisqui
 maiss
+maitenant
 maitre
 maitriser
 maius
@@ -6026,6 +6059,7 @@ matières
 matiére
 matiéres
 matlab
+matos
 matou
 matrice
 matrices
@@ -6228,6 +6262,7 @@ mineurs
 mingw
 mini
 miniature
+minimalisme
 minimum
 minion
 mins
@@ -6459,6 +6494,7 @@ musicaux
 musiq
 musique
 musiques
+musk
 muslim
 musée
 mutant
@@ -6534,6 +6570,7 @@ nada
 nah
 nahil
 nakamura
+nakdbjazogdiyukdz
 name
 nan
 nana
@@ -6612,6 +6649,7 @@ nightmares
 nigloland
 nigo
 nik
+nils
 nimp
 nimporte
 ninja
@@ -6682,6 +6720,7 @@ notif
 notifs
 notion
 notre
+notres
 noté
 notés
 nou
@@ -7317,6 +7356,7 @@ perfection
 performances
 perhaps
 perle
+perm
 permanente
 permet
 permets
@@ -7641,6 +7681,7 @@ potable
 potables
 potdr
 pote
+poteau
 potentiel
 potes
 potion
@@ -8313,6 +8354,7 @@ reactif
 reaction
 reactions
 reactivity
+reacts
 read
 readme
 ready
@@ -8339,6 +8381,7 @@ recevait
 recevoir
 rechangé
 recharge
+rechargé
 rechauffe
 recherche
 rechercher
@@ -8657,6 +8700,7 @@ retournes
 retourné
 retours
 retransférer
+retravaillé
 retrieval
 retroune
 retrouve
@@ -9559,6 +9603,7 @@ spams
 spanning
 speak
 speaking
+spectacle
 spectateur
 spectateurs
 spectre
@@ -9583,6 +9628,7 @@ sports
 spotify
 spq
 spricht
+spy
 spé
 spécial
 spéciale
@@ -9612,6 +9658,7 @@ stage
 stages
 stagiaire
 stagiaires
+stagière
 stagières
 stalk
 stalker
@@ -9769,6 +9816,7 @@ super
 superb
 superet
 supermarché
+superuser
 supp
 support
 supporte
@@ -9836,6 +9884,7 @@ switch
 switches
 switchs
 sword
+symbiose
 symbolique
 symetrie
 sympa
@@ -10214,6 +10263,8 @@ tqthéhé
 tr
 trace
 tracking
+tracteru
+tracteur
 traduction
 traduire
 traduise
@@ -10236,6 +10287,7 @@ transervse
 transeverse
 transformation
 transformé
+transhumanisme
 translate
 transmet
 transmettre
@@ -10336,6 +10388,7 @@ très
 trètre
 tréhin
 trés
+tréso
 trésorier
 ts
 tshirt
@@ -10463,6 +10516,7 @@ va
 vac
 vacance
 vacances
+vaccination
 vaccins
 vache
 vacs
@@ -10664,6 +10718,7 @@ voici
 void
 voies
 voila
+voilo
 voilà
 voilé
 voir
@@ -10883,6 +10938,7 @@ yaura
 yavait
 yay
 yayy
+ye
 yeah
 year
 yeay
@@ -10917,6 +10973,7 @@ yourself
 youtube
 youtubonss
 ytb
+yufine
 yup
 yuri
 yvait
@@ -11034,6 +11091,7 @@ zélande
 équations
 équilibre
 équilibrer
+équilibré
 équipe
 équiper
 équipes
@@ -11065,6 +11123,7 @@ zélande
 étroites
 études
 étudiant
+étudiante
 étudiants
 étudier
 étudies
