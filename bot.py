@@ -1168,9 +1168,9 @@ async def say(ctx, number, *text):
 
 @bot.command()  # PERSONAL USE ONLY
 async def AmongUs(ctx):
-    #if not ctx.author.guild_permissions.administrator:
-    #    await ctx.send("Nope, t'es pas admin désolé...")
-    #    return
+    if not ctx.author.guild_permissions.administrator:
+        await ctx.send("Nope, t'es pas admin désolé...")
+        return
 
     """
     f_name = open("txt/names.txt", "r+")
@@ -1179,8 +1179,8 @@ async def AmongUs(ctx):
     f_name.close()
     random.shuffle(all_names)
     """
+
     tour = 0
-    #TODO boucler ça, lister les joueurs, es ranger, les pings
     while 1:
         tour += 1
         test = await ctx.send("On joue ? Réagis pour jouer, sinon tant pis")
