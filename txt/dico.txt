@@ -3237,6 +3237,8 @@ déterminer
 déterministe
 déteste
 détester
+détour
+détours
 détruit
 déu
 développe
@@ -3352,6 +3354,7 @@ emojis
 emote
 emotes
 emp
+empathique
 empire
 empires
 emplois
@@ -5833,6 +5836,7 @@ légitimité
 légumes
 légèrement
 légérement
+léna
 léo
 lésion
 lézidés
@@ -7640,6 +7644,7 @@ pondu
 pont
 poo
 poodle
+poof
 poor
 pop
 popopop
@@ -8496,6 +8501,7 @@ regroupant
 regularly
 rehatder
 reil
+reine
 reiten
 rejeté
 rejoignent
@@ -9677,6 +9683,7 @@ stagière
 stagières
 stalk
 stalker
+stalkeuse
 stalké
 stammt
 stand
@@ -10974,6 +10981,7 @@ yessay
 yet
 yeux
 yey
+yg
 yo
 yoda
 yodsa

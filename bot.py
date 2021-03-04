@@ -20,7 +20,6 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.XqRBZduvydtN9cdQce3To1B6S88"
 nbtg: int = 0
 
 
