@@ -20,6 +20,7 @@ intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
 bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
+TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.XqRBZduvydtN9cdQce3To1B6S88"
 nbtg: int = 0
 
 
@@ -122,7 +123,7 @@ async def on_message(message):
         await channel.send(text)
 
     # ping a people 10 time, once every 3 sec
-    if MESSAGE.startswith("--appel ") and channel.guild != "EFREI International 2025":
+    """if MESSAGE.startswith("--appel ") and channel.guild != "EFREI International 2025":
         if "<@!653563141002756106>" in MESSAGE:
             await channel.send("T'es un marrant toi")
         elif "<@" not in MESSAGE:
@@ -146,7 +147,7 @@ async def on_message(message):
                 text = mot + nom
                 await channel.send(text)
                 time.sleep(3)
-            return
+            return"""
 
     # if you tag this bot in any message
     if "<@!653563141002756106>" in MESSAGE:

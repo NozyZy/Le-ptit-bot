@@ -784,6 +784,7 @@ bail
 bails
 baise
 baisent
+baiser
 baisé
 bait
 bakayaro
@@ -2458,6 +2459,7 @@ damn
 dana
 danemark
 danger
+dangereuse
 dangereux
 danheim
 dans
@@ -3321,6 +3323,7 @@ element
 elementbis
 elementnewl
 elevate
+eleves
 eliewan
 eligibility
 elimination
@@ -4109,6 +4112,7 @@ françaises
 franéais
 franéaise
 franéaos
+frappe
 frapper
 frappes
 frappé
@@ -4416,6 +4420,7 @@ gras
 grasse
 gratis
 gratos
+gratter
 gratuit
 grave
 graver
@@ -4528,6 +4533,7 @@ h
 ha
 habile
 habite
+habits
 habitude
 habitué
 hack
@@ -5045,6 +5051,7 @@ integration
 intel
 intelligent
 intelligents
+intended
 intense
 intentionnés
 interaction
@@ -5200,6 +5207,7 @@ java
 javais
 javanaise
 javascript
+javou
 javé
 jawive
 jcomprend
@@ -5514,6 +5522,7 @@ language
 langue
 langues
 laplacien
+laprof
 laptop
 laquelle
 larbin
@@ -5560,6 +5569,7 @@ lecture
 lectures
 ledaeron
 leeroy
+lefrei
 left
 legacy
 legends
@@ -5663,6 +5673,7 @@ lisa
 lisais
 lisent
 lisible
+liso
 lisses
 list
 liste
@@ -6811,6 +6822,7 @@ obfuscation
 obj
 objets
 obligatoire
+obligatoires
 oblige
 obliger
 obligé
@@ -7150,6 +7162,7 @@ parcourir
 parcours
 pardon
 pardonne
+pardonner
 pardue
 parefait
 parei
@@ -7810,6 +7823,7 @@ prez
 prf
 prg
 prgrm
+pri
 pricipale
 prie
 prier
@@ -8092,6 +8106,7 @@ py
 pycharm
 pydictionnary
 pydictionnayr
+pydrr
 pyfuck
 pyrotechnie
 pythn
@@ -9730,6 +9745,7 @@ strict
 strictement
 string
 stripes
+strong
 struct
 structuration
 structure
@@ -10107,6 +10123,7 @@ testé
 tete
 tetxe
 teub
+teuc
 text
 texte
 textes
@@ -10161,6 +10178,7 @@ tient
 tier
 tilt
 tilté
+tim
 time
 timeline
 timer
@@ -10758,6 +10776,7 @@ voulaient
 voulais
 voulait
 voulant
+vouler
 voulez
 vouliez
 voullez
