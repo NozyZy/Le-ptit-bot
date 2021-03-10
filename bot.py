@@ -215,13 +215,15 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("hein"):
-            await channel.send("deux.")
+        if MESSAGE.startswith("hein") or MESSAGE in ["1", "un"]:
+            reponses = ["deux.", "*dos*", "2"]
+            await channel.send(random.choice(reponses))
 
             # waits for a message valiudating further instructions
             def check(m):
-                return ("3" in m.content or
-                        "trois" in m.content) and m.channel == message.channel and not m.startswith("http")
+                return ("3" == m.content or
+                        "trois" == m.content.lower()) \
+                       and m.channel == message.channel
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
@@ -240,6 +242,17 @@ async def on_message(message):
         if MESSAGE == "pas mal":
             reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
             await channel.send(random.choice(reponses))
+
+        if MESSAGE == "a":
+            def check(m):
+                return m.content.lower() == "b" and m.channel == message.channel
+
+            try:
+                await bot.wait_for("message", timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await message.add_reaction("☹")
+            else:
+                await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
         if (MESSAGE == "ez" or MESSAGE == "easy") and rdnb >= 3:
             reponses = [
@@ -304,31 +317,6 @@ async def on_message(message):
 
         if "❤" in MESSAGE:
             await message.add_reaction("❤")
-
-        if MESSAGE == "1":
-            await channel.send("2")
-
-            # waits for a message valiudating further instructions
-            def check(m):
-                return (m.content == "3" or m.content.lower() == "trois") and m.channel == message.channel
-
-            try:
-                await bot.wait_for("message", timeout=60.0, check=check)
-            except asyncio.TimeoutError:
-                await message.add_reaction("☹")
-            else:
-                await channel.send("SOLEIL !")
-
-        if MESSAGE == "a":
-            def check(m):
-                return m.content.lower() == "b" and m.channel == message.channel
-
-            try:
-                await bot.wait_for("message", timeout=60.0, check=check)
-            except asyncio.TimeoutError:
-                await message.add_reaction("☹")
-            else:
-                await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
         if MESSAGE == "ah":
             if rdnb >= 4:
