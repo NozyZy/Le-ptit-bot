@@ -1156,11 +1156,12 @@ async def say(ctx, number, *text):
 
 @bot.command()  # PERSONAL USE ONLY
 async def AmongUs(ctx):
+    """
     if not ctx.author.guild_permissions.administrator:
         await ctx.send("Nope, t'es pas admin désolé...")
         return
 
-    """
+
     f_name = open("txt/names.txt", "r+")
     all_names = f_name.readlines()
     random.shuffle(all_names)
@@ -1171,33 +1172,33 @@ async def AmongUs(ctx):
     tour = 0
     while 1:
         tour += 1
-        test = await ctx.send("On joue ? Réagis pour jouer, sinon tant pis")
+        firstMessage = await ctx.send("On joue ? Réagis pour jouer, sinon tant pis")
         yes = "✅"
 
-        await test.add_reaction(yes)
+        await firstMessage.add_reaction(yes)
 
         time.sleep(10)
 
-        test = await test.channel.fetch_message(test.id)
+        firstMessage = await firstMessage.channel.fetch_message(firstMessage.id)
         users = set()
-        for reaction in test.reactions:
+        for reaction in firstMessage.reactions:
 
             if str(reaction.emoji) == yes:
                 async for user in reaction.users():
-                    print(reaction)
                     users.add(user)
-        """for user in users:
-            text = "<@!" + str(user.id) + ">"
-            await ctx.send(text)"""
 
-        ids = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-               "20", "21"]
+        ids = []
         for user in users:
             if user.id != 653563141002756106:
                 ids.append(user.id)
         random.shuffle(ids)
         if len(ids) < 5:
-            await ctx.send("En dessous de 5 joueurs on va avoir du mal...")
+            if len(ids) == 0:
+                await firstMessage.add_reaction("😭")
+                await firstMessage.add_reaction("💔")
+                await firstMessage.add_reaction("😢")
+            else:
+                await ctx.send("En dessous de 5 joueurs on va avoir du mal...")
         else:
             playersID = equal_games(ids)
             color = [

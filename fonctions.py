@@ -56,25 +56,20 @@ def equal_games(liste):
     equip = []
     i, j = 0, 0
 
-    print(tailleListe)
     for i in range(tailleMax, tailleMin, -1):
-        print(tailleListe % i, i)
         if tailleListe % i == 0:
-            print("YES")
             nbEquip = tailleListe // i
             for _ in range(nbEquip):
                 tailleEquip.append(i)
             break
         elif tailleListe % i == 1 and i < tailleMax:
-            print("NO", i)
             nbEquip = tailleListe // i
             for j in range(nbEquip):
                 if j == 0:
-                    tailleEquip.append(i+1)
+                    tailleEquip.append(i + 1)
                 else:
                     tailleEquip.append(i)
             break
-    print(nbEquip, tailleEquip)
 
     if nbEquip == 0:
         tailleEquip.append(tailleMax)
@@ -87,24 +82,17 @@ def equal_games(liste):
                 tailleListe = len(liste)
                 nbEquip = 0
 
-        print(tailleListe)
         for i in range(1, nbEquip):
             tailleEquip.append(tailleEquip[0])
 
-
-    print(tailleEquip)
-
-    print("nombre de joueurs sans équipe :", tailleListe)
     j = 0
     for i in range(nbEquip):
         list1 = []
         for _ in range(tailleEquip[i]):
-            print(i, j, len(liste), list[j])
             if j < len(liste):
                 list1.append(liste[j])
                 j += 1
         equip.append(list1)
-    print(equip)
     return equip
 
 
@@ -133,12 +121,12 @@ def state_alpha(ch1, ch2):
 def verifAlphabet(string):
     string = string.lower()
     for i in range(len(string)):
-        if i + 3 <= len(string) and len(string) >= 3:
-            if string[i] == string[i + 1] and string[i] == string[i + 2]:
-                return False
-        if ord(string[i]) < 97 or 97 + 26 < ord(string[i]):
-            if string[i] not in ["é", "è", "à", "ï", "ø", "â", "ñ", "î", "û", "ç"]:
-                return False
+        if i + 3 <= len(string) and len(string) >= 3 \
+                and (string[i] == string[i + 1] and string[i] == string[i + 2]):
+            return False
+        if ord(string[i]) < 97 or 97 + 26 < ord(string[i]) \
+                and string[i] not in ["é", "è", "à", "ï", "ø", "â", "ñ", "î", "û", "ç"]:
+            return False
     return True
 
 
