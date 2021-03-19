@@ -153,6 +153,8 @@ async def on_message(message):
     # if you tag this bot in any message
     if "<@!653563141002756106>" in MESSAGE:
         user = str(message.author.nick)
+        if user is None:
+            user = str(message.author.name)
         rep = [
             "ya quoi ?!",
             "Qu'est ce que tu as " + user + " ?",
@@ -1160,13 +1162,6 @@ async def AmongUs(ctx):
     if not ctx.author.guild_permissions.administrator:
         await ctx.send("Nope, t'es pas admin désolé...")
         return
-
-
-    f_name = open("txt/names.txt", "r+")
-    all_names = f_name.readlines()
-    random.shuffle(all_names)
-    f_name.close()
-    random.shuffle(all_names)
     """
 
     tour = 0
@@ -1177,7 +1172,17 @@ async def AmongUs(ctx):
 
         await firstMessage.add_reaction(yes)
 
-        time.sleep(10)
+        time.sleep(55)
+        await firstMessage.add_reaction("5️⃣")
+        time.sleep(1)
+        await firstMessage.add_reaction("4️⃣")
+        time.sleep(1)
+        await firstMessage.add_reaction("3️⃣")
+        time.sleep(1)
+        await firstMessage.add_reaction("2️⃣")
+        time.sleep(1)
+        await firstMessage.add_reaction("1️⃣")
+        time.sleep(1)
 
         firstMessage = await firstMessage.channel.fetch_message(firstMessage.id)
         users = set()
@@ -1216,23 +1221,33 @@ async def AmongUs(ctx):
                 0x05ff3c,
                 0x05ffa1
             ]
-            text = "**Partie n°" + str(tour) + "**"
+            text = f"**Partie n°{str(tour)}**"
             await ctx.send(text)
             for i in range(len(playersID)):
                 y = 0
-                embed = discord.Embed(title=("**Equipe n°" + str(i + 1) + "**"), color=random.choice(color))
+                embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**", color=random.choice(color))
                 embed.set_thumbnail(url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
                 for user in playersID[i]:
                     y += 1
-                    embed.add_field(name=("Joueur " + str(y)), value="<@!" + str(user) + ">", inline=True)
+                    embed.add_field(name=f"Joueur {str(y)}", value=f"<@!{str(user)}>", inline=True)
                 await ctx.send(embed=embed)
 
         def check(m):
             id_list = [321216514986606592, 359743894042443776, 135784465065574401, 349548485797871617]
             return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
 
-        msg = await bot.wait_for('message', check=check)
-        if msg.content == "END":
+        try:
+            if len(ids) == 0:
+                msg = await bot.wait_for('message', timeout=60.0, check=check)
+            else:
+                msg = await bot.wait_for('message', timeout=3600.0, check=check)
+            if msg.content == "END":
+                await ctx.send("**Fin de la partie...**")
+                break
+        except asyncio.TimeoutError:
+            await ctx.send("**Fin de la partie...**")
+            break
+        else:
             await ctx.send("**Fin de la partie...**")
             break
 

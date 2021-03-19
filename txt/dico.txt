@@ -76,7 +76,6 @@ achetés
 achier
 acier
 acommencé
-acp
 acquire
 acquired
 across
@@ -420,6 +419,7 @@ annulent
 annuler
 annulé
 annulée
+annul�
 année
 années
 anomie
@@ -1416,7 +1416,6 @@ campagne
 campagzn
 campus
 camsex
-camé
 caméra
 can
 canada
@@ -2949,7 +2948,6 @@ dissonants
 distance
 distances
 distanciel
-distantiel
 distentiel
 distordues
 distrib
@@ -3325,7 +3323,6 @@ dépend
 dépendant
 dépense
 dépité
-déplacement
 déplacements
 déplacer
 déplaces
@@ -3367,7 +3364,6 @@ désolé
 désolé
 désolée
 désormais
-désormqais
 déstabilisation
 déstabiliser
 désuet
@@ -3474,7 +3470,6 @@ electrify
 electro
 electronique
 element
-elementaires
 elementbis
 elementnewl
 elevate
@@ -4381,7 +4376,6 @@ fusée
 futuna
 futur
 future
-futuristes
 futurs
 futé
 fx
@@ -4679,6 +4673,7 @@ gty
 gu
 guapa
 gucci
+gud
 guel
 guerre
 guess
@@ -5655,7 +5650,6 @@ kata
 katakanas
 kathy
 katorzevirghuletroa
-kawai
 kay
 kayak
 kc
@@ -5664,7 +5658,6 @@ kdo
 kdos
 ke
 kebab
-keking
 kel
 kelh
 kelhaf
@@ -6638,7 +6631,6 @@ mo
 moa
 moad
 mobile
-mobiles
 mobilité
 moch
 moche
@@ -6724,7 +6716,7 @@ montrable
 montre
 montrer
 montré
-montrée
+montr�e
 monté
 monténégro
 monumentesque
@@ -6897,6 +6889,7 @@ métier
 métiers
 métro
 météo
+m�re
 n
 na
 naan
@@ -7399,7 +7392,6 @@ ouii
 ouille
 ouin
 ouioui
-ouip
 ouisticram
 ouiu
 oukai
@@ -7505,7 +7497,6 @@ parait
 parallèles
 parametre
 parametres
-paramètre
 paramètres
 paramétres
 parano
@@ -8259,6 +8250,7 @@ problèmes
 problématique
 probléme
 problémes
+probl�me
 process
 processing
 processus
@@ -8417,6 +8409,8 @@ préviens
 prévisible
 prévoyez
 prévu
+pr�sentation
+pr�venu
 ps
 pseudo
 pseudos
@@ -8532,7 +8526,6 @@ pétanque
 péte
 pétes
 pétrin
-pété
 pétée
 q
 qcm
@@ -9580,6 +9573,7 @@ sardoche
 sarouel
 sasageyo
 satisfait
+satur�s
 sauce
 saucisson
 saucissons
@@ -10002,7 +9996,6 @@ sommeil
 sommes
 somnoler
 son
-sondage
 sondages
 sonettes
 songer
@@ -10166,7 +10159,6 @@ started
 starter
 starting
 staruml
-statement
 static
 station
 stations
@@ -10463,7 +10455,6 @@ tace
 tachanka
 taches
 tacket
-tacle
 tacos
 tactique
 tadaronne
@@ -11011,7 +11002,6 @@ unitaire
 unity
 unité
 universities
-university
 universités
 unlocked
 unmute
@@ -11219,7 +11209,6 @@ vilà
 vim
 vimeo
 vin
-vince
 vincent
 vincere
 violence
@@ -11416,7 +11405,6 @@ week
 weekend
 weekes
 wefix
-wei
 weird
 well
 werden
@@ -11734,3 +11722,5 @@ zélande
 évènement
 événement
 événements
+�a
+�tudiante
