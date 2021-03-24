@@ -200,8 +200,10 @@ def saisi_position(grille, tour):
         joueur = 2
         caractere = ' X'
         inv_caractere = ' O'
-    coups_possibles = verif_coup(grille, caractere, inv_caractere)  # coups possibles de ce tour
-    coups_possibles_inverse = verif_coup(grille, inv_caractere, caractere)  # coups possibles du prochain tour
+    # coups possibles de ce tour
+    coups_possibles = verif_coup(grille, caractere, inv_caractere)
+    # coups possibles du prochain tour
+    coups_possibles_inverse = verif_coup(grille, inv_caractere, caractere)
     if (len(coups_possibles) == 0 and len(
             coups_possibles_inverse) == 0):  # s'il n'y a pas de coups à ce tour et au tour prochain, fin de jeu
         print("Aucun coups possible.", end="")
@@ -212,7 +214,8 @@ def saisi_position(grille, tour):
         saisi = saisi.replace(" ", "")
         if saisi == 'stop' or saisi == 'Stop' or saisi == 'STOP':
             return arreter_partie()  # return True
-        if passe_tour(coups_possibles) == False:  # si le jour ne passe pas son tour, il peut jouer
+        # si le jour ne passe pas son tour, il peut jouer
+        if passe_tour(coups_possibles) == False:
             if saisi == 'c':
                 liste_coups_valides(coups_possibles)
             position = str(input("Saisir les coordonées : "))
@@ -225,14 +228,17 @@ def saisi_position(grille, tour):
                 position = position.upper()
             ecrire_case(grille, position, caractere)  # écrit son coup
         else:
-            return False  # fin de tour, mais pas fin de partie (fin de partie = True)
+            # fin de tour, mais pas fin de partie (fin de partie = True)
+            return False
 
         try:
-            y = int(f"{position[1]}{position[2]}") - 1  # test si l'abcisse est à 2 nombres (>10)
+            # test si l'abcisse est à 2 nombres (>10)
+            y = int(f"{position[1]}{position[2]}") - 1
         except IndexError:
             y = int(position[1]) - 1
 
-        x = int(abscisse[position[0]])  # prend la lettre de la position (ex : A10 → A)
+        # prend la lettre de la position (ex : A10 → A)
+        x = int(abscisse[position[0]])
         x_cst = x
         y_cst = y
         # on va vérifier, en partant de la case écrite, tout autour si on peut faire un aller retoru entre 2 meme caracteres, ne passant que entre des caracteres inverses à retourner
@@ -350,7 +356,8 @@ def liste_sans_doublon(liste):
 def verif_coup(grille, caractere, inv_caractere):
     all_coups = []  # liste avec toutes les position de la grille, type A00
     for i in range(0, len(grille) - 1):
-        all_coups.append(['.'] * (len(grille) - 1))  # liste 2D pour récréer la grille
+        # liste 2D pour récréer la grille
+        all_coups.append(['.'] * (len(grille) - 1))
     coups_possibles = []  # liste contenant tous les coups jouables, en fonction du joueur
     for i in range(0, len(grille) - 1):
         val_y = i + 1  # commence à 1

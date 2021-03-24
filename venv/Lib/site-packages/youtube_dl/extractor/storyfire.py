@@ -66,7 +66,8 @@ class StoryFireBaseIE(InfoExtractor):
 
 
 class StoryFireIE(StoryFireBaseIE):
-    _VALID_URL = StoryFireBaseIE._VALID_URL_BASE + r'video-details/(?P<id>[0-9a-f]{24})'
+    _VALID_URL = StoryFireBaseIE._VALID_URL_BASE + \
+        r'video-details/(?P<id>[0-9a-f]{24})'
     _TEST = {
         'url': 'https://storyfire.com/video-details/5df1d132b6378700117f9181',
         'md5': 'caec54b9e4621186d6079c7ec100c1eb',
@@ -124,7 +125,8 @@ class StoryFireUserIE(StoryFireBaseIE):
 
 
 class StoryFireSeriesIE(StoryFireBaseIE):
-    _VALID_URL = StoryFireBaseIE._VALID_URL_BASE + r'write/series/stories/(?P<id>[^/?&#]+)'
+    _VALID_URL = StoryFireBaseIE._VALID_URL_BASE + \
+        r'write/series/stories/(?P<id>[^/?&#]+)'
     _TESTS = [{
         'url': 'https://storyfire.com/write/series/stories/-Lq6MsuIHLODO6d2dDkr/',
         'info_dict': {

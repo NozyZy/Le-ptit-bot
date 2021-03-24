@@ -225,7 +225,7 @@ async def on_message(message):
             def check(m):
                 return ("3" == m.content or
                         "trois" == m.content.lower()) \
-                       and m.channel == message.channel
+                    and m.channel == message.channel
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
@@ -1225,15 +1225,19 @@ async def AmongUs(ctx):
             await ctx.send(text)
             for i in range(len(playersID)):
                 y = 0
-                embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**", color=random.choice(color))
-                embed.set_thumbnail(url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
+                embed = discord.Embed(
+                    title=f"**Equipe n°{str(i + 1)}**", color=random.choice(color))
+                embed.set_thumbnail(
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
                 for user in playersID[i]:
                     y += 1
-                    embed.add_field(name=f"Joueur {str(y)}", value=f"<@!{str(user)}>", inline=True)
+                    embed.add_field(
+                        name=f"Joueur {str(y)}", value=f"<@!{str(user)}>", inline=True)
                 await ctx.send(embed=embed)
 
         def check(m):
-            id_list = [321216514986606592, 359743894042443776, 135784465065574401, 349548485797871617]
+            id_list = [321216514986606592, 359743894042443776,
+                       135784465065574401, 349548485797871617]
             return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
 
         try:
