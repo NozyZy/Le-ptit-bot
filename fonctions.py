@@ -49,32 +49,50 @@ def equal_games(liste):
     # Il vaut mieux que la liste soit déjà mélangée, mais on peut le faire ici aussi.
     # Le programme renvoie une liste 2D composant les équipes
 
-    tailleliste = len(liste)
-    taillemin = 4
-    tailleequip = 9
-    nbequip = 0
+    tailleListe = len(liste)
+    tailleMin, tailleMax = 5, 10
+    tailleEquip = []
+    nbEquip = 0
     equip = []
+    i, j = 0, 0
+
+    for i in range(tailleMax, tailleMin, -1):
+        if tailleListe % i == 0:
+            nbEquip = tailleListe // i
+            for _ in range(nbEquip):
+                tailleEquip.append(i)
+            break
+        elif tailleListe % i == 1 and i < tailleMax:
+            nbEquip = tailleListe // i
+            for j in range(nbEquip):
+                if j == 0:
+                    tailleEquip.append(i + 1)
+                else:
+                    tailleEquip.append(i)
+            break
+
+    if nbEquip == 0:
+        tailleEquip.append(tailleMax)
+        while tailleListe > 0 and tailleMin < tailleEquip[0] and nbEquip < 8:
+            tailleListe -= tailleEquip[0]
+            nbEquip += 1
+
+            if 0 < tailleListe < tailleMin and nbEquip < 8:
+                tailleEquip[0] -= 1
+                tailleListe = len(liste)
+                nbEquip = 0
+
+        for i in range(1, nbEquip):
+            tailleEquip.append(tailleEquip[0])
+
     j = 0
-
-    while tailleliste > 0 and taillemin < tailleequip and nbequip < 8:
-        tailleliste -= tailleequip
-        nbequip += 1
-
-        if tailleliste > 0 and tailleliste < taillemin and nbequip < 8:
-            tailleequip -= 1
-            tailleliste = len(liste)
-            nbequip = 0
-
-    print("nombre de joueurs sans équipe :", tailleliste)
-
-    for i in range(nbequip):
+    for i in range(nbEquip):
         list1 = []
-        for y in range(tailleequip):
+        for _ in range(tailleEquip[i]):
             if j < len(liste):
                 list1.append(liste[j])
                 j += 1
         equip.append(list1)
-
     return equip
 
 
@@ -103,12 +121,12 @@ def state_alpha(ch1, ch2):
 def verifAlphabet(string):
     string = string.lower()
     for i in range(len(string)):
-        if i + 3 <= len(string) and len(string) >= 3:
-            if string[i] == string[i + 1] and string[i] == string[i + 2]:
-                return False
-        if ord(string[i]) < 97 or 97 + 26 < ord(string[i]):
-            if string[i] not in ["é", "è", "à", "ï", "ø", "â", "ñ", "î", "û", "ç"]:
-                return False
+        if i + 3 <= len(string) and len(string) >= 3 \
+                and (string[i] == string[i + 1] and string[i] == string[i + 2]):
+            return False
+        if ord(string[i]) < 97 or 97 + 26 < ord(string[i]) \
+                and string[i] not in ["é", "è", "à", "ï", "ø", "â", "ñ", "î", "û", "ç"]:
+            return False
     return True
 
 
