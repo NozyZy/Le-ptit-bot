@@ -55,7 +55,9 @@ async def on_message(message):
     if message.author == bot.user:  # we don't want the bot to repeat itself
         return
 
-    if (str(channel.id) + "\n") in bansLines:  # option to ban reactions from some channels
+    if (
+        str(channel.id) + "\n"
+    ) in bansLines:  # option to ban reactions from some channels
         await bot.process_commands(message)
         return
 
@@ -163,7 +165,7 @@ async def on_message(message):
             "*Oui ma bicheuh <3*",
             user + " lance un duel.",
             "Je t'aime.",
-            "T'as pas d'amis ? trouduc"
+            "T'as pas d'amis ? trouduc",
         ]
         if user == "Le Grand bot":
             rep.append("Oui bb ?")
@@ -204,16 +206,21 @@ async def on_message(message):
         if "(╯°□°）╯︵ ┻━┻" in MESSAGE:
             await channel.send("┬─┬ ノ( ゜-゜ノ)")
 
-        if MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez") or \
-                MESSAGE.startswith("savez vous") or MESSAGE.startswith("savez-vous") or \
-                MESSAGE.startswith("savais-tu") or MESSAGE.startswith("savais tu"):
+        if (
+            MESSAGE.startswith("tu sais")
+            or MESSAGE.startswith("vous savez")
+            or MESSAGE.startswith("savez vous")
+            or MESSAGE.startswith("savez-vous")
+            or MESSAGE.startswith("savais-tu")
+            or MESSAGE.startswith("savais tu")
+        ):
             reponses = [
                 "J'en ai vraiment rien à faire tu sais ?",
                 "Waaa... Je bois tes paroles",
                 "Dis moi tout bg",
                 "Balec",
                 "M'en fous",
-                "Plait-il ?"
+                "Plait-il ?",
             ]
             await channel.send(random.choice(reponses))
 
@@ -223,9 +230,9 @@ async def on_message(message):
 
             # waits for a message valiudating further instructions
             def check(m):
-                return ("3" == m.content or
-                        "trois" == m.content.lower()) \
-                    and m.channel == message.channel
+                return (
+                    "3" == m.content or "trois" == m.content.lower()
+                ) and m.channel == message.channel
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
@@ -246,6 +253,7 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE == "a":
+
             def check(m):
                 return m.content.lower() == "b" and m.channel == message.channel
 
@@ -272,12 +280,17 @@ async def on_message(message):
             "chybrax",
             "chibre",
         ]:
-            text = "8" + "=" * random.randint(0, int(
-                today.strftime("%d"))) + "D"
+            text = "8" + "=" * random.randint(0, int(today.strftime("%d"))) + "D"
             await channel.send(text)
 
-        if MESSAGE.startswith("stop") or MESSAGE.startswith("arrête") or MESSAGE.startswith("arrete"):
-            await channel.send("https://tenor.com/view/stop-it-get-some-help-gif-7929301")
+        if (
+            MESSAGE.startswith("stop")
+            or MESSAGE.startswith("arrête")
+            or MESSAGE.startswith("arrete")
+        ):
+            await channel.send(
+                "https://tenor.com/view/stop-it-get-some-help-gif-7929301"
+            )
 
         if MESSAGE.startswith("exact"):
             reponses = [
@@ -295,7 +308,7 @@ async def on_message(message):
                 "Nique ta tante (pardon)",
                 "<3",
                 "luv luv",
-                "moi aussi je t'aime ❤"
+                "moi aussi je t'aime ❤",
             ]
             await channel.send(random.choice(reponses))
 
@@ -349,7 +362,7 @@ async def on_message(message):
                     "Je veux le cul d'la crémière avec.",
                     "non.",
                     "Excuse toi non ?",
-                    "Au plaisir"
+                    "Au plaisir",
                 ]
                 await channel.send(random.choice(reponses))
             else:
@@ -364,7 +377,7 @@ async def on_message(message):
                 "dur dur",
                 "dommage mon p'tit pote",
                 "balec",
-                "tant pis"
+                "tant pis",
             ]
             await channel.send(random.choice(reponses))
 
@@ -373,19 +386,12 @@ async def on_message(message):
                 "Ouais gros",
                 "Carrément ma poule",
                 "Mais jamais tes fou ptdr",
-                "Oui."
+                "Oui.",
             ]
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("quoi"):
-            reponses = [
-                "feur",
-                "hein ?",
-                "nan laisse",
-                "oublie",
-                "rien",
-                "😯"
-            ]
+            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯"]
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("pourquoi"):
@@ -393,31 +399,30 @@ async def on_message(message):
                 "PARCEQUEEEE",
                 "Aucune idée.",
                 "Demande au voisin",
-                "Pourquoi tu demandes ça ?"
+                "Pourquoi tu demandes ça ?",
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE in ["facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"] \
-                or MESSAGE.startswith("pff") or MESSAGE.startswith("no.."):
+        if (
+            MESSAGE in ["facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"]
+            or MESSAGE.startswith("pff")
+            or MESSAGE.startswith("no..")
+        ):
             await channel.send(
-                "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif")
+                "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif"
+            )
 
         if MESSAGE.startswith("t'es sur") or MESSAGE.startswith("t sur"):
             reponses = [
                 "Ouais gros",
                 "Nan pas du tout",
                 "Qui ne tente rien...",
-                "haha 👀"
+                "haha 👀",
             ]
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("ah ouais") or MESSAGE.startswith("ah bon"):
-            reponses = [
-                "Ouais gros",
-                "Nan ptdr",
-                "Je sais pas écoute...",
-                "tg"
-            ]
+            reponses = ["Ouais gros", "Nan ptdr", "Je sais pas écoute...", "tg"]
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("au pied") and message.author.id == 359743894042443776:
@@ -425,7 +430,7 @@ async def on_message(message):
                 "wouf wouf",
                 "Maître ?",
                 "*s'agenouille*\nComment puis-je vous être utile ?",
-                "*Nous vous devons une reconnaissance éternelllllllle*"
+                "*Nous vous devons une reconnaissance éternelllllllle*",
             ]
             await channel.send(random.choice(reponses))
 
@@ -433,11 +438,7 @@ async def on_message(message):
             await channel.send("Sku sku")
 
         if "<@!321216514986606592>" in MESSAGE and rdnb >= 4:
-            reponses = [
-                "Le VP numéro 2",
-                "Encore lui ?",
-                "fasstin"
-            ]
+            reponses = ["Le VP numéro 2", "Encore lui ?", "fasstin"]
             await channel.send(random.choice(reponses))
 
         if "<@!761898936364695573>" in MESSAGE:
@@ -446,23 +447,23 @@ async def on_message(message):
         if "tg" in MESSAGE:
             MESSAGE = " " + MESSAGE + " "
             for i in range(len(MESSAGE) - 3):
-                if MESSAGE[i] == " " and MESSAGE[i + 1] == "t" and MESSAGE[i + 2] == "g" and MESSAGE[i + 3] == " ":
+                if (
+                    MESSAGE[i] == " "
+                    and MESSAGE[i + 1] == "t"
+                    and MESSAGE[i + 2] == "g"
+                    and MESSAGE[i + 3] == " "
+                ):
                     nbtg += 1
                     activity = f"insulter {nbtg} personnes"
                     await bot.change_presence(activity=discord.Game(name=activity))
                     await channel.send(random.choice(insultes))
                     if rdnb >= 4:
-                        await message.add_reaction('🇹')
-                        await message.add_reaction('🇬')
+                        await message.add_reaction("🇹")
+                        await message.add_reaction("🇬")
 
         if MESSAGE == "cheh" or MESSAGE == "sheh":
             if rdnb >= 3:
-                reponses = [
-                    "Oh tu t'excuses",
-                    "Cheh",
-                    "C'est pas gentil ça",
-                    "🙁"
-                ]
+                reponses = ["Oh tu t'excuses", "Cheh", "C'est pas gentil ça", "🙁"]
                 await channel.send(random.choice(reponses))
             else:
                 await message.add_reaction("🥰")
@@ -473,7 +474,7 @@ async def on_message(message):
                 "ah bah ca c'est sur",
                 "SÉRIEUX ??",
                 "logique aussi",
-                "jure ?"
+                "jure ?",
             ]
             await channel.send(random.choice(reponses))
 
@@ -492,7 +493,9 @@ async def on_message(message):
             elif "wallah" in MESSAGE:
                 await channel.send("Wallah")
             else:
-                rep = await channel.send("Je jure de dire la vérité, uniquement la vérité et toute la vérité")
+                rep = await channel.send(
+                    "Je jure de dire la vérité, uniquement la vérité et toute la vérité"
+                )
                 if rdnb >= 4:
                     await rep.add_reaction("✌")
 
@@ -500,8 +503,7 @@ async def on_message(message):
             await message.add_reaction("🥰")
 
         if MESSAGE == "f" or MESSAGE == "rip":
-            await channel.send(
-                "#####\n#\n#\n####\n#\n#\n#       to pay respect")
+            await channel.send("#####\n#\n#\n####\n#\n#\n#       to pay respect")
 
         if ("quentin" in MESSAGE or "quent1" in MESSAGE) and rdnb >= 4:
             await channel.send("Papa ! 🤗")
@@ -517,8 +519,11 @@ async def on_message(message):
             else:
                 i = 0
                 for i in range(len(MESSAGE)):
-                    if (MESSAGE[i] == "<" and MESSAGE[i + 1] == "@"
-                            and MESSAGE[i + 2] == "!"):
+                    if (
+                        MESSAGE[i] == "<"
+                        and MESSAGE[i + 1] == "@"
+                        and MESSAGE[i + 2] == "!"
+                    ):
                         i += 3
                         userID = ""
                         break
@@ -575,8 +580,12 @@ async def on_message(message):
         if "pd" in MESSAGE:
             MESSAGE = " " + MESSAGE + " "
             for i in range(len(MESSAGE) - 3):
-                if (MESSAGE[i] == " " and MESSAGE[i + 1] == "p"
-                        and MESSAGE[i + 2] == "d" and MESSAGE[i + 3] == " "):
+                if (
+                    MESSAGE[i] == " "
+                    and MESSAGE[i + 1] == "p"
+                    and MESSAGE[i + 2] == "d"
+                    and MESSAGE[i + 3] == " "
+                ):
                     await channel.send(file=discord.File("images/pd.jpg"))
 
         if "oof" in MESSAGE and rdnb >= 2:
@@ -818,8 +827,7 @@ async def poll(ctx, *text):
         )
         return
     if len(tab) > 11:
-        await ctx.send("Ca commence à faire beaucoup non ?... 10 max ca suffit"
-                       )
+        await ctx.send("Ca commence à faire beaucoup non ?... 10 max ca suffit")
         return
     text = ""
     for i in range(len(tab)):
@@ -962,7 +970,8 @@ def playSong(clt, queue, song):
         discord.FFmpegPCMAudio(
             song.stream_url,
             before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        ))
+        )
+    )
 
     def next(_):
         if len(queue) > 0:
@@ -1001,11 +1010,17 @@ async def translate(ctx, *text):
     fromLang = text[1].replace(" ", "")
     toLang = text[2].replace(" ", "")
     try:
-        textTranslated = translator.translate(toTranslate,
-                                              src=fromLang,
-                                              dest=toLang)
-        text = (toTranslate + " (" + textTranslated.src + ") -> " +
-                textTranslated.text + " (" + textTranslated.dest + ")")
+        textTranslated = translator.translate(toTranslate, src=fromLang, dest=toLang)
+        text = (
+            toTranslate
+            + " ("
+            + textTranslated.src
+            + ") -> "
+            + textTranslated.text
+            + " ("
+            + textTranslated.dest
+            + ")"
+        )
     except:
         text = "Nope, sorry !"
     await ctx.send(text)
@@ -1111,7 +1126,9 @@ async def ban(ctx):
         bansFile = open("txt/bans.txt", "a+")
         bansFile.write(chanID)
         bansFile.close()
-        await ctx.send("D'accord, j'arrete de vous embeter ici... mais les commandes sont toujours dispos")
+        await ctx.send(
+            "D'accord, j'arrete de vous embeter ici... mais les commandes sont toujours dispos"
+        )
 
 
 @bot.command()
@@ -1143,7 +1160,8 @@ async def unban(ctx):
 async def invite(ctx):
     await ctx.send(
         "Invitez-moi 🥵 !\n"
-        "https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8")
+        "https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8"
+    )
 
 
 """
@@ -1155,6 +1173,7 @@ async def say(ctx, number, *text):
 
 
 # runs the bot (if you have a TOKEN hahaha)
+
 
 @bot.command()  # PERSONAL USE ONLY
 async def AmongUs(ctx):
@@ -1207,44 +1226,55 @@ async def AmongUs(ctx):
         else:
             playersID = equal_games(ids)
             color = [
-                0x0000ff,
+                0x0000FF,
                 0x740001,
-                0x458b74,
-                0x18eeff,
-                0xeae4d3,
-                0xff8100,
-                0x9098ff,
-                0xff90fa,
-                0xff1443,
-                0xff1414,
-                0x7fffd4,
-                0x05ff3c,
-                0x05ffa1
+                0x458B74,
+                0x18EEFF,
+                0xEAE4D3,
+                0xFF8100,
+                0x9098FF,
+                0xFF90FA,
+                0xFF1443,
+                0xFF1414,
+                0x7FFFD4,
+                0x05FF3C,
+                0x05FFA1,
             ]
             text = f"**Partie n°{str(tour)}**"
             await ctx.send(text)
             for i in range(len(playersID)):
                 y = 0
                 embed = discord.Embed(
-                    title=f"**Equipe n°{str(i + 1)}**", color=random.choice(color))
+                    title=f"**Equipe n°{str(i + 1)}**", color=random.choice(color)
+                )
                 embed.set_thumbnail(
-                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
+                )
                 for user in playersID[i]:
                     y += 1
                     embed.add_field(
-                        name=f"Joueur {str(y)}", value=f"<@!{str(user)}>", inline=True)
+                        name=f"Joueur {str(y)}", value=f"<@!{str(user)}>", inline=True
+                    )
                 await ctx.send(embed=embed)
 
         def check(m):
-            id_list = [321216514986606592, 359743894042443776,
-                       135784465065574401, 349548485797871617]
-            return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
+            id_list = [
+                321216514986606592,
+                359743894042443776,
+                135784465065574401,
+                349548485797871617,
+            ]
+            return (
+                (m.content == "NEXT" or m.content == "END")
+                and m.channel == ctx.channel
+                and m.author.id in id_list
+            )
 
         try:
             if len(ids) == 0:
-                msg = await bot.wait_for('message', timeout=60.0, check=check)
+                msg = await bot.wait_for("message", timeout=60.0, check=check)
             else:
-                msg = await bot.wait_for('message', timeout=3600.0, check=check)
+                msg = await bot.wait_for("message", timeout=3600.0, check=check)
             if msg.content == "END":
                 await ctx.send("**Fin de la partie...**")
                 break
