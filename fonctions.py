@@ -54,7 +54,6 @@ def equal_games(liste):
     tailleEquip = []
     nbEquip = 0
     equip = []
-    i, j = 0, 0
 
     for i in range(tailleMax, tailleMin, -1):
         if tailleListe % i == 0:

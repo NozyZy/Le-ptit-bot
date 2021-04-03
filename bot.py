@@ -19,15 +19,19 @@ from fonctions import *
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
-bot = commands.Bot(command_prefix="--", description="Le p'tit bot !")
-TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.__OY_iSvN2Vu2mwTM-JmYEPmEYw"
-nbtg: int = 0
+bot = commands.Bot(command_prefix="--",
+                   description="Le p'tit bot !",
+                   case_insensitive=True)
+TOKEN = ""
+tgFile = open("txt/tg.txt", "r+")
+nbtg: int = int(tgFile.readlines()[0])
+tgFile.close()
 
 
 # On ready message
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game(name="dis tg pour voir ?"))
+    await bot.change_presence(activity=discord.Game(name=f"insulter {nbtg} personnes"))
     print("Logged in as")
     print(bot.user.name)
     print(bot.user.id)
@@ -154,8 +158,6 @@ async def on_message(message):
     # if you tag this bot in any message
     if "<@!653563141002756106>" in MESSAGE:
         user = str(message.author.nick)
-        if user is None:
-            user = str(message.author.name)
         rep = [
             "ya quoi ?!",
             "Qu'est ce que tu as " + user + " ?",
@@ -218,15 +220,13 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("hein") or MESSAGE in ["1", "un"]:
-            reponses = ["deux.", "*dos*", "2"]
-            await channel.send(random.choice(reponses))
+        if MESSAGE.startswith("hein"):
+            await channel.send("deux.")
 
             # waits for a message valiudating further instructions
             def check(m):
-                return ("3" == m.content or
-                        "trois" == m.content.lower()) \
-                       and m.channel == message.channel
+                return ("3" in m.content or
+                        "trois" in m.content) and m.channel == message.channel and not m.startswith("http")
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
@@ -245,17 +245,6 @@ async def on_message(message):
         if MESSAGE == "pas mal":
             reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
             await channel.send(random.choice(reponses))
-
-        if MESSAGE == "a":
-            def check(m):
-                return m.content.lower() == "b" and m.channel == message.channel
-
-            try:
-                await bot.wait_for("message", timeout=60.0, check=check)
-            except asyncio.TimeoutError:
-                await message.add_reaction("☹")
-            else:
-                await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
         if (MESSAGE == "ez" or MESSAGE == "easy") and rdnb >= 3:
             reponses = [
@@ -320,6 +309,31 @@ async def on_message(message):
 
         if "❤" in MESSAGE:
             await message.add_reaction("❤")
+
+        if MESSAGE == "1":
+            await channel.send("2")
+
+            # waits for a message valiudating further instructions
+            def check(m):
+                return (m.content == "3" or m.content.lower() == "trois") and m.channel == message.channel
+
+            try:
+                await bot.wait_for("message", timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await message.add_reaction("☹")
+            else:
+                await channel.send("SOLEIL !")
+
+        if MESSAGE == "a":
+            def check(m):
+                return m.content.lower() == "b" and m.channel == message.channel
+
+            try:
+                await bot.wait_for("message", timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await message.add_reaction("☹")
+            else:
+                await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
         if MESSAGE == "ah":
             if rdnb >= 4:
@@ -449,6 +463,9 @@ async def on_message(message):
             for i in range(len(MESSAGE) - 3):
                 if MESSAGE[i] == " " and MESSAGE[i + 1] == "t" and MESSAGE[i + 2] == "g" and MESSAGE[i + 3] == " ":
                     nbtg += 1
+                    tgFile = open("txt/tg.txt", "w+")
+                    tgFile.write(str(nbtg))
+                    tgFile.close()
                     activity = f"insulter {nbtg} personnes"
                     await bot.change_presence(activity=discord.Game(name=activity))
                     await channel.send(random.choice(insultes))
@@ -651,11 +668,6 @@ async def serverinfo(ctx):
     await ctx.send(text)
 
 
-@bot.command()  # same, with a capital letter
-async def serverInfo(ctx):
-    await serverinfo(ctx)
-
-
 @bot.command()  # send the 26 possibilites of a ceasar un/decryption
 async def crypt(ctx, *text):
     mot = " ".join(text)
@@ -697,11 +709,6 @@ async def randint(ctx, *text):
     rd = random.randint(nb1, nb2)
     print(f"random {nb1}:{nb2} = {rd}")
     await ctx.send(rd)
-
-
-@bot.command()  # same, with a capital letter
-async def randInt(ctx, *text):
-    await randint(ctx, *text)
 
 
 @bot.command()  # send a random word from the dico, the first to write it wins
@@ -1155,10 +1162,57 @@ async def say(ctx, number, *text):
 """
 
 
-# runs the bot (if you have a TOKEN hahaha)
-
 @bot.command()  # PERSONAL USE ONLY
-async def AmongUs(ctx):
+async def amongus(ctx):
+    def equal_games(liste):
+        # Il vaut mieux que la liste soit déjà mélangée, mais on peut le faire ici aussi.
+        # Le programme renvoie une liste 2D composant les équipes
+
+        tailleListe = len(liste)
+        tailleMin, tailleMax = 5, 10
+        tailleEquip = []
+        nbEquip = 0
+        equip = []
+
+        for i in range(tailleMax, tailleMin, -1):
+            if tailleListe % i == 0:
+                nbEquip = tailleListe // i
+                for _ in range(nbEquip):
+                    tailleEquip.append(i)
+                break
+            elif tailleListe % i == 1 and i < tailleMax:
+                nbEquip = tailleListe // i
+                for j in range(nbEquip):
+                    if j == 0:
+                        tailleEquip.append(i + 1)
+                    else:
+                        tailleEquip.append(i)
+                break
+
+        if nbEquip == 0:
+            tailleEquip.append(tailleMax)
+            while tailleListe > 0 and tailleMin < tailleEquip[0] and nbEquip < 8:
+                tailleListe -= tailleEquip[0]
+                nbEquip += 1
+
+                if 0 < tailleListe < tailleMin and nbEquip < 8:
+                    tailleEquip[0] -= 1
+                    tailleListe = len(liste)
+                    nbEquip = 0
+
+            for i in range(1, nbEquip):
+                tailleEquip.append(tailleEquip[0])
+
+        j = 0
+        for i in range(nbEquip):
+            list1 = []
+            for _ in range(tailleEquip[i]):
+                if j < len(liste):
+                    list1.append(liste[j])
+                    j += 1
+            equip.append(list1)
+        return equip
+
     """
     if not ctx.author.guild_permissions.administrator:
         await ctx.send("Nope, t'es pas admin désolé...")
@@ -1168,22 +1222,19 @@ async def AmongUs(ctx):
     tour = 0
     while 1:
         tour += 1
-        firstMessage = await ctx.send("On joue ? Réagis pour jouer, sinon tant pis")
+        message = "Réagis avec ✅ pour jouer !"
+        totalTime = 60
+        timeLeft = totalTime
+        firstMessage = await ctx.send(f"Réagis avec ✅ pour jouer ! Il reste {timeLeft} sec")
         yes = "✅"
 
         await firstMessage.add_reaction(yes)
 
-        time.sleep(55)
-        await firstMessage.add_reaction("5️⃣")
-        time.sleep(1)
-        await firstMessage.add_reaction("4️⃣")
-        time.sleep(1)
-        await firstMessage.add_reaction("3️⃣")
-        time.sleep(1)
-        await firstMessage.add_reaction("2️⃣")
-        time.sleep(1)
-        await firstMessage.add_reaction("1️⃣")
-        time.sleep(1)
+        for _ in range(totalTime):
+            time.sleep(1)
+            timeLeft -= 1
+            await firstMessage.edit(content=message + f" Il reste {str(timeLeft)} sec")
+        await firstMessage.edit(content="Inscriptions fermées !")
 
         firstMessage = await firstMessage.channel.fetch_message(firstMessage.id)
         users = set()
@@ -1193,9 +1244,9 @@ async def AmongUs(ctx):
                 async for user in reaction.users():
                     users.add(user)
 
-        ids = []
+        ids = [i for i in range(23)]
         for user in users:
-            if user.id != 653563141002756106:
+            if user.id != bot.user.id:
                 ids.append(user.id)
         random.shuffle(ids)
         if len(ids) < 5:
@@ -1222,35 +1273,43 @@ async def AmongUs(ctx):
                 0x05ff3c,
                 0x05ffa1
             ]
-            text = f"**Partie n°{str(tour)}**"
+            text = f"**Partie n°{str(tour)} ---- {len(ids)} joueurs**"
             await ctx.send(text)
             for i in range(len(playersID)):
                 y = 0
-                embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**", color=random.choice(color))
-                embed.set_thumbnail(url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
+                embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**",
+                                      color=random.choice(color))
+                embed.set_thumbnail(
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
                 for user in playersID[i]:
                     y += 1
-                    embed.add_field(name=f"Joueur {str(y)}", value=f"<@!{str(user)}>", inline=True)
+                    embed.add_field(name=f"Joueur {str(y)}",
+                                    value=f"<@!{str(user)}>",
+                                    inline=True)
                 await ctx.send(embed=embed)
+            await ctx.send("**NEXT** pour relancer\n**END** poure terminer")
 
         def check(m):
-            id_list = [321216514986606592, 359743894042443776, 135784465065574401, 349548485797871617]
+            id_list = [321216514986606592, 359743894042443776,
+                       135784465065574401, 349548485797871617]
             return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
 
         try:
             if len(ids) == 0:
-                msg = await bot.wait_for('message', timeout=60.0, check=check)
+                msg = await bot.wait_for('message',
+                                         timeout=60.0,
+                                         check=check)
             else:
-                msg = await bot.wait_for('message', timeout=3600.0, check=check)
+                msg = await bot.wait_for('message',
+                                         timeout=3600.0,
+                                         check=check)
             if msg.content == "END":
                 await ctx.send("**Fin de la partie...**")
                 break
         except asyncio.TimeoutError:
             await ctx.send("**Fin de la partie...**")
             break
-        else:
-            await ctx.send("**Fin de la partie...**")
-            break
+
 
 
 bot.run(TOKEN)
