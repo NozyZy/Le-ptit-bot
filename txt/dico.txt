@@ -966,6 +966,7 @@ bahah
 bahaha
 bahahah
 bahahaha
+bahahahaahha
 bahahahah
 bahahahaha
 bahahahahah
@@ -5236,6 +5237,7 @@ gayet
 gays
 gdb
 gdn
+gdo
 ge
 geant
 geber
@@ -5576,6 +5578,7 @@ gérer
 géré
 gét
 géteau
+g�nial
 h
 ha
 habile
@@ -10072,6 +10075,7 @@ pétes
 pétrin
 pétée
 pétés
+p�s
 q
 qcm
 qconfirm
