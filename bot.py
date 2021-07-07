@@ -22,7 +22,7 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
                    case_insensitive=True)
-TOKEN = ""
+TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.4zzNCyfuemTeOqKVUiTFjaYIPpI"
 tgFile = open("txt/tg.txt", "r+")
 nbtg: int = int(tgFile.readlines()[0])
 tgFile.close()
@@ -1244,7 +1244,7 @@ async def amongus(ctx):
                 async for user in reaction.users():
                     users.add(user)
 
-        ids = [i for i in range(23)]
+        ids = []
         for user in users:
             if user.id != bot.user.id:
                 ids.append(user.id)
