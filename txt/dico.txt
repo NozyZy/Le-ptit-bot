@@ -330,7 +330,6 @@ algorithme
 algorithmes
 algos
 algèbre
-algébre
 ali
 alien
 alienware
@@ -5578,7 +5577,7 @@ gérer
 géré
 gét
 géteau
-g�nial
+g�nial
 h
 ha
 habile
@@ -10075,7 +10074,7 @@ pétes
 pétrin
 pétée
 pétés
-p�s
+p�s
 q
 qcm
 qconfirm
