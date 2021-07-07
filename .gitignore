@@ -1,6 +1,7 @@
 # Specified files/folder
 save/
 save.py
+secret.py
 txt/admin.txt
 txt/names.txt
 txt/ShPeu.txt

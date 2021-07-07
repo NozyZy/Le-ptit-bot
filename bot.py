@@ -2,6 +2,7 @@ import asyncio
 import time
 from datetime import date
 
+import secret
 import discord
 import googletrans
 import youtube_dl
@@ -22,7 +23,6 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
                    case_insensitive=True)
-TOKEN = "NjUzNTYzMTQxMDAyNzU2MTA2.Xe40Gw.4zzNCyfuemTeOqKVUiTFjaYIPpI"
 tgFile = open("txt/tg.txt", "r+")
 nbtg: int = int(tgFile.readlines()[0])
 tgFile.close()
@@ -126,7 +126,7 @@ async def on_message(message):
         await channel.send("Je retiens...")
 
     # ping a people 10 time, once every 3 sec
-    if MESSAGE.startswith("--appel "):
+    if MESSAGE.startswith("--appel"):
         if "<@!653563141002756106>" in MESSAGE:
             await channel.send("T'es un marrant toi")
             return
@@ -201,15 +201,15 @@ async def on_message(message):
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
-        if "enerv" in MESSAGE or "énerv" in MESSAGE and rdnb >= 3:
+        if "enerv" in MESSAGE or "énerv" in MESSAGE and rdnb >= 2:
             await channel.send("(╯°□°）╯︵ ┻━┻")
 
         if "(╯°□°）╯︵ ┻━┻" in MESSAGE:
             await channel.send("┬─┬ ノ( ゜-゜ノ)")
 
-        if MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez") or \
-                MESSAGE.startswith("savez vous") or MESSAGE.startswith("savez-vous") or \
-                MESSAGE.startswith("savais-tu") or MESSAGE.startswith("savais tu"):
+        if (MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez") or MESSAGE.startswith("savez vous")
+            or MESSAGE.startswith("savez-vous") or MESSAGE.startswith("savais-tu") or MESSAGE.startswith("savais tu")) \
+                and rdnb > 3:
             reponses = [
                 "J'en ai vraiment rien à faire tu sais ?",
                 "Waaa... Je bois tes paroles",
@@ -220,35 +220,21 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("hein"):
-            await channel.send("deux.")
-
-            # waits for a message valiudating further instructions
-            def check(m):
-                return ("3" in m.content or
-                        "trois" in m.content) and m.channel == message.channel and not m.startswith("http")
-
-            try:
-                await bot.wait_for("message", timeout=60.0, check=check)
-            except asyncio.TimeoutError:
-                await message.add_reaction("☹")
-            else:
-                reponses = [
-                    "BRAVO TU SAIS COMPTER !",
-                    "SOLEIL !",
-                    "4, 5, 6, 7.... oh et puis merde",
-                    "HAHAHAHAH non.",
-                    "stop.",
-                ]
-                await channel.send(random.choice(reponses))
-
-        if MESSAGE == "pas mal":
-            reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
+        if MESSAGE == "pas mal" and rdnb > 2:
+            reponses = [
+                "mouais",
+                "peut mieux faire",
+                "woaw",
+                ":o"
+            ]
             await channel.send(random.choice(reponses))
 
         if (MESSAGE == "ez" or MESSAGE == "easy") and rdnb >= 3:
             reponses = [
-                "https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918"
+                "https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918",
+                "https://tenor.com/view/pewds-pewdiepie-easy-ez-gif-9475407",
+                "https://tenor.com/view/easy-red-easy-button-red-button-gif-4642542",
+                "https://tenor.com/view/simple-easy-easy-game-easy-life-deal-with-it-gif-9276124"
             ]
             await channel.send(random.choice(reponses))
 
@@ -266,10 +252,15 @@ async def on_message(message):
                 today.strftime("%d"))) + "D"
             await channel.send(text)
 
-        if MESSAGE.startswith("stop") or MESSAGE.startswith("arrête") or MESSAGE.startswith("arrete"):
-            await channel.send("https://tenor.com/view/stop-it-get-some-help-gif-7929301")
+        if MESSAGE.startswith("stop") or MESSAGE.startswith("arrête") or MESSAGE.startswith("arrete") and rdnb > 3:
+            reponses = [
+                "https://tenor.com/view/daddys-home2-daddys-home2gifs-stop-it-stop-that-i-mean-it-gif-9694318",
+                "https://tenor.com/view/stop-sign-when-you-catch-feelings-note-to-self-stop-now-gif-4850841",
+                "https://tenor.com/view/stop-it-get-some-help-gif-7929301"
+            ]
+            await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("exact"):
+        if MESSAGE.startswith("exact") and rdnb > 2:
             reponses = [
                 "Je dirais même plus, exact.",
                 "Il est vrai",
@@ -310,21 +301,35 @@ async def on_message(message):
         if "❤" in MESSAGE:
             await message.add_reaction("❤")
 
-        if MESSAGE == "1":
-            await channel.send("2")
+        if (MESSAGE.startswith("hein") or MESSAGE.startswith("1")) and rdnb > 3:
+            reponses = [
+                "deux",
+                "2",
+                "deux ?",
+                "2 😏"
+            ]
+            await channel.send(random.choice(reponses))
 
             # waits for a message valiudating further instructions
             def check(m):
-                return (m.content == "3" or m.content.lower() == "trois") and m.channel == message.channel
+                return ("3" in m.content or "trois" in m.content) \
+                       and m.channel == message.channel and not m.startswith("http")
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
             except asyncio.TimeoutError:
                 await message.add_reaction("☹")
             else:
-                await channel.send("SOLEIL !")
+                reponses = [
+                    "BRAVO TU SAIS COMPTER !",
+                    "SOLEIL !",
+                    "4, 5, 6, 7.... oh et puis merde",
+                    "HAHAHAHAH non.",
+                    "stop.",
+                ]
+                await channel.send(random.choice(reponses))
 
-        if MESSAGE == "a":
+        if MESSAGE == "a" and rdnb > 2:
             def check(m):
                 return m.content.lower() == "b" and m.channel == message.channel
 
@@ -335,21 +340,21 @@ async def on_message(message):
             else:
                 await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
-        if MESSAGE == "ah":
+        if MESSAGE == "ah" and rdnb > 3:
             if rdnb >= 4:
                 reponses = ["Oh", "Bh"]
                 await channel.send(random.choice(reponses))
             else:
                 await channel.send(finndAndReplace("a", dicoLines))
 
-        if MESSAGE == "oh":
+        if MESSAGE == "oh" and rdnb > 3:
             if rdnb >= 4:
                 reponses = ["Quoi ?", "p", "ah", ":o"]
                 await channel.send(random.choice(reponses))
             else:
                 await channel.send(finndAndReplace("o", dicoLines))
 
-        if MESSAGE == "eh":
+        if MESSAGE == "eh" and rdnb > 3:
             if rdnb >= 4:
                 reponses = ["hehehehehe", "oh", "Du calme."]
                 await channel.send(random.choice(reponses))
@@ -383,7 +388,7 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("tu veux"):
+        if MESSAGE.startswith("tu veux") and rdnb > 3:
             reponses = [
                 "Ouais gros",
                 "Carrément ma poule",
@@ -392,7 +397,7 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("quoi"):
+        if MESSAGE.startswith("quoi") and rdnb > 2:
             reponses = [
                 "feur",
                 "hein ?",
@@ -403,7 +408,7 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("pourquoi"):
+        if MESSAGE.startswith("pourquoi") and rdnb > 3:
             reponses = [
                 "PARCEQUEEEE",
                 "Aucune idée.",
@@ -412,12 +417,19 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE in ["facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"] \
-                or MESSAGE.startswith("pff") or MESSAGE.startswith("no.."):
+        if (MESSAGE in [
+            "facepalm",
+            "damn",
+            "fait chier",
+            "fais chier",
+            "ptn",
+            "putain"]
+            or MESSAGE.startswith("pff") or MESSAGE.startswith("no.."))\
+                and rdnb > 3:
             await channel.send(
                 "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif")
 
-        if MESSAGE.startswith("t'es sur") or MESSAGE.startswith("t sur"):
+        if (MESSAGE.startswith("t'es sur") or MESSAGE.startswith("t sur")) and rdnb > 3:
             reponses = [
                 "Ouais gros",
                 "Nan pas du tout",
@@ -426,7 +438,7 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("ah ouais") or MESSAGE.startswith("ah bon"):
+        if (MESSAGE.startswith("ah ouais") or MESSAGE.startswith("ah bon")) and rdnb > 3:
             reponses = [
                 "Ouais gros",
                 "Nan ptdr",
@@ -441,17 +453,6 @@ async def on_message(message):
                 "Maître ?",
                 "*s'agenouille*\nComment puis-je vous être utile ?",
                 "*Nous vous devons une reconnaissance éternelllllllle*"
-            ]
-            await channel.send(random.choice(reponses))
-
-        if MESSAGE.startswith("lourd") and rdnb >= 4:
-            await channel.send("Sku sku")
-
-        if "<@!321216514986606592>" in MESSAGE and rdnb >= 4:
-            reponses = [
-                "Le VP numéro 2",
-                "Encore lui ?",
-                "fasstin"
             ]
             await channel.send(random.choice(reponses))
 
@@ -483,9 +484,9 @@ async def on_message(message):
                 ]
                 await channel.send(random.choice(reponses))
             else:
-                await message.add_reaction("🥰")
+                await message.add_reaction("😉")
 
-        if MESSAGE.startswith("non"):
+        if MESSAGE.startswith("non") and rdnb > 3:
             reponses = [
                 "si.",
                 "ah bah ca c'est sur",
@@ -495,16 +496,26 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("lequel"):
-            await channel.send("Le deuxième.")
+        if MESSAGE.startswith("lequel") and rdnb > 3:
+            reponses = [
+                "Le deuxième",
+                "Le prochain",
+                "Aucun"
+            ]
+            await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("laquelle"):
-            await channel.send("La deuxième.")
+        if MESSAGE.startswith("laquelle") and rdnb > 3:
+            reponses = [
+                "La deuxième",
+                "La prochaine",
+                "Aucune"
+            ]
+            await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("miroir magique"):
             await channel.send(MESSAGE)
 
-        if MESSAGE.startswith("jure"):
+        if MESSAGE.startswith("jure") and rdnb > 4:
             if "wola" in MESSAGE:
                 await channel.send("Wola")
             elif "wallah" in MESSAGE:
@@ -512,7 +523,7 @@ async def on_message(message):
             else:
                 rep = await channel.send("Je jure de dire la vérité, uniquement la vérité et toute la vérité")
                 if rdnb >= 4:
-                    await rep.add_reaction("✌")
+                    await rep.add_reaction("🤞")
 
         if "☹" in MESSAGE or "😞" in MESSAGE or "😦" in MESSAGE:
             await message.add_reaction("🥰")
@@ -549,32 +560,51 @@ async def on_message(message):
                 return
             user = await message.guild.fetch_member(userID)
             pfp = user.avatar_url
+            gods = [
+                ["https://tse4.mm.bing.net/th?id=OIP.IXAIL06o83HxXHGjKHqZMAHaKe&pid=Api", "Loki"],
+                ["https://www.wallpaperflare.com/static/810/148/1018/painting-vikings-odin-gungnir-wallpaper.jpg", "Odin"],
+                ["https://tse3.mm.bing.net/th?id=OIP.3NR2eZEBm46mrcFM_p14RgHaJ3&pid=Api", "Osiris"],
+                ["https://tse1.explicit.bing.net/th?id=OIP.KXfuA_jDa_cfDkrMInOMfQHaJq&pid=Api", "Shiva"],
+                ["https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api", "Poseidon"],
+                ["https://tse1.mm.bing.net/th?id=OIP.M6A5OIYcaUO5UUrUjVRn5wHaNK&pid=Api", "Arceus"],
+                ["https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api", "Anubis"],
+                ["https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api", "Tezcatlipoca"],
+                ["https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api", "Venus"]
+            ]
             embed = discord.Embed(
                 title="This is God",
-                description="<@%s> is god." % userID,
+                description="<@%s> is that god." % userID,
                 color=0xECCE8B,
+                url=random.choice([
+                    "https://media.giphy.com/media/USm8tJQzgDAAKJRKkk/giphy.gif",
+                    "https://media.giphy.com/media/ZArMUnViJtKaBH0XLg/giphy.gif",
+                    "https://tenor.com/view/bruce-almighty-morgan-freeman-i-am-god-hello-hey-gif-4743445"
+                ])
             )
             embed.set_thumbnail(url=pfp)
+            embed.set_author(name="Le p'tit god", url="https://github.com/NozyZy/Le-ptit-bot", icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png")
+            embed.set_image(url=gods[((userID//365 + int(day)*5)//int(month)) % len(gods)][0])
+            embed.set_footer(text=gods[((userID//365 + int(day)*5)//int(month)) % len(gods)][1])
 
             await channel.send("God looks like him.", embed=embed)
 
         if MESSAGE.startswith("hello") and rdnb >= 3:
             await channel.send(file=discord.File("images/helo.jpg"))
 
-        if MESSAGE == "enculé" or MESSAGE == "enculer":
+        if (MESSAGE == "enculé" or MESSAGE == "enculer") and rdnb > 3:
             image = ["images/tellermeme.png", "images/bigard.jpeg"]
             await channel.send(file=discord.File(random.choice(image)))
 
         if MESSAGE == "stonks":
             await channel.send(file=discord.File("images/stonks.png"))
 
-        if MESSAGE == "parfait" or MESSAGE == "perfection":
+        if (MESSAGE == "parfait" or MESSAGE == "perfection") and rdnb > 3:
             await channel.send(file=discord.File("images/perfection.jpg"))
 
         if MESSAGE.startswith("leeroy"):
             await channel.send(file=discord.File("sounds/Leeroy Jenkins.mp3"))
 
-        if "pute" in MESSAGE:
+        if "pute" in MESSAGE and rdnb > 4:
             reponses = [
                 "https://tenor.com/view/mom-gif-10756105",
                 "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
@@ -597,7 +627,7 @@ async def on_message(message):
                         and MESSAGE[i + 2] == "d" and MESSAGE[i + 3] == " "):
                     await channel.send(file=discord.File("images/pd.jpg"))
 
-        if "oof" in MESSAGE and rdnb >= 2:
+        if "oof" in MESSAGE and rdnb >= 3:
             reponses = [
                 "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif",
                 "https://tenor.com/view/oh-snap-surprise-shocked-johncena-gif-5026702",
@@ -912,7 +942,8 @@ async def prime(ctx, nb: int):
             await ctx.send(text)
     else:
         text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
-        await ctx.send(text, file=discord.File("txt/prime.txt"))
+        await ctx.send(text,
+                       file=discord.File("txt/prime.txt"))
 
 
 @bot.command()  # find if 'nb' is a prime number, reacts to the message
@@ -1213,12 +1244,6 @@ async def amongus(ctx):
             equip.append(list1)
         return equip
 
-    """
-    if not ctx.author.guild_permissions.administrator:
-        await ctx.send("Nope, t'es pas admin désolé...")
-        return
-    """
-
     tour = 0
     while 1:
         tour += 1
@@ -1244,7 +1269,7 @@ async def amongus(ctx):
                 async for user in reaction.users():
                     users.add(user)
 
-        ids = []
+        ids = [i for i in range(23)]
         for user in users:
             if user.id != bot.user.id:
                 ids.append(user.id)
@@ -1311,5 +1336,4 @@ async def amongus(ctx):
             break
 
 
-
-bot.run(TOKEN)
+bot.run(secret.TOKEN)
