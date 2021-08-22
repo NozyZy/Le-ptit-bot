@@ -1479,6 +1479,7 @@ async def amongus(ctx):
 
 @bot.command()
 async def puissance4(ctx):
+    print(f">>({ctx.author.name} {time.asctime()}) - A lancé une partie de puissance 4 {ctx.guild.name}")
     grid = [[0 for _ in range(7)] for _ in range(6)]
     """grid = [[0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
@@ -1592,6 +1593,7 @@ async def puissance4(ctx):
     except asyncio.TimeoutError:
         await yellowMessage.edit(content="Pas de joueur jaune ❌")
         return
+    print(f">>({yellow} {time.asctime()}) - Est le joueur jaune {ctx.guild.name}")
 
     redMessage = await ctx.send("**⬇ Joueur rouge ⬇**")
     await redMessage.add_reaction("🔴")
@@ -1605,6 +1607,7 @@ async def puissance4(ctx):
     except asyncio.TimeoutError:
         await redMessage.edit(content="Pas de joueur rouge ❌")
         return
+    print(f">>({red} {time.asctime()}) - Est le joueur red {ctx.guild.name}")
 
     yellowPing = "<@!" + str(yellow.id) + "> 🟡"
     redPing = "<@!" + str(red.id) + "> 🔴"
@@ -1660,11 +1663,13 @@ async def puissance4(ctx):
 
             if tour > 6 and await checkWin(grid, tour):
                 if tour % 2 == 0:
+                    print(f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                     await addScoreLeaderboard(red.id)
                     await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
                     text = redPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(red.id) + " victoires** - " \
                            + await getPlaceLeaderbord(red.id)
                 else:
+                    print(f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                     await addScoreLeaderboard(yellow.id)
                     await updateGrid(grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage)
                     text = yellowPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(yellow.id) + " victoires** - " \
@@ -1675,6 +1680,7 @@ async def puissance4(ctx):
             elif tour >= 42:
                 await addScoreLeaderboard(yellow.id)
                 await addScoreLeaderboard(red.id)
+                print(f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}")
                 text = "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n" \
                        "**Score de " + yellowPing + " : " + await getScoreLeaderBoard(yellow.id) + "victoires !" \
                        "**Score de " + redPing + " : " + await getScoreLeaderBoard(red.id) + "victoires !**"
@@ -1685,12 +1691,14 @@ async def puissance4(ctx):
             await gridMessage.add_reaction("❌")
             await gridMessage.add_reaction("⌛")
             if tour % 2 == 0:
+                print(f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                 await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
                 await addScoreLeaderboard(yellow.id)
                 text = redPing + " n'a pas joué ! Alors **" + yellowPing + " gagne !** (c'est le jeu ma pov lucette)\n" \
                         "Score actuel : " + await getScoreLeaderBoard(yellow.id) +\
                        " victoires - " + await getPlaceLeaderbord(yellow.id)
             else:
+                print(f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                 await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
                 await addScoreLeaderboard(red.id)
                 text = yellowPing + " n'a pas joué ! Alors **" + redPing + " gagne !** (fallait jouer, 2 min t'es large !)\n " \
