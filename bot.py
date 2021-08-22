@@ -333,8 +333,8 @@ async def on_message(message):
 
             # waits for a message valiudating further instructions
             def check(m):
-                return ("3" in m.content or "trois" in m.content) \
-                       and m.channel == message.channel and not m.startswith("http")
+                return ("3" in m.content or "trois" in m.content) and m.channel == message.channel and not m.startswith(
+                    "http")
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
@@ -386,7 +386,7 @@ async def on_message(message):
                             "ah",
                             ":o",
                             "https://thumbs.gfycat.com/AptGrouchyAmericanquarterhorse-size_restricted.gif"
-                ]
+                            ]
                 await channel.send(random.choice(reponses))
             else:
                 print("S'est fait répondre par le dico (oh)")
@@ -759,7 +759,8 @@ async def on_message(message):
 
 @bot.command()  # delete 'nombre' messages
 async def clear(ctx, nombre: int):
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}")
     messages = await ctx.channel.history(limit=nombre + 1).flatten()
     for message in messages:
         await message.delete()
@@ -1088,13 +1089,15 @@ async def randomWord(ctx, nb: int):
 @bot.command()  # join the vocal channel fo the caller
 async def join(ctx):
     channel = ctx.author.voice.channel
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé que je rejoigne le vocal {channel} du serveur {ctx.guild.name}")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé que je rejoigne le vocal {channel} du serveur {ctx.guild.name}")
     await channel.connect()
 
 
 @bot.command()  # leaves it
 async def leave(ctx):
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé que je quitte le vocal {ctx.author.voice.channel} du serveur {ctx.guild.name}")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé que je quitte le vocal {ctx.author.voice.channel} du serveur {ctx.guild.name}")
     await ctx.voice_client.disconnect()
 
 
@@ -1163,7 +1166,8 @@ async def translate(ctx, *text):
                 textTranslated.text + " (" + textTranslated.dest + ")")
     except:
         text = "Nope, sorry !"
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé que je traduise {toTranslate} en {fromLang} vers {toLang} : {text}")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé que je traduise {toTranslate} en {fromLang} vers {toLang} : {text}")
     await ctx.send(text)
 
 
@@ -1258,7 +1262,9 @@ async def presentation(ctx, *base):
 
 @bot.command()
 async def ban(ctx):
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé de me bannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ", end="")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé de me bannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        end="")
     if not ctx.author.guild_permissions.administrator:
         await ctx.send("T'es pas admin, nananananère 😜")
         print("mais n'a pas les droits")
@@ -1280,7 +1286,9 @@ async def ban(ctx):
 
 @bot.command()
 async def unban(ctx):
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé de me débannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ", end="")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé de me débannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        end="")
     if not ctx.author.guild_permissions.administrator:
         await ctx.send("T'es pas admin, nananananère 😜")
         print("mais n'a pas les droits")
@@ -1326,6 +1334,7 @@ async def say(ctx, number, *text):
 @bot.command()  # PERSONAL USE ONLY
 async def amongus(ctx):
     print(f">>({ctx.author.name} {time.asctime()}) - A demandé une game Among Us {ctx.guild.name}")
+
     def equal_games(liste):
         # Il vaut mieux que la liste soit déjà mélangée, mais on peut le faire ici aussi.
         # Le programme renvoie une liste 2D composant les équipes
@@ -1467,5 +1476,284 @@ async def amongus(ctx):
             break
     print(f">>({ctx.author.name} {time.asctime()}) - La game Among Us a prit fin {ctx.guild.name}")
 
+
+@bot.command()
+async def puissance4(ctx):
+    grid = [[0 for _ in range(7)] for _ in range(6)]
+    """grid = [[0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 2, 1, 0, 0],
+            [0, 0, 0, 2, 2, 1, 0],
+            [0, 0, 0, 2, 2, 2, 1]]"""
+
+    async def updateGrid(grid, text, message):
+        text += "\n" + "".join(numbers) + "\n"
+        for row in grid:
+            print(row)
+            for case in row:
+                if case == 0:
+                    text += "🔵"
+                elif case == 1:
+                    text += "🔴"
+                elif case == 2:
+                    text += "🟡"
+                else:
+                    print("ERROR - ", case, row)
+            text += "\n"
+        await message.edit(content=text)
+
+        return gridMessage
+
+    async def addChip(grid, col, tour):
+        i = 5
+        while i >= 0:
+            if grid[i][col] != 0:
+                i -= 1
+            else:
+                grid[i][col] = tour % 2 + 1
+                if i == 0:
+                    await gridMessage.remove_reaction(str(numbers[col]), bot.user)
+                    numbers[col] = "#️⃣"
+                break
+        return i >= 0
+
+    async def checkWin(grid, tour):
+        for row in range(len(grid) - 1, -1, -1):
+            for col in range(0, len(grid[row])):
+                if await checkRight(grid, row, col, 0, tour) \
+                        or await checkLeft(grid, row, col, 0, tour) \
+                        or await checkUp(grid, row, col, 0, tour) \
+                        or await checkLeftDiag(grid, row, col, 0, tour) \
+                        or await checkRightDiag(grid, row, col, 0, tour):
+                    return True
+        return False
+
+    async def checkRight(grid, row, col, size, tour):
+        if size >= 4:
+            return True
+        if row >= len(grid) or col >= len(grid[row]) or row < 0 or col < 0:
+            return False
+        if grid[row][col] != tour % 2 + 1:
+            return False
+        return await checkRight(grid, row, col + 1, size + 1, tour)
+
+    async def checkLeft(grid, row, col, size, tour):
+        if size >= 4:
+            return True
+        if row >= len(grid) or col >= len(grid[row]) or row < 0 or col < 0:
+            return False
+        if grid[row][col] != tour % 2 + 1:
+            return False
+        return await checkLeft(grid, row, col - 1, size + 1, tour)
+
+    async def checkUp(grid, row, col, size, tour):
+        if size >= 4:
+            return True
+        if row >= len(grid) or col >= len(grid[row]) or row < 0 or col < 0:
+            return False
+        if grid[row][col] != tour % 2 + 1:
+            return False
+        return await checkUp(grid, row - 1, col, size + 1, tour)
+
+    async def checkRightDiag(grid, row, col, size, tour):
+        if size >= 4:
+            return True
+        if row >= len(grid) or col >= len(grid[row]) or row < 0 or col < 0:
+            return False
+        if grid[row][col] != tour % 2 + 1:
+            return False
+        return await checkRightDiag(grid, row - 1, col + 1, size + 1, tour)
+
+    async def checkLeftDiag(grid, row, col, size, tour):
+        if size >= 4:
+            return True
+        if row >= len(grid) or col >= len(grid[row]) or row < 0 or col < 0:
+            return False
+        if grid[row][col] != tour % 2 + 1:
+            return False
+        return await checkLeftDiag(grid, row - 1, col - 1, size + 1, tour)
+
+    tour = 1
+    red = ""
+    yellow = ""
+    end = False
+    numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
+
+    yellowMessage = await ctx.send("**⬇ Joueur jaune ⬇**")
+    await yellowMessage.add_reaction("🟡")
+
+    def check(reaction, user):
+        return user != bot.user and str(reaction.emoji) == "🟡"
+
+    try:
+        reaction, user = await bot.wait_for("reaction_add", timeout=60.0, check=check)
+        yellow = user
+    except asyncio.TimeoutError:
+        await yellowMessage.edit(content="Pas de joueur jaune ❌")
+        return
+
+    redMessage = await ctx.send("**⬇ Joueur rouge ⬇**")
+    await redMessage.add_reaction("🔴")
+
+    def check(reaction, user):
+        return user != bot.user and user != yellow and str(reaction.emoji) == "🔴"
+
+    try:
+        reaction, user = await bot.wait_for("reaction_add", timeout=60.0, check=check)
+        red = user
+    except asyncio.TimeoutError:
+        await redMessage.edit(content="Pas de joueur rouge ❌")
+        return
+
+    yellowPing = "<@!" + str(yellow.id) + "> 🟡"
+    redPing = "<@!" + str(red.id) + "> 🔴"
+
+    text = yellowPing + " et " + redPing + " tenez vous prêts !"
+    gridMessage = await ctx.send(text)
+
+    time.sleep(5)
+
+    while not end:
+        if tour == 1:
+            text = "Tour n°" + str(tour) + " - " + yellowPing + "\n\n"
+            text += "".join(numbers) + "\n"
+            for row in grid:
+                for case in row:
+                    if case == 0:
+                        text += "🔵"
+                    elif case == 1:
+                        text += "🔴"
+                    elif case == 2:
+                        text += "🟡"
+                    else:
+                        print("ERROR - ", case, row)
+                text += "\n"
+            await gridMessage.edit(content=text)
+            await gridMessage.add_reaction("1️⃣")
+            await gridMessage.add_reaction("2️⃣")
+            await gridMessage.add_reaction("3️⃣")
+            await gridMessage.add_reaction("4️⃣")
+            await gridMessage.add_reaction("5️⃣")
+            await gridMessage.add_reaction("6️⃣")
+            await gridMessage.add_reaction("7️⃣")
+        elif tour % 2 == 0:
+            await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
+        else:
+            await updateGrid(grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage)
+
+        if tour % 2 == 0:
+            def check(reaction, user):
+                return user == red and str(reaction.emoji) in numbers
+        else:
+            def check(reaction, user):
+                return user == yellow and str(reaction.emoji) in numbers
+
+        try:
+            reaction, user = await bot.wait_for("reaction_add", timeout=120.0, check=check)
+
+            await gridMessage.remove_reaction(reaction, user)
+
+            for i in range(len(numbers)):
+                if str(reaction.emoji) == numbers[i]:
+                    await addChip(grid, i, tour)
+
+            if tour > 6 and await checkWin(grid, tour):
+                if tour % 2 == 0:
+                    await addScoreLeaderboard(red.id)
+                    await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
+                    text = redPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(red.id) + " victoires** - " \
+                           + await getPlaceLeaderbord(red.id)
+                else:
+                    await addScoreLeaderboard(yellow.id)
+                    await updateGrid(grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage)
+                    text = yellowPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(yellow.id) + " victoires** - " \
+                           + await getPlaceLeaderbord(yellow.id)
+                await ctx.send(text)
+                end = True
+
+            elif tour >= 42:
+                await addScoreLeaderboard(yellow.id)
+                await addScoreLeaderboard(red.id)
+                text = "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n" \
+                       "**Score de " + yellowPing + " : " + await getScoreLeaderBoard(yellow.id) + "victoires !" \
+                       "**Score de " + redPing + " : " + await getScoreLeaderBoard(red.id) + "victoires !**"
+                await ctx.send(text)
+                end = True
+
+        except asyncio.TimeoutError:
+            await gridMessage.add_reaction("❌")
+            await gridMessage.add_reaction("⌛")
+            if tour % 2 == 0:
+                await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
+                await addScoreLeaderboard(yellow.id)
+                text = redPing + " n'a pas joué ! Alors **" + yellowPing + " gagne !** (c'est le jeu ma pov lucette)\n" \
+                        "Score actuel : " + await getScoreLeaderBoard(yellow.id) +\
+                       " victoires - " + await getPlaceLeaderbord(yellow.id)
+            else:
+                await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
+                await addScoreLeaderboard(red.id)
+                text = yellowPing + " n'a pas joué ! Alors **" + redPing + " gagne !** (fallait jouer, 2 min t'es large !)\n " \
+                        "Score actuel : " + await getScoreLeaderBoard(red.id) + \
+                       " victoires - " + await getPlaceLeaderbord(red.id)
+            await ctx.send(text)
+            end = True
+
+        tour += 1
+
+@bot.command()
+async def p4(ctx):
+    await puissance4(ctx)
+
+async def updateLeaderboard(liste):
+    file = open("txt/leaderboard.txt", "w+")
+    for line in liste:
+        line = "-".join(line)
+        if line[len(line)-1] != "\n":
+            line += "\n"
+        file.write(line)
+    file.close()
+
+
+async def getScoreLeaderBoard(id):
+    file = open("txt/leaderboard.txt", "r+")
+    leaderboard = file.readlines()
+    file.close()
+    for i in range(len(leaderboard)):
+        if str(id) in leaderboard[i]:
+            leaderboard[i] = leaderboard[i].split("-")
+            return leaderboard[i][1].replace("\n", "")
+
+
+async def getPlaceLeaderbord(id):
+    file = open("txt/leaderboard.txt", "r+")
+    leaderboard = file.readlines()
+    file.close()
+    for i in range(len(leaderboard)):
+        if str(id) in leaderboard[i]:
+            i += 1
+            if i == 1:
+                return "1er/" + str(len(leaderboard))
+            else:
+                return str(i) + "e/" + str(len(leaderboard))
+
+
+async def addScoreLeaderboard(id):
+    file = open("txt/leaderboard.txt", "r+")
+    leaderboard = file.readlines()
+    file.close()
+    isIn = False
+    for i in range(len(leaderboard)):
+        leaderboard[i] = leaderboard[i].split("-")
+        if str(id) in leaderboard[i]:
+            isIn = True
+            leaderboard[i][1] = str(int(leaderboard[i][1].replace("\n", "")) + 1) + "\n"
+    if not isIn:
+        leaderboard.append((str(id) + "-1\n").split("-"))
+
+    leaderboard.sort(reverse=True, key=lambda score: score[1])
+    await updateLeaderboard(leaderboard)
+
+# TODO afficher le classment
 
 bot.run(secret.TOKEN)
