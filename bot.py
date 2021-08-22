@@ -1664,26 +1664,28 @@ async def puissance4(ctx):
             if tour > 6 and await checkWin(grid, tour):
                 if tour % 2 == 0:
                     print(f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
-                    await addScoreLeaderboard(red.id)
+                    await addScoreLeaderboard(red.id, red)
                     await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
-                    text = redPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(red.id) + " victoires** - " \
+                    text = redPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(
+                        red.id) + " victoires** - " \
                            + await getPlaceLeaderbord(red.id)
                 else:
                     print(f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
-                    await addScoreLeaderboard(yellow.id)
+                    await addScoreLeaderboard(yellow.id, yellow)
                     await updateGrid(grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage)
-                    text = yellowPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(yellow.id) + " victoires** - " \
+                    text = yellowPing + " gagne ! **Score actuel : " + await getScoreLeaderBoard(
+                        yellow.id) + " victoires** - " \
                            + await getPlaceLeaderbord(yellow.id)
                 await ctx.send(text)
                 end = True
 
             elif tour >= 42:
-                await addScoreLeaderboard(yellow.id)
-                await addScoreLeaderboard(red.id)
+                await addScoreLeaderboard(yellow.id, yellow)
+                await addScoreLeaderboard(red.id, red)
                 print(f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}")
                 text = "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n" \
-                       "**Score de " + yellowPing + " : " + await getScoreLeaderBoard(yellow.id) + "victoires !" \
-                       "**Score de " + redPing + " : " + await getScoreLeaderBoard(red.id) + "victoires !**"
+                       "**Score de " + yellowPing + " : " + await getScoreLeaderBoard(yellow.id) + " victoires !**\n" \
+                       "**Score de " + redPing + " : " + await getScoreLeaderBoard(red.id) + " victoires !**"
                 await ctx.send(text)
                 end = True
 
@@ -1693,31 +1695,35 @@ async def puissance4(ctx):
             if tour % 2 == 0:
                 print(f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                 await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
-                await addScoreLeaderboard(yellow.id)
+                await addScoreLeaderboard(yellow.id, yellow)
                 text = redPing + " n'a pas joué ! Alors **" + yellowPing + " gagne !** (c'est le jeu ma pov lucette)\n" \
-                        "Score actuel : " + await getScoreLeaderBoard(yellow.id) +\
+                                                                           "Score actuel : " + await getScoreLeaderBoard(
+                    yellow.id) + \
                        " victoires - " + await getPlaceLeaderbord(yellow.id)
             else:
                 print(f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                 await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
-                await addScoreLeaderboard(red.id)
+                await addScoreLeaderboard(red.id, red)
                 text = yellowPing + " n'a pas joué ! Alors **" + redPing + " gagne !** (fallait jouer, 2 min t'es large !)\n " \
-                        "Score actuel : " + await getScoreLeaderBoard(red.id) + \
+                                                                           "Score actuel : " + await getScoreLeaderBoard(
+                    red.id) + \
                        " victoires - " + await getPlaceLeaderbord(red.id)
             await ctx.send(text)
             end = True
 
         tour += 1
 
+
 @bot.command()
 async def p4(ctx):
     await puissance4(ctx)
+
 
 async def updateLeaderboard(liste):
     file = open("txt/leaderboard.txt", "w+")
     for line in liste:
         line = "-".join(line)
-        if line[len(line)-1] != "\n":
+        if line[len(line) - 1] != "\n":
             line += "\n"
         file.write(line)
     file.close()
@@ -1746,7 +1752,7 @@ async def getPlaceLeaderbord(id):
                 return str(i) + "e/" + str(len(leaderboard))
 
 
-async def addScoreLeaderboard(id):
+async def addScoreLeaderboard(id, name):
     file = open("txt/leaderboard.txt", "r+")
     leaderboard = file.readlines()
     file.close()
@@ -1755,13 +1761,51 @@ async def addScoreLeaderboard(id):
         leaderboard[i] = leaderboard[i].split("-")
         if str(id) in leaderboard[i]:
             isIn = True
-            leaderboard[i][1] = str(int(leaderboard[i][1].replace("\n", "")) + 1) + "\n"
+            leaderboard[i][1] = str(int(leaderboard[i][1]) + 1)
     if not isIn:
-        leaderboard.append((str(id) + "-1\n").split("-"))
+        line = (str(id) + "-1-" + str(name) + "\n").split("-")
+        leaderboard.append(line)
 
     leaderboard.sort(reverse=True, key=lambda score: score[1])
     await updateLeaderboard(leaderboard)
 
-# TODO afficher le classment
+
+@bot.command()
+async def classement(ctx):
+    file = open("txt/leaderboard.txt", "r+")
+    leaderboard = file.readlines()
+    file.close()
+
+    numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    text = "Le classement du puissance 4 est composé de : \n\n"
+    if len(leaderboard) <= 10:
+        if len(leaderboard) <= 0:
+            text = "Bah ya personne... ***jouez !***"
+        else:
+            for i in range(len(leaderboard)):
+                name = leaderboard[i].split("-")
+                text += numbers[i] + " : **" + name[2].replace("\n", "") + "** avec **" + name[1] + " victoires**\n"
+    else:
+        for i in range(10):
+            name = leaderboard[i].split("-")
+            text += numbers[i] + " : **" + name[2].replace("\n", "") + "** avec **" + name[1] + " victoires**\n"
+        text += "*+" + str(len(leaderboard) - 10) + " autres joueurs*"
+
+    await ctx.send(text)
+
+@bot.command()
+async def leaderboard(ctx):
+    await classement
+
+@bot.command()
+async def monRang(ctx):
+    file = open("txt/leaderboard.txt", "r+")
+    leaderboard = file.readlines()
+    file.close()
+    for i in range(len(leaderboard)):
+        if str(ctx.author.id) in leaderboard[i]:
+            await ctx.send(f"Tu es {str(i+1)}e/{len(leaderboard)}, avec {leaderboard[i].split('-')[1]} victoires !")
+            return
+    await ctx.send("Mmmmh... Tu n'es pas dans le classement, essaies de jouer !")
 
 bot.run(secret.TOKEN)
