@@ -1490,6 +1490,7 @@ async def puissance4(ctx):
 
     async def updateGrid(grid, text, message):
         text += "\n" + "".join(numbers) + "\n"
+        print("\n")
         for row in grid:
             print(row)
             for case in row:

@@ -3570,6 +3570,7 @@ distordues
 distqncie
 distraction
 distrib
+distribuer
 distribution
 distribué
 distribués
@@ -6127,6 +6128,7 @@ implique
 impliquié
 impliqué
 implle
+implémenter
 implémenté
 impo
 import
@@ -7232,6 +7234,7 @@ lok
 loki
 lokis
 lol
+loleoeleoleol
 lomepal
 lon
 londres
@@ -7496,6 +7499,7 @@ malpropre
 malus
 malware
 malédicition
+malédiction
 maléfique
 mama
 mamadou
@@ -8748,6 +8752,7 @@ onsaitjamé
 ont
 onéla
 oo
+ood
 oof
 ooff
 oofs
@@ -10803,6 +10808,7 @@ remttre
 remy
 rename
 rencontre
+rencontrent
 rencontres
 rend
 rendait
@@ -10901,6 +10907,7 @@ reseaux
 reserver
 reset
 resine
+resistance
 resistence
 resistive
 reskap
@@ -11834,6 +11841,7 @@ signez
 significatif
 signifie
 signé
+signée
 sii
 sil
 silcoon
