@@ -1767,7 +1767,7 @@ async def addScoreLeaderboard(id, name):
         line = (str(id) + "-1-" + str(name) + "\n").split("-")
         leaderboard.append(line)
 
-    leaderboard.sort(reverse=True, key=lambda score: score[1])
+    leaderboard.sort(reverse=True, key=lambda score: int(score[1]))
     await updateLeaderboard(leaderboard)
 
 
