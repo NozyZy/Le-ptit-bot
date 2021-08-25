@@ -1832,33 +1832,39 @@ async def classement(ctx):
         else:
             text += "Avec le plus de victoires : \n"
             for i in range(len(leaderboard)):
-                name = leaderboard[i].split("-")
+                leaderboard[i] = leaderboard[i].split("-")
+                name = leaderboard[i]
                 text += numbers[i] + " : **" + name[4].replace("\n", "") + "** avec **" + name[1] + " victoires**\n"
 
             leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
             text += "\nAvec le plus grand ratio Victoire/Défaite\n"
             for i in range(len(leaderboard)):
-                name = leaderboard[i].split("-")
-                text += numbers[i] + " : **" + name[4].replace("\n", "") + "** avec **" + name[3] + " V/D**\n"
+                name = leaderboard[i]
+                text += numbers[i] + " : **" + name[4].replace("\n", "") + \
+                        "** avec **" + name[3] + " V/D** (" + \
+                        str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n"
     else:
         text += "Avec le plus de victoires : \n"
         for i in range(5):
-            name = leaderboard[i].split("-")
+            leaderboard[i] = leaderboard[i].split("-")
+            name = leaderboard[i]
             text += numbers[i] + " : **" + name[4].replace("\n", "") + "** avec **" + name[1] + " victoires**\n"
             text += "*+" + str(len(leaderboard) - 10) + " autres joueurs*"
 
         leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
         text += "Avec le plus grand ratio Victoire/Défaite\n"
         for i in range(5):
-            name = leaderboard[i].split("-")
-            text += numbers[i] + " : **" + name[4].replace("\n", "") + "** avec **" + name[3] + " V/D**\n"
+            name = leaderboard[i]
+            text += numbers[i] + " : **" + name[4].replace("\n", "") + \
+                    "** avec **" + name[3] + " V/D** (" + \
+                    str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n"
 
     await ctx.send(text)
 
 
 @bot.command()
-async def leaderboard(ctx):
-    await classement
+async def rank(ctx):
+    await classement(ctx)
 
 
 @bot.command()
@@ -1867,15 +1873,22 @@ async def monRang(ctx):
     leaderboard = file.readlines()
     file.close()
     for i in range(len(leaderboard)):
-        if str(ctx.author.id) in leaderboard[i]:
-            await ctx.send(
-                f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des victoires, avec **{leaderboard[i].split('-')[1]} victoires** !")
-            break
-    leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
+        leaderboard[i] = leaderboard[i].split("-")
+
     for i in range(len(leaderboard)):
         if str(ctx.author.id) in leaderboard[i]:
-            await ctx.send(
-                f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des ratios, avec **{leaderboard[i].split('-')[3]} V/D** !")
+            await ctx.send(f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des victoires,"
+                           f" avec **{leaderboard[i][1]} victoires** !")
+            break
+    leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
+    print(leaderboard)
+    for i in range(len(leaderboard)):
+        name = leaderboard[i]
+        if str(ctx.author.id) in name:
+            await ctx.send(f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des ratios,"
+                           f" avec **{name[3]} V/D**"
+                           f" ({str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))}%) !")
+            print(round(33.3333333333333333, 2))
             return
     await ctx.send("Mmmmh... Tu n'es pas dans le classement, essaies de jouer !")
 
