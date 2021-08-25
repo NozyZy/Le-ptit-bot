@@ -3207,6 +3207,7 @@ deduction
 deduire
 deep
 def
+defaites
 default
 defendre
 defense
@@ -6668,6 +6669,7 @@ journées
 jours
 joué
 jouées
+joués
 joy
 joyeux
 joywave
@@ -7636,6 +7638,7 @@ masturbating
 mat
 match
 matchmaking
+matchs
 mate
 mater
 material
