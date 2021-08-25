@@ -336,6 +336,7 @@ ali
 alien
 alienware
 aliexpress
+aligné
 alignés
 alive
 all
@@ -1264,6 +1265,7 @@ binouze
 bio
 biologie
 biologiques
+biosses
 bip
 bipolaire
 bir
@@ -1678,6 +1680,7 @@ bétonnet
 bétons
 c
 ca
+caarr
 cable
 cabler
 cables
@@ -2290,6 +2293,7 @@ clpa
 club
 clubrezo
 cluster
+clutch
 clé
 clément
 clér
@@ -3923,6 +3927,7 @@ dédouane
 déductibles
 défaillant
 défaite
+défaites
 défaut
 défend
 défendre
@@ -4084,6 +4089,7 @@ détruire
 détruit
 déu
 dévastateur
+dévasté
 développe
 développement
 développer
@@ -4220,6 +4226,7 @@ embde
 embrasse
 embrouillant
 embrouilles
+embrouillé
 eme
 emergency
 eminem
@@ -5463,6 +5470,7 @@ go
 goal
 goals
 goat
+goatesque
 god
 gode
 godf
@@ -6547,6 +6555,7 @@ javanaise
 javascript
 javase
 javou
+javoue
 javé
 jawive
 jazz
@@ -7087,6 +7096,7 @@ lfo
 lgbt
 lgtps
 lh
+lheure
 lhinformatyke
 liberalism
 liberation
@@ -7926,6 +7936,7 @@ minutes
 minuts
 minuutes
 miom
+mion
 mionutes
 mira
 miracle
@@ -8139,6 +8150,7 @@ moustache
 mouton
 mouvement
 movember
+moves
 movies
 mové
 moyen
@@ -9347,6 +9359,7 @@ pespeu
 pesquet
 pessey
 pessimiste
+pet
 pete
 peter
 petes
@@ -10305,6 +10318,7 @@ qqu
 qques
 qqun
 qr
+qrcodes
 qroteccttioon
 qrthur
 qsdqsdqsdqsdz
@@ -10616,6 +10630,7 @@ recommandables
 recommandé
 recommence
 recommencer
+recommencez
 recommencé
 recommend
 reconfinement
@@ -10766,6 +10781,7 @@ remake
 remanger
 remanipulations
 remarche
+remarchent
 remarque
 remarquer
 remarques
@@ -11771,6 +11787,7 @@ shame
 shapu
 shared
 shareflag
+sharex
 shark
 shatsu
 shazam
@@ -12265,6 +12282,7 @@ sthub
 still
 stipule
 stocks
+stomp
 stonehenge
 stones
 stonk
@@ -12658,6 +12676,7 @@ tarder
 tardif
 tarlouze
 tarta
+tartafelle
 tartaglia
 tartez
 tartine
@@ -13367,6 +13386,7 @@ user
 username
 users
 using
+usual
 usuelles
 utc
 utile
@@ -14065,6 +14085,7 @@ zoologie
 zoom
 zoomé
 zoro
+zou
 zout
 zuh
 zut
