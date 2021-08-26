@@ -1823,16 +1823,18 @@ async def classement(ctx):
     file = open("txt/leaderboard.txt", "r+")
     leaderboard = file.readlines()
     file.close()
+    for i in range(len(leaderboard)):
+        leaderboard[i] = leaderboard[i].split("-")
 
     numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     text = "Le classement du puissance 4 est composé de : \n\n"
-    if len(leaderboard) <= 5:
+    leaderSize = 5
+    if len(leaderboard) <= leaderSize:
         if len(leaderboard) <= 0:
             text = "Bah ya personne... ***jouez !***"
         else:
             text += "Avec le plus de victoires : \n"
             for i in range(len(leaderboard)):
-                leaderboard[i] = leaderboard[i].split("-")
                 name = leaderboard[i]
                 text += numbers[i] + " : **" + name[4].replace("\n", "") + "** avec **" + name[1] + " victoires**\n"
 
@@ -1845,19 +1847,19 @@ async def classement(ctx):
                         str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n"
     else:
         text += "Avec le plus de victoires : \n"
-        for i in range(5):
-            leaderboard[i] = leaderboard[i].split("-")
+        for i in range(leaderSize):
             name = leaderboard[i]
             text += numbers[i] + " : **" + name[4].replace("\n", "") + "** avec **" + name[1] + " victoires**\n"
-            text += "*+" + str(len(leaderboard) - 10) + " autres joueurs*"
+        text += "*+" + str(len(leaderboard) - leaderSize) + " autres joueurs*\n\n"
 
         leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
         text += "Avec le plus grand ratio Victoire/Défaite\n"
-        for i in range(5):
+        for i in range(leaderSize):
             name = leaderboard[i]
             text += numbers[i] + " : **" + name[4].replace("\n", "") + \
                     "** avec **" + name[3] + " V/D** (" + \
                     str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n"
+        text += "*+" + str(len(leaderboard) - leaderSize) + " autres joueurs*"
 
     await ctx.send(text)
 
