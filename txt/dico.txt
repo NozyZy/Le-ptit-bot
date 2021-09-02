@@ -400,6 +400,7 @@ amar
 amaru
 amazing
 amazon
+ambassadeur
 ambassadeurs
 amber
 ambiance
@@ -618,6 +619,7 @@ apprécie
 apprécient
 apprécié
 appréciés
+appuie
 appuyer
 aprem
 apres
@@ -765,6 +767,7 @@ associations
 associé
 assos
 assume
+assumer
 assumé
 assurance
 assurer
@@ -997,6 +1000,7 @@ bahahahahahahahahah
 bahahahahahahahahahah
 bahahahahahahahahahahaah
 bahahahahahahahahhaahhaha
+bahahahahahahhaha
 bahahahahahha
 bahahahahahhaha
 bahahahahha
@@ -1017,6 +1021,7 @@ bahhahah
 bahhahahaha
 bahjahahahahaha
 bahjesaispas
+baie
 bail
 bails
 bain
@@ -1100,6 +1105,7 @@ basta
 basé
 basée
 bat
+bataille
 batar
 batard
 batards
@@ -1205,6 +1211,7 @@ betemnt
 betise
 betises
 better
+betterdiscord
 between
 beua
 beug
@@ -1349,6 +1356,7 @@ blitzcrank
 bllblblblb
 blobs
 bloc
+blocage
 block
 blockbuster
 blocks
@@ -1652,6 +1660,7 @@ busy
 but
 bute
 buter
+butt
 buttcoin
 butte
 button
@@ -1852,6 +1861,7 @@ casques
 cassant
 casse
 cassecouille
+cassent
 casser
 cassera
 casso
@@ -2097,6 +2107,7 @@ cherché
 cherché
 cherchées
 chere
+cherie
 chers
 cheum
 cheuveux
@@ -2106,10 +2117,12 @@ chevauchent
 cheveux
 cheville
 chevilles
+chevre
 chevuex
 chewie
 chez
 chht
+chi
 chial
 chiale
 chialer
@@ -2182,6 +2195,7 @@ chose
 choses
 chosiir
 chou
+chouette
 chouettes
 choupi
 chouquettes
@@ -2258,6 +2272,7 @@ claque
 claques
 claqué
 claquées
+claqués
 clarinette
 clash
 classe
@@ -2775,6 +2790,7 @@ copains
 copie
 copier
 copies
+copieur
 copiez
 copine
 copiteur
@@ -2912,6 +2928,7 @@ crab
 crabe
 cracher
 crack
+crackable
 crackait
 cracks
 crackée
@@ -3078,7 +3095,9 @@ cvomment
 cvompris
 cw
 cx
+cyber
 cyberchloroquine
+cybernights
 cyberpunk
 cyberstonks
 cyborg
@@ -3307,6 +3326,7 @@ deposer
 deposée
 depot
 depression
+deps
 deptharbre
 depthnode
 depthtree
@@ -3359,6 +3379,7 @@ dessine
 dessins
 dessiné
 dessis
+dessjs
 dessous
 dessu
 dessus
@@ -3569,6 +3590,7 @@ dispo
 dispoi
 disponibilité
 disponible
+disponibles
 dispos
 disposant
 disposition
@@ -3623,6 +3645,7 @@ djamila
 djay
 djennah
 djoko
+djé
 dl
 dlc
 dlevel
@@ -3742,6 +3765,7 @@ doute
 doutent
 douter
 doutes
+douteux
 doux
 doué
 douées
@@ -3949,6 +3973,7 @@ défend
 défendre
 défense
 défi
+défier
 défilante
 défini
 définitif
@@ -4329,6 +4354,7 @@ enlever
 enlevé
 enlevés
 enléve
+ennemi
 ennemy
 ennuyait
 ennuyant
@@ -4553,6 +4579,7 @@ every
 everyday
 everyone
 everything
+evian
 evidemment
 evidemmernt
 evident
@@ -4746,6 +4773,7 @@ familles
 famosa
 famoso
 famous
+famé
 famélique
 fan
 fanart
@@ -4890,6 +4918,7 @@ feuillets
 feur
 feux
 few
+ff
 ffk
 ffmpeg
 fgois
@@ -5085,6 +5114,7 @@ force
 forcement
 forcent
 forcer
+forcera
 forces
 forceur
 forcez
@@ -5399,6 +5429,7 @@ genti
 gentil
 gentille
 gentils
+gentleman
 geo
 geogebra
 geovishap
@@ -5548,6 +5579,7 @@ gpu
 gr
 graal
 graave
+grabify
 grace
 grad
 graev
@@ -5653,6 +5685,7 @@ guess
 guette
 guetter
 gueule
+gueules
 gueume
 guguss
 gui
@@ -6230,6 +6263,7 @@ inconnus
 inconscient
 incorect
 incorrect
+incorruptibles
 incoryable
 incr
 increase
@@ -6338,6 +6372,7 @@ inspirés
 inssup
 insta
 instable
+instagram
 install
 installant
 installe
@@ -6532,6 +6567,7 @@ iui
 iunutiles
 ivan
 ivanna
+ixd
 iz
 izi
 izy
@@ -6543,6 +6579,7 @@ jabva
 jack
 jackson
 jacqueline
+jacques
 jacquet
 jade
 jador
@@ -6800,6 +6837,7 @@ kalss
 kamado
 kameto
 kan
+kanar
 kance
 kang
 kantan
@@ -7099,6 +7137,7 @@ lessgo
 lessgoo
 lessieux
 lestgo
+lestrade
 let
 letemps
 letruc
@@ -7359,6 +7398,7 @@ lumières
 lumoor
 lumpur
 lundi
+lundu
 lune
 lunettes
 lupin
@@ -7843,6 +7883,7 @@ mesages
 mess
 message
 messages
+messagée
 messenger
 messi
 mesure
@@ -8259,6 +8300,7 @@ mwouais
 mwé
 mxt
 my
+mycanal
 myefrei
 myope
 myopes
@@ -8270,6 +8312,7 @@ mystique
 mystère
 mytho
 mze
+mà
 màj
 màre
 mâchoire
@@ -8721,6 +8764,7 @@ oio
 oiseau
 oiseaux
 oit
+oite
 oiu
 oiui
 ojk
@@ -8736,6 +8780,7 @@ okidac
 okidok
 okidoki
 okioki
+okip
 okithx
 okix
 okk
@@ -8758,6 +8803,7 @@ olalala
 old
 olivier
 olymp
+olympique
 om
 ombelliféres
 ombre
@@ -9428,6 +9474,7 @@ philibert
 phillarmonique
 philo
 philosophie
+phishing
 phlan
 pho
 phobie
@@ -9507,6 +9554,7 @@ pires
 pirrik
 pirrikk
 pis
+piscine
 pisser
 piste
 pistes
@@ -9624,6 +9672,7 @@ plop
 plot
 plott
 plotteurs
+plouf
 pls
 plss
 plsu
@@ -9702,6 +9751,7 @@ pololo
 polololololo
 polonais
 polonaise
+polsky
 polus
 pomme
 pompax
@@ -9790,6 +9840,7 @@ potes
 potion
 poto
 pouah
+pouahahah
 pouave
 poubelle
 poubelles
@@ -10089,6 +10140,7 @@ propriétés
 prosperity
 prostagmage
 prostitution
+prot
 protagoniste
 protection
 protectioon
@@ -10135,6 +10187,7 @@ préfaite
 préferrez
 préfixe
 préfère
+préférable
 préférais
 préfére
 préférez
@@ -10592,6 +10645,7 @@ rater
 rates
 ratio
 rationnelles
+ratip
 ratrappages
 rattachers
 rattrapable
@@ -10797,6 +10851,7 @@ relativement
 relatives
 relativiste
 relax
+relayé
 release
 relecture
 relier
@@ -10933,6 +10988,7 @@ reposer
 repositories
 repost
 repousser
+repoussera
 reprend
 reprendre
 reprends
@@ -11101,6 +11157,7 @@ revisions
 revisé
 revive
 revoir
+revoire
 revois
 revoit
 revu
@@ -11293,6 +11350,7 @@ réagir
 réagissent
 réagissez
 réagit
+réal
 réaliser
 réalisme
 réaliste
@@ -11396,6 +11454,7 @@ répones
 réponse
 réponse
 réponses
+réprimandes
 république
 répéte
 répéter
@@ -11685,6 +11744,7 @@ secondaire
 secondaires
 seconde
 secondes
+secouer
 secours
 secret
 secrétaire
@@ -12606,6 +12666,7 @@ system
 systeme
 systrans
 système
+systématique
 systéme
 sz
 sà»r
@@ -13087,6 +13148,7 @@ tournoi
 tournois
 tournure
 tournée
+tours
 tous
 tousanticovid
 toussa
@@ -13302,6 +13364,7 @@ tue
 tuer
 tuerie
 tues
+tum
 tune
 tunnel
 turbine
@@ -13386,6 +13449,7 @@ uneid
 unes
 uni
 unicolore
+unies
 uniheroes
 union
 unique
@@ -13510,6 +13574,7 @@ vamos
 van
 vanish
 vanne
+vansan
 var
 variable
 variables
@@ -13966,6 +14031,7 @@ wola
 wolf
 wolframalpha
 wolframons
+wolofok
 wonderfull
 wonderwall
 woodkid
@@ -14167,6 +14233,7 @@ zélande
 échauffement
 échauffé
 échecs
+échoué
 éclatax
 éclate
 éclaté
@@ -14179,6 +14246,7 @@ zélande
 école
 écoles
 économie
+économise
 économisé
 écout
 écoutable
