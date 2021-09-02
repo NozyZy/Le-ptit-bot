@@ -1682,6 +1682,7 @@ async def puissance4(ctx):
                     print(f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                     await addScoreLeaderboard(red.id, red)
                     await addLoseLeaderboard(yellow.id, yellow)
+                    await gridMessage.add_reaction("✅")
                     await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
                     text = redPing + " gagne ! **Score actuel : " \
                            + await getScoreLeaderBoard(red.id) \
@@ -1690,6 +1691,7 @@ async def puissance4(ctx):
                     print(f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
                     await addScoreLeaderboard(yellow.id, yellow)
                     await addLoseLeaderboard(red.id, red)
+                    await gridMessage.add_reaction("✅")
                     await updateGrid(grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage)
                     text = yellowPing + " gagne ! **Score actuel : " \
                            + await getScoreLeaderBoard(yellow.id) \
@@ -1700,6 +1702,7 @@ async def puissance4(ctx):
             elif tour >= 42:
                 await addScoreLeaderboard(yellow.id, yellow)
                 await addScoreLeaderboard(red.id, red)
+                await gridMessage.add_reaction("✅")
                 print(f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}")
                 text = "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n" \
                        "**Score de " + yellowPing + " : " \
