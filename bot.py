@@ -533,7 +533,7 @@ async def on_message(message):
                         await message.add_reaction('🇹')
                         await message.add_reaction('🇬')
                     print(f">>({user.name} {time.asctime()}) - A insulté")
-                      return
+                    return
 
         if MESSAGE == "cheh" or MESSAGE == "sheh":
             print(f">>({user.name} {time.asctime()}) - A dit cheh")
