@@ -13,6 +13,7 @@ abandon
 abandonner
 abandonné
 abaok
+abasuper
 abatuvoi
 abbacchio
 abdelzarack
@@ -169,6 +170,7 @@ adorer
 adoré
 adouci
 adresse
+adresses
 adrien
 adts
 adulte
@@ -235,6 +237,8 @@ ahahahahahaahahh
 ahahahahahah
 ahahahahahahaha
 ahahahahahahahahahahhaha
+ahahha
+ahahhaha
 ahahhahahahaha
 ahahhahha
 ahahqh
@@ -247,6 +251,7 @@ ahg
 ahh
 ahhahahahah
 ahiso
+ahjahah
 ahlala
 ahlalala
 ahok
@@ -284,6 +289,7 @@ ainés
 air
 aire
 airpods
+airs
 airsoft
 ais
 ait
@@ -351,6 +357,7 @@ alled
 alleluiha
 allemagne
 allemand
+allemande
 aller
 allez
 allgo
@@ -358,6 +365,7 @@ allo
 allonger
 allongée
 alloues
+allright
 alluler
 allume
 allumer
@@ -399,6 +407,7 @@ am
 amalgame
 amar
 amaru
+amateur
 amazing
 amazon
 ambassadeur
@@ -434,6 +443,7 @@ ampere
 amphi
 amphibiens
 amphis
+ampji
 ampli
 amplitude
 ampère
@@ -747,6 +757,7 @@ asie
 ask
 askiop
 askip
+askipp
 askipx
 asley
 asoka
@@ -842,6 +853,7 @@ auisamer
 auitre
 auj
 aujourdhui
+aujourhdui
 auoi
 aup
 auprès
@@ -866,6 +878,7 @@ austres
 aut
 autant
 auteur
+authority
 auto
 autobiographie
 automate
@@ -1000,6 +1013,7 @@ bahahahahah
 bahahahahaha
 bahahahahahah
 bahahahahahaha
+bahahahahahahahah
 bahahahahahahahahah
 bahahahahahahahahahah
 bahahahahahahahahahahaah
@@ -1050,6 +1064,7 @@ ballec
 ballek
 balles
 ballon
+ballot
 ballz
 balot
 balthazar
@@ -1101,6 +1116,7 @@ base
 baser
 bases
 bash
+bashrc
 basic
 basique
 basiques
@@ -1108,6 +1124,7 @@ baskets
 basse
 basses
 basta
+baston
 basé
 basée
 bat
@@ -1123,6 +1140,7 @@ batons
 bats
 battements
 batterie
+battez
 battle
 battrai
 battre
@@ -1469,6 +1487,7 @@ born
 bornes
 bos
 boss
+bossais
 bosse
 bossent
 bosser
@@ -1502,12 +1521,14 @@ bouffer
 bouffon
 bouffons
 boufon
+boug
 bouge
 bouger
 bougre
 bougé
 bouhahahahahaha
 bouilles
+boulangerie
 boule
 boules
 boulet
@@ -1525,6 +1546,7 @@ bourrent
 bourré
 bourré
 bourse
+bousin
 bout
 boutique
 bouton
@@ -1680,6 +1702,7 @@ bvbg
 bvs
 bvv
 bwahahaha
+bwhahahaha
 by
 bye
 byebye
@@ -1804,6 +1827,7 @@ candidatures
 canette
 canidés
 canis
+canner
 cannes
 cannot
 canon
@@ -1983,6 +2007,7 @@ chaises
 chakal
 chakaux
 chakchouk
+chala
 chaleureuse
 chalin
 chall
@@ -2311,6 +2336,7 @@ clients
 clim
 clion
 clip
+cliquai
 clique
 cliquer
 cliquez
@@ -2566,6 +2592,7 @@ compter
 comptes
 comptez
 compton
+compté
 compute
 computer
 compétence
@@ -2690,6 +2717,7 @@ conqueror
 conquis
 cons
 conscience
+conscients
 conseil
 conseille
 conseiller
@@ -2922,6 +2950,7 @@ couturier
 couverture
 couvre
 couvrirai
+couz
 couça
 cover
 covered
@@ -2996,6 +3025,7 @@ critiquer
 critiques
 crié
 cro
+croa
 croatie
 croce
 crochets
@@ -3225,6 +3255,7 @@ dead
 deadline
 deal
 debate
+debian
 debout
 debreifera
 debrouiller
@@ -3250,6 +3281,7 @@ decouvrir
 decp
 ded
 dedans
+dediboite
 deduction
 deduire
 deep
@@ -3296,6 +3328,7 @@ demandant
 demande
 demandent
 demander
+demanderai
 demanderont
 demandes
 demandez
@@ -3410,6 +3443,7 @@ destituer
 desu
 desuite
 desus
+detail
 detailed
 details
 detecte
@@ -3431,6 +3465,7 @@ deuxiéme
 dev
 devais
 devait
+devancé
 devant
 developement
 development
@@ -3542,6 +3577,7 @@ diona
 diplome
 diplomes
 diqtance
+dir
 dira
 dirai
 dirais
@@ -3554,7 +3590,9 @@ directement
 directes
 direction
 directionnelles
+directory
 dires
+dirft
 diriger
 dirt
 diréction
@@ -3569,6 +3607,7 @@ disant
 disapointed
 disappointed
 discipline
+disclosed
 discoirs
 disconnected
 discor
@@ -3577,6 +3616,7 @@ discord
 discordd
 discorde
 discordjs
+discords
 discorrd
 discors
 discours
@@ -3658,6 +3698,7 @@ dizaine
 diziane
 diée
 djamila
+django
 djay
 djennah
 djoko
@@ -3805,6 +3846,7 @@ dream
 dreams
 drh
 drift
+drip
 drive
 driver
 droit
@@ -3842,9 +3884,11 @@ dudul
 due
 duel
 dues
+duh
 duhazokjcdaziyuk
 duhiazvuiyduazli
 dumb
+dune
 dungeon
 dunjour
 dunno
@@ -3976,6 +4020,7 @@ décroche
 décroché
 décryptage
 décrypter
+décu
 décès
 décéder
 décés
@@ -4010,6 +4055,7 @@ dégeu
 dégoute
 dégouter
 dégouté
+dégoutée
 dégoûté
 déguelasse
 dégueu
@@ -4160,6 +4206,7 @@ déviation
 déçois
 déçu
 déçus
+dîner
 e
 ea
 each
@@ -4317,6 +4364,7 @@ enabled
 encadré
 encfoiré
 enchaine
+enchainement
 enclume
 encoder
 encodé
@@ -4519,6 +4567,7 @@ espèce
 espèrent
 espéce
 espére
+espérer
 espérez
 esquissé
 essai
@@ -4544,6 +4593,7 @@ esthétique
 estime
 estimer
 estétyk
+esxplique
 et
 etage
 etais
@@ -4730,6 +4780,7 @@ faciles
 facilite
 facilites
 facon
+fact
 facteur
 faction
 factorial
@@ -4749,6 +4800,7 @@ faiblement
 faiblesse
 faie
 fail
+failk
 faille
 failles
 failli
@@ -4847,6 +4899,7 @@ faudra
 faudrai
 faudrais
 faudrait
+faura
 fausrin
 fausrtin
 fausse
@@ -4946,6 +4999,7 @@ ffk
 ffmpeg
 fgois
 fhtagn
+fiak
 fiaks
 fiasco
 fiat
@@ -5076,6 +5130,7 @@ flux
 flèches
 flûte
 fm
+fma
 fml
 fnac
 fnacdarty
@@ -5246,6 +5301,7 @@ fraudes
 freddies
 frederico
 free
+freeblyat
 freebox
 freely
 freetab
@@ -5269,6 +5325,7 @@ frigo
 fringues
 frnçais
 froid
+froide
 from
 fromage
 front
@@ -5331,6 +5388,7 @@ futur
 future
 futurs
 futé
+fuyez
 fvg
 fx
 fxdx
@@ -5371,6 +5429,7 @@ galerie
 galiléenes
 galère
 galèrent
+galères
 galére
 galérer
 galéré
@@ -5437,6 +5496,7 @@ gel
 genant
 general
 generator
+generique
 genial
 genie
 genocide
@@ -5480,6 +5540,7 @@ gg
 ggf
 ggs
 ggwp
+ggzp
 ghetoo
 ghost
 gi
@@ -5547,6 +5608,7 @@ goal
 goals
 goat
 goatesque
+goaïlles
 god
 gode
 godf
@@ -5562,6 +5624,7 @@ going
 gojira
 gojou
 goka
+gold
 golden
 gomme
 gomorra
@@ -5579,6 +5642,7 @@ google
 gorge
 gorgeous
 gorki
+gos
 gosse
 gosses
 got
@@ -5717,6 +5781,7 @@ gueume
 guguss
 gui
 guide
+guident
 guider
 guides
 guidée
@@ -5768,6 +5833,7 @@ généralisé
 généralité
 généreations
 généreux
+générique
 générosité
 géo
 gépalu
@@ -5847,6 +5913,7 @@ happened
 happening
 happens
 happy
+harbor
 harceler
 hard
 hardcoder
@@ -5918,6 +5985,7 @@ heros
 herve
 hervé
 hesite
+hesité
 hess
 hessienne
 hessiennes
@@ -6309,6 +6377,7 @@ incroyablement
 incroyables
 incroyabme
 incroyalbe
+incruste
 indeed
 index
 indication
@@ -6440,6 +6509,7 @@ intensifies
 intentionnés
 interactif
 interaction
+interclassés
 interdit
 interdite
 interdits
@@ -6484,6 +6554,7 @@ intimes
 intimité
 intitulé
 intolérable
+intonation
 intraitable
 intransitif
 intregal
@@ -6708,8 +6779,10 @@ jo
 job
 joef
 joeur
+jogging
 jogingu
 john
+joi
 joie
 join
 joined
@@ -6803,6 +6876,7 @@ juger
 jugez
 jui
 juicy
+juif
 juifs
 juillet
 juin
@@ -6908,6 +6982,7 @@ ke
 kebab
 keith
 kel
+kelbaye
 kelh
 kelhaf
 kelhome
@@ -6927,6 +7002,7 @@ kfc
 kg
 khellaf
 kholles
+khouyas
 khz
 ki
 kick
@@ -6934,6 +7010,7 @@ kicékijou
 kidnapper
 kids
 kiff
+kiffe
 kiffer
 kiffes
 kiffé
@@ -6947,12 +7024,14 @@ kilos
 kinda
 king
 kink
+kippour
 kirghistan
 kiribati
 kirishima
 kise
 kissa
 kitchentte
+kitkat
 kk
 kl
 kla
@@ -7035,6 +7114,7 @@ ladd
 lag
 lags
 laguait
+lague
 lagy
 lahuiss
 lai
@@ -7059,6 +7139,7 @@ lambert
 lan
 lanc
 lance
+lancemant
 lancement
 lancer
 lancez
@@ -7258,6 +7339,7 @@ linux
 linéaire
 liorne
 liquid
+liquide
 lirai
 lire
 lis
@@ -7320,6 +7402,7 @@ locations
 locaux
 lock
 lodh
+lof
 logan
 loge
 logement
@@ -7403,6 +7486,7 @@ love
 lover
 loyer
 loïc
+lp
 lpb
 lpl
 lpour
@@ -7536,6 +7620,7 @@ mahometh
 mai
 maid
 mail
+mailaisie
 maillon
 mailm
 mails
@@ -7809,6 +7894,7 @@ mbs
 mc
 mcdo
 mcfly
+mcq
 mcu
 md
 mddrr
@@ -7884,7 +7970,9 @@ mentionner
 mentionné
 mentions
 mentir
+mentit
 menu
+meopa
 mer
 merc
 mercato
@@ -7911,6 +7999,7 @@ mere
 merec
 meree
 merge
+merged
 merite
 merlin
 merrde
@@ -7956,6 +8045,7 @@ meubles
 meuf
 meufs
 meunier
+meuniergate
 meurs
 meurt
 meurtre
@@ -7963,6 +8053,7 @@ meurtrière
 meux
 mev
 mex
+mexicain
 mg
 mgl
 mgsv
@@ -8099,6 +8190,7 @@ mn
 mnage
 mnde
 mnm
+mnms
 mno
 mnt
 mntn
@@ -8146,6 +8238,7 @@ modérer
 mohad
 mohammed
 moi
+moin
 moindre
 moins
 mois
@@ -8194,6 +8287,7 @@ montantes
 monte
 monter
 montparnasse
+montpzrnasse
 montr
 montrable
 montre
@@ -8222,6 +8316,7 @@ mor
 mora
 moral
 morale
+morceau
 more
 morets
 morgiana
@@ -8238,6 +8333,7 @@ motherfucker
 motherfuckers
 motiv
 motivant
+motivants
 motivation
 motiver
 motives
@@ -8347,6 +8443,7 @@ myefrei
 myope
 myopes
 myriam
+myrtilles
 myself
 mysql
 mystics
@@ -8430,6 +8527,7 @@ nana
 nananananananana
 nanh
 nani
+nano
 nanoparticules
 napapijri
 napparement
@@ -8453,6 +8551,7 @@ navigateur
 navrée
 naze
 nazi
+naître
 naïf
 nb
 nbon
@@ -8464,6 +8563,7 @@ nearby
 neauhaile
 need
 needs
+negatif
 neige
 neiges
 neither
@@ -8539,7 +8639,9 @@ nitrowut
 niveau
 niveaux
 nivo
+niéhéhéhéhé
 njlxif
+njn
 njon
 nk
 nn
@@ -8599,6 +8701,7 @@ norman
 normandie
 normands
 normaux
+norme
 normes
 nort
 north
@@ -8939,6 +9042,7 @@ oral
 orales
 orange
 oraux
+orba
 orbits
 order
 ordi
@@ -9101,6 +9205,7 @@ pack
 package
 packs
 pacotilles
+pad
 padawan
 padme
 padutou
@@ -9111,6 +9216,7 @@ page
 pages
 pagne
 paie
+paiement
 paies
 pain
 paint
@@ -9145,6 +9251,7 @@ pape
 papier
 papiers
 papillon
+papote
 paq
 paques
 par
@@ -9441,6 +9548,7 @@ perlis
 perm
 perma
 permanence
+permanences
 permanente
 permet
 permets
@@ -9572,6 +9680,7 @@ pilotes
 pin
 pinder
 ping
+pingerai
 pingez
 pings
 pingsock
@@ -9899,6 +10008,7 @@ poueth
 pouetrh
 pouf
 pouhahahaha
+pouhauteuh
 poulain
 poule
 poulice
@@ -10046,6 +10156,7 @@ primark
 prime
 primo
 primos
+prince
 princesse
 principal
 principale
@@ -10084,6 +10195,7 @@ probable
 probablement
 probably
 probas
+probity
 problem
 probleme
 problemes
@@ -10171,6 +10283,7 @@ proof
 propa
 propag
 propagande
+propal
 propement
 propes
 prophète
@@ -10210,6 +10323,7 @@ proximité
 proxmox
 prq
 prrèss
+prt
 prtant
 prudent
 prune
@@ -10343,6 +10457,7 @@ pucci
 puces
 pue
 puent
+pueth
 puis
 puisque
 puiss
@@ -10366,6 +10481,7 @@ pureté
 purgé
 purpose
 purposes
+purs
 purée
 push
 pushpil
@@ -10573,6 +10689,7 @@ raccourcis
 raccroché
 race
 races
+rache
 racheter
 rachétes
 racine
@@ -10696,6 +10813,7 @@ rassembler
 rassoir
 rassure
 rassurer
+rat
 rate
 rater
 rates
@@ -10714,6 +10832,7 @@ ratz
 raté
 ratée
 ravager
+ravagé
 ravi
 rayon
 rayons
@@ -10790,6 +10909,7 @@ reconnaissance
 reconnaissant
 reconnait
 reconnu
+reconnue
 recopier
 recopié
 record
@@ -10813,6 +10933,7 @@ recycle
 red
 reda
 redeco
+redemande
 redemander
 redemarrer
 redira
@@ -10938,6 +11059,7 @@ remarque
 remarquer
 remarques
 remarqué
+remaster
 remballé
 remboursement
 remboursent
@@ -11189,6 +11311,7 @@ revanche
 reve
 reveal
 revealed
+reveil
 reveille
 reveillee
 reveiller
@@ -11354,6 +11477,7 @@ roues
 rougaille
 rouge
 rougir
+roulante
 roule
 rouler
 roulette
@@ -11386,9 +11510,11 @@ rudimentaire
 rue
 rule
 rules
+rumble
 rumeur
 run
 runnait
+running
 russe
 rusé
 rvd
@@ -11529,6 +11655,7 @@ réserver
 réservera
 réservez
 réservé
+résidence
 résine
 résitance
 résolu
@@ -11872,6 +11999,7 @@ sept
 september
 septembre
 sequels
+sequentielle
 sequestrai
 sera
 serai
@@ -12162,6 +12290,7 @@ sociales
 sociaux
 sociéter
 société
+socquet
 soda
 sodomie
 soeur
@@ -12177,6 +12306,7 @@ soin
 soir
 soiree
 soirs
+soirtie
 soirée
 soirées
 sois
@@ -12224,6 +12354,7 @@ sonic
 soniqs
 sonne
 sonnerie
+sonné
 sonor
 sons
 sont
@@ -12493,6 +12624,7 @@ stressed
 stresser
 stressons
 stresspo
+stressé
 stretch
 strezss
 strict
@@ -12525,6 +12657,7 @@ style
 stylo
 stylé
 stylé
+stylées
 stylés
 su
 sub
@@ -12668,6 +12801,7 @@ survienne
 survivant
 survive
 survived
+survivre
 survolé
 sus
 susceptible
@@ -12711,6 +12845,7 @@ sympathique
 sympatique
 sympatoche
 symétrique
+synapson
 synchro
 synchrones
 synchronisation
@@ -12790,6 +12925,7 @@ tabouret
 tace
 tachanka
 taches
+taci
 tacket
 tacler
 tacos
@@ -12841,6 +12977,7 @@ tapette
 tapettes
 tapis
 tappote
+tapé
 taquine
 tard
 tarder
@@ -12971,6 +13108,7 @@ terracota
 terraformation
 terraformer
 terrain
+terraria
 terrasse
 terrayotabg
 terre
@@ -13007,6 +13145,7 @@ tfacon
 tft
 tg
 tgg
+tgn
 tgole
 tgt
 tgtg
@@ -13091,6 +13230,7 @@ timer
 times
 timezone
 timing
+timocafé
 timothy
 timothée
 tin
@@ -13163,6 +13303,7 @@ tombé
 tombés
 tome
 tomodelfuego
+tomorow
 tomorrow
 ton
 tonight
@@ -13243,6 +13384,7 @@ trade
 traduction
 traduire
 traduise
+traduit
 trahi
 trailer
 train
@@ -13404,6 +13546,7 @@ trump
 truqué
 trust
 truth
+trux
 try
 tryfjkdzaihsulkgfepdimkdz
 tryhard
@@ -13424,6 +13567,7 @@ tsunade
 tsunami
 tt
 ttc
+ttg
 ttk
 ttranquile
 tts
@@ -13451,11 +13595,13 @@ tva
 twa
 tweet
 tweeter
+tweetos
 twhr
 twice
 twitch
 twitter
 two
+txa
 txc
 txitch
 txt
@@ -13506,6 +13652,7 @@ uiuiui
 uiz
 ul
 ulti
+ultimate
 ultime
 ultra
 ulysse
@@ -13531,6 +13678,7 @@ unité
 univers
 universities
 universités
+unix
 unlocked
 unmute
 unoo
@@ -13559,6 +13707,7 @@ urodéle
 urodéles
 urss
 us
+usa
 usb
 use
 useful
@@ -13642,6 +13791,8 @@ valére
 valérie
 vamos
 van
+vancouver
+vanilla
 vanish
 vanne
 vansan
@@ -13662,6 +13813,7 @@ vasy
 vatfr
 vatican
 vaut
+vay
 vaz
 vazy
 vc
@@ -13710,6 +13862,7 @@ venus
 vera
 verbe
 verbes
+verifiez
 verités
 verra
 verrai
@@ -13774,6 +13927,7 @@ viele
 vielle
 viellit
 vien
+viendez
 viendra
 viendrai
 vienne
@@ -13791,6 +13945,7 @@ vilaine
 vilains
 vildred
 villa
+ville
 villejuid
 villejuif
 vilà
@@ -13977,6 +14132,7 @@ vuh
 vuillejuif
 vulkan
 vullaby
+vullejuif
 vus
 vvu
 vzy
@@ -14048,10 +14204,12 @@ weekes
 wefix
 wei
 weird
+weistérix
 well
 werden
 wesh
 wew
+wh
 wha
 whales
 what
@@ -14159,6 +14317,7 @@ xxd
 xylos
 y
 ya
+yaa
 yable
 yachi
 yae
@@ -14192,6 +14351,7 @@ yen
 yep
 yes
 yesai
+yesaie
 yeslife
 yess
 yessaile
@@ -14225,6 +14385,7 @@ your
 yourself
 youtube
 youtubonss
+yses
 ytb
 yufine
 yup
