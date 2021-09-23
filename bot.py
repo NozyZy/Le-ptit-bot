@@ -1046,7 +1046,7 @@ async def prime(ctx, nb: int):
         if nb <= n_max:
             await ctx.send("Donne moi quelques minutes bro...")
             for i in range(biggest, nb + 1, 2):
-                if is_prime(i):
+                if await is_prime(i):
                     text += str(i) + "\n"
             Fprime = open("txt/primes.txt", "a+")
             Fprime.write(text)
@@ -1067,7 +1067,10 @@ async def prime(ctx, nb: int):
 @bot.command()  # find if 'nb' is a prime number, reacts to the message
 async def isPrime(ctx, nb: int):
     print(f">>({ctx.author.name} {time.asctime()}) - A demandé si {nb} est premier : ", end="")
-    if is_prime(nb):
+    if nb > 99999997979797979797979777797:
+        await ctx.send("C'est trop gros, ca va tout casser, demande à papa Google :D")
+        print("too big")
+    elif await is_prime(nb):
         await ctx.message.add_reaction("👍")
         print("oui")
     else:

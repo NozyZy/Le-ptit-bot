@@ -20,7 +20,7 @@ def division(a, b):
         return a / b
 
 
-def is_prime(nb):
+async def is_prime(nb):
     print(nb)
     if nb <= 3:
         return nb > 1
