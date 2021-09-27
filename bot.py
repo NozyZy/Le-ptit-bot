@@ -24,6 +24,7 @@ bot = commands.Bot(command_prefix="--",
                    case_insensitive=True)
 tgFile = open("txt/tg.txt", "r+")
 nbtg: int = int(tgFile.readlines()[0])
+nbprime: int = 0
 tgFile.close()
 
 
@@ -41,6 +42,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     global nbtg
+    global nbprime
     channel = message.channel
     MESSAGE = message.content.lower()
     rdnb = random.randint(1, 5)
@@ -1027,11 +1029,17 @@ async def poll(ctx, *text):
 @bot.command(
 )  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
 async def prime(ctx, nb: int):
+    global nbprime
     print(f">>({ctx.author.name} {time.asctime()}) - ", end="")
     if nb < 2:
         await ctx.send("Tu sais ce que ca veut dire 'prime number' ?")
-        print("A demandé de calculer des nombre premier sen dessous de 2")
+        print("A demandé de calculer un nombre premier sen dessous de 2")
         return
+    if nbprime > 3:
+        await ctx.send("Attends quelques instants stp, je suis occupé...")
+        print("A demandé trop de prime")
+        return
+    nbprime += 1
     Fprime = open("txt/primes.txt", "r+")
     primes = Fprime.readlines()
     Fprime.close()
@@ -1039,7 +1047,7 @@ async def prime(ctx, nb: int):
     text = ""
     ratio_max = 1.02
     n_max = int(biggest * ratio_max)
-    print(biggest, n_max)
+    print(nb, biggest, n_max)
 
     if nb > biggest:
         if biggest % 2 == 0:
@@ -1052,6 +1060,7 @@ async def prime(ctx, nb: int):
             Fprime = open("txt/primes.txt", "a+")
             Fprime.write(text)
             Fprime.close()
+            nbprime -= 1
             if nb > 14064991:  # 8Mb file limit
                 text = f"Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
                 await ctx.send(text)

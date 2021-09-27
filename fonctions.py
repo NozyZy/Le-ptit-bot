@@ -21,7 +21,6 @@ def division(a, b):
 
 
 async def is_prime(nb):
-    print(nb)
     if nb <= 3:
         return nb > 1
     elif nb % 2 == 0 or nb % 3 == 0:
