@@ -23,12 +23,15 @@ def division(a, b):
 async def is_prime(nb):
     if nb <= 3:
         return nb > 1
-    elif nb % 2 == 0 or nb % 3 == 0:
+    elif nb % 2 == 0 or nb % 3 == 0 or nb % 5 == 0:
         return False
 
     i = 5
 
     while i * i <= nb:
+        print("i * i :", i * i)
+        print("nb % i :", nb % i)
+        print("nb % (i + 2) :", nb % (i + 2))
         if nb % i == 0 or nb % (i + 2) == 0:
             return False
         i = i + 6

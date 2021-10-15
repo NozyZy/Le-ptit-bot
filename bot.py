@@ -1035,9 +1035,9 @@ async def prime(ctx, nb: int):
         await ctx.send("Tu sais ce que ca veut dire 'prime number' ?")
         print("A demandé de calculer un nombre premier sen dessous de 2")
         return
-    if nbprime > 3:
+    if nbprime > 2:
         await ctx.send("Attends quelques instants stp, je suis occupé...")
-        print("A demandé trop de prime")
+        print("A demandé trop de prime ->", nbprime)
         return
     nbprime += 1
     Fprime = open("txt/primes.txt", "r+")
@@ -1060,7 +1060,7 @@ async def prime(ctx, nb: int):
             Fprime = open("txt/primes.txt", "a+")
             Fprime.write(text)
             Fprime.close()
-            nbprime -= 1
+
             if nb > 14064991:  # 8Mb file limit
                 text = f"Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
                 await ctx.send(text)
@@ -1071,6 +1071,7 @@ async def prime(ctx, nb: int):
         text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
         await ctx.send(text,
                        file=discord.File("txt/prime.txt"))
+    nbprime -= 1
     print(f"A demandé de claculer tous les nombres premiers juqu'à {nb}")
 
 
@@ -1921,5 +1922,38 @@ async def myRank(ctx):
 async def github(ctx):
     await ctx.send("Mais avec plaisir !\nhttps://github.com/NozyZy/Le-ptit-bot")
 
+
+@bot.command()
+async def ask(ctx, *text):
+    text = "".join(text)
+
+    if text == "":
+        await ctx.send("Pose une question andouille")
+        return
+
+    if len(text) < 4:
+        await ctx.send("Je vais avoir du mal à te répondre là 🤔")
+        return
+
+    if text[len(text) - 1] != "?":
+        await ctx.send("C'est pas une question ça tu sais ?")
+        return
+
+    counter = 0
+    for letter in text:
+        counter += ord(letter)
+
+    counter += ctx.author.id
+
+    responses = ["Bah oui",
+                 "Qui sait ? 👀",
+                 "Absolument pas. Non. Jamais.",
+                 "Demande à ta mère",
+                 "Bientôt, tkt frr",
+                 "https://tenor.com/view/well-yes-but-actually-no-well-yes-no-yes-yes-no-gif-13736934",
+                 "Peut-être bien écoute",
+                 "Carrément ma poule"]
+
+    await ctx.send(responses[counter % len(responses)])
 
 bot.run(secret.TOKEN)
