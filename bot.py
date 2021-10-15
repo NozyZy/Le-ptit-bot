@@ -1,5 +1,8 @@
 import asyncio
 import time
+
+from discord.ext.commands import UnexpectedQuoteError
+
 import secret
 import discord
 import googletrans
@@ -168,6 +171,9 @@ async def on_message(message):
     if "<@!653563141002756106>" in MESSAGE:
         print(f">>({user.name} {time.asctime()}) - A ping le bot")
         user = str(message.author.nick)
+        if user == "None":
+            user = message.author.name
+
         rep = [
             "ya quoi ?!",
             "Qu'est ce que tu as " + user + " ?",
@@ -1924,8 +1930,11 @@ async def github(ctx):
 
 
 @bot.command()
-async def ask(ctx, *text):
-    text = "".join(text)
+async def ask(ctx):
+
+    text = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "")
+    text.replace("’", "")
+    print(f">>({ctx.author.name} {time.asctime()}) - A demandé '{text}' - {ctx.guild.name} : ", end="")
 
     if text == "":
         await ctx.send("Pose une question andouille")
@@ -1955,5 +1964,6 @@ async def ask(ctx, *text):
                  "Carrément ma poule"]
 
     await ctx.send(responses[counter % len(responses)])
+    print(responses[counter % len(responses)])
 
 bot.run(secret.TOKEN)
