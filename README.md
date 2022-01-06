@@ -40,5 +40,9 @@ if Message.startswith('quoi'):
 - Be creative, and do be affraid to add things in english, even if it's firstly programed for french users, mixity is good !
 3. When you're done, make a pull request to the `dev_improve` branch of my repository, and hope I'll accept your changes (I'm sure you'll do good stuff that I'll approve !)
 
+# Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/23ce08364d0ca8426839d99f6e17ddb66e7381ee.svg "Repobeats analytics image")
+
 ENJOY
 ============
