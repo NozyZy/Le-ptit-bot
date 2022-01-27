@@ -15,10 +15,10 @@ It is open to everyone, to use and modify it.
 
 At this time, using:
 
- - **python 3.9.2**
- - **pip 21.0.1**
- - **discord.py 1.5.1**
- - **youtube-dl 2021.3.14**
+ - **python 3.10.2**
+ - **pip 21.3.1**
+ - **discord.py 1.7.3**
+ - **youtube-dl 2021.6.6**
 
 1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
 	- All the packages should be in the `venv/Scripts` folder, but if not, thy are quoted above
