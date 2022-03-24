@@ -648,7 +648,8 @@ async def on_message(message):
                 ["https://tse1.mm.bing.net/th?id=OIP.M6A5OIYcaUO5UUrUjVRn5wHaNK&pid=Api", "Arceus"],
                 ["https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api", "Anubis"],
                 ["https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api", "Tezcatlipoca"],
-                ["https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api", "Venus"]
+                ["https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api", "Venus"],
+		["https://c.tenor.com/nMkmGwGH8s8AAAAd/elon-musk-smoke.gif","Elon Musk"]
             ]
             embed = discord.Embed(
                 title="This is God",
@@ -1059,7 +1060,8 @@ async def prime(ctx, nb: int):
         if biggest % 2 == 0:
             biggest -= 1
         if nb <= n_max:
-            await ctx.send("Donne moi quelques minutes bro...")
+            await ctx.send("Primo no")
+            return
             for i in range(biggest, nb + 1, 2):
                 if await is_prime(i):
                     text += str(i) + "\n"
