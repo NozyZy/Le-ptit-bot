@@ -1,19 +1,16 @@
 import asyncio
 import time
+from datetime import date
 
-from discord.ext.commands import UnexpectedQuoteError
-
-import secret
 import discord
 import googletrans
+import secret
 import youtube_dl
-
-from datetime import date
 from discord.ext import commands
+from discord.ext.commands import UnexpectedQuoteError
 from googletrans import Translator
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+from PIL import Image, ImageDraw, ImageFont
+
 from fonctions import *
 
 # ID : 653563141002756106
