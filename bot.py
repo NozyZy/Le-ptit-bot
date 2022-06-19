@@ -611,6 +611,10 @@ async def on_message(message):
         if ("quentin" in MESSAGE or "quent1" in MESSAGE) and rdnb >= 4:
             print(f">>({user.name} {time.asctime()}) - A parlé de mon maitre")
             await channel.send("Papa ! 🤗")
+            
+        if MESSAGE == "chaud" or MESSAGE == "cho":
+            print(f">>({user.name} {time.asctime()}) - A dit chaud")
+            await channel.send("Cacao !")
 
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
