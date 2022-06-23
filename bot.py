@@ -683,6 +683,22 @@ async def on_message(message):
                     "https://c.tenor.com/nMkmGwGH8s8AAAAd/elon-musk-smoke.gif",
                     "Elon Musk",
                 ],
+                [
+                    "https://www.writersandy.com/uploads/1/2/5/4/12545559/published/goddess-inanna2.jpg?1524448024",
+                    "Ishtar",
+                ],
+                [
+                    "https://1.bp.blogspot.com/-J6h4vRgHTEg/WDkQztXD12I/AAAAAAAANRY/TeAWIz6L3_kBZr86cTWS4YVHYoCXCmx3gCLcB/s1600/Karna-Vimanika-Comics.jpg",
+                    "Karna",
+                ],
+                [
+                    "https://i.pinimg.com/originals/32/d6/55/32d6553b6a36d8872734998af9312c71.jpg",
+                    "Brynhild",
+                ],
+                [
+                    "https://i.pinimg.com/originals/f3/d7/6a/f3d76ad179d4f4242002e54e990a5e2c.jpg",
+                    "Quirinus",
+                ],
             ]
             embed = discord.Embed(
                 title="This is God",
