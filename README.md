@@ -23,7 +23,7 @@ At this time, using:
 1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
 	- All the packages should be in the `venv/Scripts` folder, but if not, thy are quoted above
 2. Make your changes, here are the things you need to know. 
- 	- The main file is `bot.py`, where every commands and reaction are, you can use and add funstions in `functions.py`
+ 	- The main file is `bot.py`, where every commands and reaction are, you can use and add functions in `functions.py`
  	- in the `on_message(message)` function :
  				- `channel` is thje variable of the channel, use `await channel.send(text)` to send message containing `text`
  				- `Message` is the variable where the content of the message sent is stocked, but in lowercase. Use `message.content` if you want to match the case.
