@@ -722,7 +722,7 @@ async def on_message(message):
                 [
                     "https://i.skyrock.net/1396/90561396/pics/3267570630_1_14_d06m9MtY.jpg",
                     "Izanami",
-                ]
+                ],
             ]
             embed = discord.Embed(
                 title="This is God",
