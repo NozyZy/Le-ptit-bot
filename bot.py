@@ -707,7 +707,7 @@ async def on_message(message):
                     "https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg",
                     "Quetzacoalt",
                 ],
-                [ 
+                [
                     "https://static.wikia.nocookie.net/gods_and_demons/images/d/d6/D317f73591e2565cc5617fc7d8f2c630.jpg",
                     "Hades",
                 ],
@@ -740,8 +740,7 @@ async def on_message(message):
             embed.set_author(
                 name="Le p'tit god",
                 url="https://github.com/NozyZy/Le-ptit-bot",
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
             )
             embed.set_image(url=god[0])
             embed.set_footer(text=god[1])
@@ -1247,8 +1246,7 @@ def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(
             song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         ))
 
     def next(_):
@@ -1594,8 +1592,7 @@ async def amongus(ctx):
                 embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**",
                                       color=random.choice(color))
                 embed.set_thumbnail(
-                    url=
-                    "https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
                 )
 
                 for user in playersID[i]:
