@@ -684,10 +684,6 @@ async def on_message(message):
                     "Ishtar",
                 ],
                 [
-                    "https://www.mygodpictures.com/wp-content/uploads/2015/07/Arjuna.jpg",
-                    "Arjuna",
-                ],
-                [
                     "https://1.bp.blogspot.com/-J6h4vRgHTEg/WDkQztXD12I/AAAAAAAANRY/TeAWIz6L3_kBZr86cTWS4YVHYoCXCmx3gCLcB/s1600/Karna-Vimanika-Comics.jpg",
                     "Karna",
                 ],
@@ -698,10 +694,6 @@ async def on_message(message):
                 [
                     "https://i.pinimg.com/originals/f3/d7/6a/f3d76ad179d4f4242002e54e990a5e2c.jpg",
                     "Quirinus",
-                ],
-                [
-                    "https://i.pinimg.com/originals/cf/44/7d/cf447d2d567a20a043bd31d0e9784d79.jpg",
-                    "Kama",
                 ],
             ]
             embed = discord.Embed(
