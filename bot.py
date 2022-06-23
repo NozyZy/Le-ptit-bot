@@ -699,6 +699,30 @@ async def on_message(message):
                     "https://i.pinimg.com/originals/f3/d7/6a/f3d76ad179d4f4242002e54e990a5e2c.jpg",
                     "Quirinus",
                 ],
+                [
+                    "https://i.redd.it/7q9as4hojtd61.jpg",
+                    "Apollo (Supreme god)",
+                ],
+                [
+                    "https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg",
+                    "Quetzacoalt",
+                ],
+                [ 
+                    "https://static.wikia.nocookie.net/gods_and_demons/images/d/d6/D317f73591e2565cc5617fc7d8f2c630.jpg",
+                    "Hades",
+                ],
+                [
+                    "https://i.pinimg.com/564x/8a/80/04/8a80043fcb5da678a16e33b0183da0d8.jpg",
+                    "Ereshkigal",
+                ],
+                [
+                    "https://static.wikia.nocookie.net/gods_and_demons/images/2/26/Indra_god_of_thunder_lv2_by_diegogisbertllorens_d80c2rq-fullview.jpg",
+                    "Indra",
+                ],
+                [
+                    "https://i.skyrock.net/1396/90561396/pics/3267570630_1_14_d06m9MtY.jpg",
+                    "Izanami",
+                ]
             ]
             embed = discord.Embed(
                 title="This is God",
