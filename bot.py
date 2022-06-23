@@ -612,6 +612,10 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - A parlé de mon maitre")
             await channel.send("Papa ! 🤗")
 
+        if MESSAGE == "chaud" or MESSAGE == "cho":
+            print(f">>({user.name} {time.asctime()}) - A dit chaud")
+            await channel.send("Cacao !")
+
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
             day = today.strftime("%d")
