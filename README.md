@@ -15,10 +15,10 @@ It is open to everyone, to use and modify it.
 
 At this time, using:
 
- - **python 3.9.0**
- - **pip 20.2.4**
- - **discord.py 1.5.1**
- - **youtube-dl 2020.11.1.1**
+ - **python 3.10.2**
+ - **pip 21.3.1**
+ - **discord.py 1.7.3**
+ - **youtube-dl 2021.6.6**
 
 1. Clone/Fork this repository <img src="https://github-images.s3.amazonaws.com/help/bootcamp/Bootcamp-Fork.png" alt="fork" width="300"/>
 	- All the packages should be in the `venv/Scripts` folder, but if not, thy are quoted above
@@ -39,6 +39,10 @@ if Message.startswith('quoi'):
 	Then, use `@bot.command()` to begin a new command, next line has to be `async def command_name(ctx, other_parameters):`, and then the command call will be the prexif, past top 	the 	name (so here it'll be `--command_name`)
 - Be creative, and do be affraid to add things in english, even if it's firstly programed for french users, mixity is good !
 3. When you're done, make a pull request to the `dev_improve` branch of my repository, and hope I'll accept your changes (I'm sure you'll do good stuff that I'll approve !)
+
+# Stats
+
+![Alt](https://repobeats.axiom.co/api/embed/23ce08364d0ca8426839d99f6e17ddb66e7381ee.svg "Repobeats analytics image")
 
 ENJOY
 ============
