@@ -19,9 +19,9 @@ from fonctions import *
 intents = discord.Intents.default()
 intents.members = True
 client = discord.Client()
-bot = commands.Bot(command_prefix="--",
-                   description="Le p'tit bot !",
-                   case_insensitive=True)
+bot = commands.Bot(
+    command_prefix="--", description="Le p'tit bot !", case_insensitive=True
+)
 tgFile = open("txt/tg.txt", "r+")
 nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
@@ -62,8 +62,9 @@ async def on_message(message):
     if message.author == bot.user:  # we don't want the bot to repeat itself
         return
 
-    if (str(channel.id) +
-            "\n") in bansLines:  # option to ban reactions from some channels
+    if (
+        str(channel.id) + "\n"
+    ) in bansLines:  # option to ban reactions from some channels
         await bot.process_commands(message)
         return
 
@@ -95,8 +96,7 @@ async def on_message(message):
                 if verifAlphabet(mot) and 0 < len(mot) < 27:
                     mot += "\n"
                     if mot not in dicoLines:
-                        print(
-                            f">>({user.name} {time.asctime()}) - nouveau mot : {mot}")
+                        print(f">>({user.name} {time.asctime()}) - nouveau mot : {mot}")
                         dicoLines.append(mot)
                 mot = ""
 
@@ -210,8 +210,7 @@ async def on_message(message):
 
     # send the number of words stocked in the dico
     if MESSAGE == "--dico":
-        print(
-            f">>({user.name} {time.asctime()}) - A compter le nombe de mots du dico")
+        print(f">>({user.name} {time.asctime()}) - A compter le nombe de mots du dico")
         text = f"J'ai actuellement {str(len(dicoLines))} mots enregistrés, nickel"
         await channel.send(text)
 
@@ -226,9 +225,14 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - A balancé la table")
             await channel.send("┬─┬ ノ( ゜-゜ノ)")
 
-        if (MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez") or MESSAGE.startswith("savez vous")
-            or MESSAGE.startswith("savez-vous") or MESSAGE.startswith("savais-tu") or MESSAGE.startswith("savais tu")) \
-                and rdnb > 3:
+        if (
+            MESSAGE.startswith("tu sais")
+            or MESSAGE.startswith("vous savez")
+            or MESSAGE.startswith("savez vous")
+            or MESSAGE.startswith("savez-vous")
+            or MESSAGE.startswith("savais-tu")
+            or MESSAGE.startswith("savais tu")
+        ) and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A demandé si on savait")
             reponses = [
                 "J'en ai vraiment rien à faire tu sais ?",
@@ -242,12 +246,7 @@ async def on_message(message):
 
         if MESSAGE == "pas mal" and rdnb > 2:
             print(f">>({user.name} {time.asctime()}) - A trouvé ca pas mal")
-            reponses = [
-                "mouais",
-                "peut mieux faire",
-                "woaw",
-                ":o"
-            ]
+            reponses = ["mouais", "peut mieux faire", "woaw", ":o"]
             await channel.send(random.choice(reponses))
 
         if (MESSAGE == "ez" or MESSAGE == "easy") and rdnb >= 3:
@@ -256,7 +255,7 @@ async def on_message(message):
                 "https://tenor.com/view/walking-dead-easy-easy-peasy-lemon-squeazy-gif-7268918",
                 "https://tenor.com/view/pewds-pewdiepie-easy-ez-gif-9475407",
                 "https://tenor.com/view/easy-red-easy-button-red-button-gif-4642542",
-                "https://tenor.com/view/simple-easy-easy-game-easy-life-deal-with-it-gif-9276124"
+                "https://tenor.com/view/simple-easy-easy-game-easy-life-deal-with-it-gif-9276124",
             ]
             await channel.send(random.choice(reponses))
 
@@ -271,16 +270,20 @@ async def on_message(message):
             "chibre",
         ]:
             print(f">>({user.name} {time.asctime()}) - A parlé de bite")
-            text = "8" + "=" * random.randint(0, int(
-                today.strftime("%d"))) + "D"
+            text = "8" + "=" * random.randint(0, int(today.strftime("%d"))) + "D"
             await channel.send(text)
 
-        if MESSAGE.startswith("stop") or MESSAGE.startswith("arrête") or MESSAGE.startswith("arrete") and rdnb > 3:
+        if (
+            MESSAGE.startswith("stop")
+            or MESSAGE.startswith("arrête")
+            or MESSAGE.startswith("arrete")
+            and rdnb > 3
+        ):
             print(f">>({user.name} {time.asctime()}) - A demandé d'arrêter")
             reponses = [
                 "https://tenor.com/view/daddys-home2-daddys-home2gifs-stop-it-stop-that-i-mean-it-gif-9694318",
                 "https://tenor.com/view/stop-sign-when-you-catch-feelings-note-to-self-stop-now-gif-4850841",
-                "https://tenor.com/view/stop-it-get-some-help-gif-7929301"
+                "https://tenor.com/view/stop-it-get-some-help-gif-7929301",
             ]
             await channel.send(random.choice(reponses))
 
@@ -307,8 +310,7 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE in ["toi-même", "toi-meme", "toi même", "toi meme"]:
-            print(
-                f">>({user.name} {time.asctime()}) - A sorti sa meilleure répartie")
+            print(f">>({user.name} {time.asctime()}) - A sorti sa meilleure répartie")
             reponses = [
                 "Je ne vous permet pas",
                 "Miroir magique",
@@ -333,18 +335,16 @@ async def on_message(message):
 
         if (MESSAGE.startswith("hein") or MESSAGE.startswith("1")) and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A commencé par 1", end="")
-            reponses = [
-                "deux",
-                "2",
-                "deux ?",
-                "2 😏"
-            ]
+            reponses = ["deux", "2", "deux ?", "2 😏"]
             await channel.send(random.choice(reponses))
 
             # waits for a message valiudating further instructions
             def check(m):
-                return ("3" in m.content or "trois" in m.content) and m.channel == message.channel and not m.startswith(
-                    "http")
+                return (
+                    ("3" in m.content or "trois" in m.content)
+                    and m.channel == message.channel
+                    and not m.startswith("http")
+                )
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
@@ -374,8 +374,7 @@ async def on_message(message):
                 await message.add_reaction("☹")
                 print(f">>({user.name} {time.asctime()}) - A pas continué par b")
             else:
-                print(
-                    f">>({user.name} {time.asctime()}) - A connait son alphabet")
+                print(f">>({user.name} {time.asctime()}) - A connait son alphabet")
                 await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
         if MESSAGE == "ah" and rdnb > 3:
@@ -392,12 +391,13 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - ", end="")
             if rdnb >= 4:
                 print("S'est fait répondre (oh)")
-                reponses = ["Quoi ?",
-                            "p",
-                            "ah",
-                            ":o",
-                            "https://thumbs.gfycat.com/AptGrouchyAmericanquarterhorse-size_restricted.gif"
-                            ]
+                reponses = [
+                    "Quoi ?",
+                    "p",
+                    "ah",
+                    ":o",
+                    "https://thumbs.gfycat.com/AptGrouchyAmericanquarterhorse-size_restricted.gif",
+                ]
                 await channel.send(random.choice(reponses))
             else:
                 print("S'est fait répondre par le dico (oh)")
@@ -455,14 +455,7 @@ async def on_message(message):
 
         if MESSAGE.startswith("quoi") and rdnb > 2:
             print(f">>({user.name} {time.asctime()}) - A demandé quoi")
-            reponses = [
-                "feur",
-                "hein ?",
-                "nan laisse",
-                "oublie",
-                "rien",
-                "😯"
-            ]
+            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯"]
 
             await channel.send(random.choice(reponses))
 
@@ -476,16 +469,11 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if (MESSAGE in [
-
-            "facepalm",
-            "damn",
-            "fait chier",
-            "fais chier",
-            "ptn",
-            "putain"]
-            or MESSAGE.startswith("pff") or MESSAGE.startswith("no..")) \
-                and rdnb > 3:
+        if (
+            MESSAGE in ["facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"]
+            or MESSAGE.startswith("pff")
+            or MESSAGE.startswith("no..")
+        ) and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A gifé Conteville")
 
             await channel.send(
@@ -502,12 +490,13 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if (MESSAGE.startswith("ah ouais") or MESSAGE.startswith("ah bon")) and rdnb > 3:
+        if (
+            MESSAGE.startswith("ah ouais") or MESSAGE.startswith("ah bon")
+        ) and rdnb > 3:
             print(
-                f">>({user.name} {time.asctime()}) - S'est intérrogé de la véracité du dernier propos")
-            reponses = [
-                "Ouais gros", "Nan ptdr", "Je sais pas écoute...", "tg"
-            ]
+                f">>({user.name} {time.asctime()}) - S'est intérrogé de la véracité du dernier propos"
+            )
+            reponses = ["Ouais gros", "Nan ptdr", "Je sais pas écoute...", "tg"]
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("au pied") and message.author.id == 359743894042443776:
@@ -529,28 +518,29 @@ async def on_message(message):
 
             MESSAGE = " " + MESSAGE + " "
             for i in range(len(MESSAGE) - 3):
-                if (MESSAGE[i] == " " and MESSAGE[i + 1] == "t"
-                        and MESSAGE[i + 2] == "g" and MESSAGE[i + 3] == " "):
+                if (
+                    MESSAGE[i] == " "
+                    and MESSAGE[i + 1] == "t"
+                    and MESSAGE[i + 2] == "g"
+                    and MESSAGE[i + 3] == " "
+                ):
                     nbtg += 1
                     tgFile = open("txt/tg.txt", "w+")
                     tgFile.write(str(nbtg))
                     tgFile.close()
                     activity = f"insulter {nbtg} personnes"
-                    await bot.change_presence(activity=discord.Game(
-                        name=activity))
+                    await bot.change_presence(activity=discord.Game(name=activity))
                     await channel.send(random.choice(insultes))
                     if rdnb >= 4:
-                        await message.add_reaction('🇹')
-                        await message.add_reaction('🇬')
+                        await message.add_reaction("🇹")
+                        await message.add_reaction("🇬")
                     print(f">>({user.name} {time.asctime()}) - A insulté")
                     return
 
         if MESSAGE == "cheh" or MESSAGE == "sheh":
             print(f">>({user.name} {time.asctime()}) - A dit cheh")
             if rdnb >= 3:
-                reponses = [
-                    "Oh tu t'excuses", "Cheh", "C'est pas gentil ça", "🙁"
-                ]
+                reponses = ["Oh tu t'excuses", "Cheh", "C'est pas gentil ça", "🙁"]
                 await channel.send(random.choice(reponses))
             else:
                 await message.add_reaction("😉")
@@ -568,25 +558,18 @@ async def on_message(message):
 
         if MESSAGE.startswith("lequel") and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A demandé lequel")
-            reponses = [
-                "Le deuxième",
-                "Le prochain",
-                "Aucun"
-            ]
+            reponses = ["Le deuxième", "Le prochain", "Aucun"]
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("laquelle") and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A demandé laquelle")
-            reponses = [
-                "La deuxième",
-                "La prochaine",
-                "Aucune"
-            ]
+            reponses = ["La deuxième", "La prochaine", "Aucune"]
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("miroir magique"):
             print(
-                f">>({user.name} {time.asctime()}) - A sorti une répartie de maternelle")
+                f">>({user.name} {time.asctime()}) - A sorti une répartie de maternelle"
+            )
             await channel.send(MESSAGE)
 
         if MESSAGE.startswith("jure") and rdnb > 4:
@@ -608,8 +591,7 @@ async def on_message(message):
 
         if MESSAGE == "f" or MESSAGE == "rip":
             print(f">>({user.name} {time.asctime()}) - Payed respect")
-            await channel.send(
-                "#####\n#\n#\n####\n#\n#\n#       to pay respect")
+            await channel.send("#####\n#\n#\n####\n#\n#\n#       to pay respect")
 
         if ("quentin" in MESSAGE or "quent1" in MESSAGE) and rdnb >= 4:
             print(f">>({user.name} {time.asctime()}) - A parlé de mon maitre")
@@ -626,8 +608,11 @@ async def on_message(message):
             else:
                 i = 0
                 for i in range(len(MESSAGE)):
-                    if (MESSAGE[i] == "<" and MESSAGE[i + 1] == "@"
-                            and MESSAGE[i + 2] == "!"):
+                    if (
+                        MESSAGE[i] == "<"
+                        and MESSAGE[i + 1] == "@"
+                        and MESSAGE[i + 2] == "!"
+                    ):
                         i += 3
                         userID = ""
                         break
@@ -642,33 +627,66 @@ async def on_message(message):
             user = await message.guild.fetch_member(userID)
             pfp = user.avatar_url
             gods = [
-                ["https://tse4.mm.bing.net/th?id=OIP.IXAIL06o83HxXHGjKHqZMAHaKe&pid=Api", "Loki"],
-                ["https://www.wallpaperflare.com/static/810/148/1018/painting-vikings-odin-gungnir-wallpaper.jpg",
-                 "Odin"],
-                ["https://tse3.mm.bing.net/th?id=OIP.3NR2eZEBm46mrcFM_p14RgHaJ3&pid=Api", "Osiris"],
-                ["https://tse1.explicit.bing.net/th?id=OIP.KXfuA_jDa_cfDkrMInOMfQHaJq&pid=Api", "Shiva"],
-                ["https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api", "Poseidon"],
-                ["https://tse1.mm.bing.net/th?id=OIP.M6A5OIYcaUO5UUrUjVRn5wHaNK&pid=Api", "Arceus"],
-                ["https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api", "Anubis"],
-                ["https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api", "Tezcatlipoca"],
-                ["https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api", "Venus"],
-                ["https://c.tenor.com/nMkmGwGH8s8AAAAd/elon-musk-smoke.gif", "Elon Musk"]
+                [
+                    "https://tse4.mm.bing.net/th?id=OIP.IXAIL06o83HxXHGjKHqZMAHaKe&pid=Api",
+                    "Loki",
+                ],
+                [
+                    "https://www.wallpaperflare.com/static/810/148/1018/painting-vikings-odin-gungnir-wallpaper.jpg",
+                    "Odin",
+                ],
+                [
+                    "https://tse3.mm.bing.net/th?id=OIP.3NR2eZEBm46mrcFM_p14RgHaJ3&pid=Api",
+                    "Osiris",
+                ],
+                [
+                    "https://tse1.explicit.bing.net/th?id=OIP.KXfuA_jDa_cfDkrMInOMfQHaJq&pid=Api",
+                    "Shiva",
+                ],
+                [
+                    "https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api",
+                    "Poseidon",
+                ],
+                [
+                    "https://tse1.mm.bing.net/th?id=OIP.M6A5OIYcaUO5UUrUjVRn5wHaNK&pid=Api",
+                    "Arceus",
+                ],
+                [
+                    "https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api",
+                    "Anubis",
+                ],
+                [
+                    "https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api",
+                    "Tezcatlipoca",
+                ],
+                [
+                    "https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api",
+                    "Venus",
+                ],
+                [
+                    "https://c.tenor.com/nMkmGwGH8s8AAAAd/elon-musk-smoke.gif",
+                    "Elon Musk",
+                ],
             ]
             embed = discord.Embed(
                 title="This is God",
                 description="<@%s> is that god." % userID,
                 color=0xECCE8B,
-                url=random.choice([
-                    "https://media.giphy.com/media/USm8tJQzgDAAKJRKkk/giphy.gif",
-                    "https://media.giphy.com/media/ZArMUnViJtKaBH0XLg/giphy.gif",
-                    "https://tenor.com/view/bruce-almighty-morgan-freeman-i-am-god-hello-hey-gif-4743445"
-                ])
+                url=random.choice(
+                    [
+                        "https://media.giphy.com/media/USm8tJQzgDAAKJRKkk/giphy.gif",
+                        "https://media.giphy.com/media/ZArMUnViJtKaBH0XLg/giphy.gif",
+                        "https://tenor.com/view/bruce-almighty-morgan-freeman-i-am-god-hello-hey-gif-4743445",
+                    ]
+                ),
             )
-            god = gods[((userID // 365 + int(day) * 5) //
-                        int(month)) % len(gods)]
+            god = gods[((userID // 365 + int(day) * 5) // int(month)) % len(gods)]
             embed.set_thumbnail(url=pfp)
-            embed.set_author(name="Le p'tit god", url="https://github.com/NozyZy/Le-ptit-bot",
-                             icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png")
+            embed.set_author(
+                name="Le p'tit god",
+                url="https://github.com/NozyZy/Le-ptit-bot",
+                icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+            )
             embed.set_image(url=god[0])
             embed.set_footer(text=god[1])
             print("Est un dieu aujourd'hui : ", god[1])
@@ -680,7 +698,8 @@ async def on_message(message):
 
         if (MESSAGE == "enculé" or MESSAGE == "enculer") and rdnb > 3:
             print(
-                f">>({user.name} {time.asctime()}) - A demander d'aller se faire enculer")
+                f">>({user.name} {time.asctime()}) - A demander d'aller se faire enculer"
+            )
             image = ["images/tellermeme.png", "images/bigard.jpeg"]
             await channel.send(file=discord.File(random.choice(image)))
 
@@ -716,14 +735,20 @@ async def on_message(message):
 
         if (MESSAGE == "ouh" or MESSAGE == "oh.") and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - 'OUH.', by Velikson")
-            await channel.send("https://thumbs.gfycat.com/AptGrouchyAmericanquarterhorse-size_restricted.gif")
+            await channel.send(
+                "https://thumbs.gfycat.com/AptGrouchyAmericanquarterhorse-size_restricted.gif"
+            )
 
         if "pd" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - A parlé de pd")
             MESSAGE = " " + MESSAGE + " "
             for i in range(len(MESSAGE) - 3):
-                if (MESSAGE[i] == " " and MESSAGE[i + 1] == "p"
-                        and MESSAGE[i + 2] == "d" and MESSAGE[i + 3] == " "):
+                if (
+                    MESSAGE[i] == " "
+                    and MESSAGE[i + 1] == "p"
+                    and MESSAGE[i + 2] == "d"
+                    and MESSAGE[i + 3] == " "
+                ):
                     await channel.send(file=discord.File("images/pd.jpg"))
 
         if "oof" in MESSAGE and rdnb >= 3:
@@ -780,7 +805,8 @@ async def on_message(message):
 @bot.command()  # delete 'nombre' messages
 async def clear(ctx, nombre: int):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}"
+    )
     messages = await ctx.channel.history(limit=nombre + 1).flatten()
     for message in messages:
         await message.delete()
@@ -788,7 +814,9 @@ async def clear(ctx, nombre: int):
 
 @bot.command()  # repeat the 'text', and delete the original message
 async def repeat(ctx, *text):
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé de répéter {' '.join(text)} messages")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé de répéter {' '.join(text)} messages"
+    )
     messages = await ctx.channel.history(limit=1).flatten()
     for message in messages:
         await message.delete()
@@ -801,7 +829,8 @@ async def serverinfo(ctx):
     nbUsers = server.member_count
     text = f"Le serveur **{server.name}** contient **{nbUsers}** personnes !"
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé les infos du serveur {server.name}")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé les infos du serveur {server.name}"
+    )
     await ctx.send(text)
 
 
@@ -811,7 +840,9 @@ async def crypt(ctx, *text):
     messages = await ctx.channel.history(limit=1).flatten()
     for message in messages:
         await message.delete()
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé de crypter {mot} en {crypting(mot)}")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé de crypter {mot} en {crypting(mot)}"
+    )
     await ctx.send(f"||{mot}|| :\n" + crypting(mot))
 
 
@@ -884,8 +915,7 @@ async def game(ctx):
         await ctx.send(text)
 
 
-@bot.command(
-)  # do a simple calcul of 2 numbers and 1 operator (or a fractionnal)
+@bot.command()  # do a simple calcul of 2 numbers and 1 operator (or a fractionnal)
 async def calcul(ctx, *text):
     print(f">>({ctx.author.name} {time.asctime()}) - ", end="")
     tab = []
@@ -955,15 +985,14 @@ async def calcul(ctx, *text):
             return
         rd = float(nb1 / nb2)
     elif symb == "^":
-        rd = nb1 ** nb2
+        rd = nb1**nb2
     text = str(nb1) + str(symb) + str(nb2) + "=" + str(rd)
     print(text)
     print(f"A demandé de calculer {text}")
     await ctx.send(text)
 
 
-@bot.command(
-)  # create a reaction poll with a question, and max 10 propositions
+@bot.command()  # create a reaction poll with a question, and max 10 propositions
 async def poll(ctx, *text):
     print(f">>({ctx.author.name} {time.asctime()}) - ", end="")
     tab = []
@@ -985,8 +1014,7 @@ async def poll(ctx, *text):
         print("A demandé un poll sans choix")
         return
     if len(tab) > 11:
-        await ctx.send("Ca commence à faire beaucoup non ?... 10 max ca suffit"
-                       )
+        await ctx.send("Ca commence à faire beaucoup non ?... 10 max ca suffit")
         print("A demandé un poll e plus de 10 choix")
         return
     text = ""
@@ -1041,8 +1069,7 @@ async def poll(ctx, *text):
             await reponse.add_reaction("🔟")
 
 
-@bot.command(
-)  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
+@bot.command()  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
 async def prime(ctx, nb: int):
     global nbprime
     print(f">>({ctx.author.name} {time.asctime()}) - ", end="")
@@ -1085,8 +1112,7 @@ async def prime(ctx, nb: int):
             await ctx.send(text)
     else:
         text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
-        await ctx.send(text,
-                       file=discord.File("txt/prime.txt"))
+        await ctx.send(text, file=discord.File("txt/prime.txt"))
     nbprime -= 1
     print(f"A demandé de claculer tous les nombres premiers juqu'à {nb}")
 
@@ -1094,7 +1120,9 @@ async def prime(ctx, nb: int):
 @bot.command()  # find if 'nb' is a prime number, reacts to the message
 async def isPrime(ctx, nb: int):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé si {nb} est premier : ", end="")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé si {nb} est premier : ",
+        end="",
+    )
     if nb > 99999997979797979797979777797:
         await ctx.send("C'est trop gros, ca va tout casser, demande à papa Google :D")
         print("too big")
@@ -1108,7 +1136,10 @@ async def isPrime(ctx, nb: int):
 
 @bot.command()  # send 'nb' random words of the dico, can repeat itself
 async def randomWord(ctx, nb: int):
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé {nb} mots aléatoires dans le dico : ", end="")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé {nb} mots aléatoires dans le dico : ",
+        end="",
+    )
     dicoFile = open("txt/dico.txt", "r+")
     dicoLines = dicoFile.readlines()
     dicoFile.close()
@@ -1129,14 +1160,16 @@ async def randomWord(ctx, nb: int):
 async def join(ctx):
     channel = ctx.author.voice.channel
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé que je rejoigne le vocal {channel} du serveur {ctx.guild.name}")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé que je rejoigne le vocal {channel} du serveur {ctx.guild.name}"
+    )
     await channel.connect()
 
 
 @bot.command()  # leaves it
 async def leave(ctx):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé que je quitte le vocal {ctx.author.voice.channel} du serveur {ctx.guild.name}")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé que je quitte le vocal {ctx.author.voice.channel} du serveur {ctx.guild.name}"
+    )
     await ctx.voice_client.disconnect()
 
 
@@ -1159,7 +1192,8 @@ def playSong(clt, queue, song):
         discord.FFmpegPCMAudio(
             song.stream_url,
             before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        ))
+        )
+    )
 
     def next(_):
         if len(queue) > 0:
@@ -1198,22 +1232,28 @@ async def translate(ctx, *text):
     fromLang = text[1].replace(" ", "")
     toLang = text[2].replace(" ", "")
     try:
-        textTranslated = translator.translate(toTranslate,
-                                              src=fromLang,
-                                              dest=toLang)
-        text = (toTranslate + " (" + textTranslated.src + ") -> " +
-                textTranslated.text + " (" + textTranslated.dest + ")")
+        textTranslated = translator.translate(toTranslate, src=fromLang, dest=toLang)
+        text = (
+            toTranslate
+            + " ("
+            + textTranslated.src
+            + ") -> "
+            + textTranslated.text
+            + " ("
+            + textTranslated.dest
+            + ")"
+        )
     except:
         text = "Nope, sorry !"
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé que je traduise {toTranslate} en {fromLang} vers {toLang} : {text}")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé que je traduise {toTranslate} en {fromLang} vers {toLang} : {text}"
+    )
     await ctx.send(text)
 
 
 @bot.command()
 async def master(ctx, *text):
-    print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé un meme master ", end="")
+    print(f">>({ctx.author.name} {time.asctime()}) - A demandé un meme master ", end="")
     text = " ".join(text)
     if not len(text) or text.count(",") != 2:
         text = ["add 3", "f*cking terms", "splited by ,"]
@@ -1264,7 +1304,9 @@ async def master(ctx, *text):
 @bot.command()
 async def presentation(ctx, *base):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé un meme presentation ", end="")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé un meme presentation ",
+        end="",
+    )
     base = " ".join(base)
     if not len(base):
         base = "add something dude"
@@ -1305,7 +1347,8 @@ async def presentation(ctx, *base):
 async def ban(ctx):
     print(
         f">>({ctx.author.name} {time.asctime()}) - A demandé de me bannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
-        end="")
+        end="",
+    )
     if not ctx.author.guild_permissions.administrator:
         await ctx.send("T'es pas admin, nananananère 😜")
         print("mais n'a pas les droits")
@@ -1321,7 +1364,9 @@ async def ban(ctx):
         bansFile = open("txt/bans.txt", "a+")
         bansFile.write(chanID)
         bansFile.close()
-        await ctx.send("D'accord, j'arrete de vous embeter ici... mais les commandes sont toujours dispos")
+        await ctx.send(
+            "D'accord, j'arrete de vous embeter ici... mais les commandes sont toujours dispos"
+        )
         print("et je suis ban")
 
 
@@ -1329,7 +1374,8 @@ async def ban(ctx):
 async def unban(ctx):
     print(
         f">>({ctx.author.name} {time.asctime()}) - A demandé de me débannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
-        end="")
+        end="",
+    )
     if not ctx.author.guild_permissions.administrator:
         await ctx.send("T'es pas admin, nananananère 😜")
         print("mais n'a pas les droits")
@@ -1358,7 +1404,9 @@ async def unban(ctx):
 
 @bot.command()
 async def invite(ctx):
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé une invitation dans le serveur {ctx.guild.name}")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé une invitation dans le serveur {ctx.guild.name}"
+    )
     await ctx.send(
         "Invitez-moi 🥵 !\n"
         "https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8"
@@ -1376,7 +1424,8 @@ async def say(ctx, number, *text):
 @bot.command()  # PERSONAL USE ONLY
 async def amongus(ctx):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé une game Among Us {ctx.guild.name}")
+        f">>({ctx.author.name} {time.asctime()}) - A demandé une game Among Us {ctx.guild.name}"
+    )
 
     def equal_games(liste):
         # Il vaut mieux que la liste soit déjà mélangée, mais on peut le faire ici aussi.
@@ -1433,7 +1482,9 @@ async def amongus(ctx):
         message = "Réagis avec ✅ pour jouer !"
         totalTime = 60
         timeLeft = totalTime
-        firstMessage = await ctx.send(f"Réagis avec ✅ pour jouer ! Il reste {timeLeft} sec")
+        firstMessage = await ctx.send(
+            f"Réagis avec ✅ pour jouer ! Il reste {timeLeft} sec"
+        )
 
         yes = "✅"
 
@@ -1445,8 +1496,7 @@ async def amongus(ctx):
             await firstMessage.edit(content=message + f" Il reste {str(timeLeft)} sec")
         await firstMessage.edit(content="Inscriptions fermées !")
 
-        firstMessage = await firstMessage.channel.fetch_message(firstMessage.id
-                                                                )
+        firstMessage = await firstMessage.channel.fetch_message(firstMessage.id)
         users = set()
         for reaction in firstMessage.reactions:
 
@@ -1487,35 +1537,39 @@ async def amongus(ctx):
             await ctx.send(text)
             for i in range(len(playersID)):
                 y = 0
-                embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**",
-                                      color=random.choice(color))
+                embed = discord.Embed(
+                    title=f"**Equipe n°{str(i + 1)}**", color=random.choice(color)
+                )
                 embed.set_thumbnail(
-
-                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api")
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
+                )
 
                 for user in playersID[i]:
                     y += 1
-                    embed.add_field(name=f"Joueur {str(y)}",
-                                    value=f"<@!{str(user)}>",
-                                    inline=True)
+                    embed.add_field(
+                        name=f"Joueur {str(y)}", value=f"<@!{str(user)}>", inline=True
+                    )
                 await ctx.send(embed=embed)
             await ctx.send("**NEXT** pour relancer\n**END** poure terminer")
 
         def check(m):
-            id_list = [321216514986606592, 359743894042443776,
-                       135784465065574401, 349548485797871617]
-            return (m.content == "NEXT" or m.content == "END") and m.channel == ctx.channel and m.author.id in id_list
+            id_list = [
+                321216514986606592,
+                359743894042443776,
+                135784465065574401,
+                349548485797871617,
+            ]
+            return (
+                (m.content == "NEXT" or m.content == "END")
+                and m.channel == ctx.channel
+                and m.author.id in id_list
+            )
 
         try:
             if len(ids) == 0:
-                msg = await bot.wait_for('message',
-                                         timeout=60.0,
-                                         check=check)
+                msg = await bot.wait_for("message", timeout=60.0, check=check)
             else:
-                msg = await bot.wait_for('message',
-
-                                         timeout=3600.0,
-                                         check=check)
+                msg = await bot.wait_for("message", timeout=3600.0, check=check)
             if msg.content == "END":
                 await ctx.send("**Fin de la partie...**")
                 break
@@ -1523,12 +1577,15 @@ async def amongus(ctx):
             await ctx.send("**Fin de la partie...**")
             break
     print(
-        f">>({ctx.author.name} {time.asctime()}) - La game Among Us a prit fin {ctx.guild.name}")
+        f">>({ctx.author.name} {time.asctime()}) - La game Among Us a prit fin {ctx.guild.name}"
+    )
 
 
 @bot.command()
 async def puissance4(ctx):
-    print(f">>({ctx.author.name} {time.asctime()}) - A lancé une partie de puissance 4 {ctx.guild.name}")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A lancé une partie de puissance 4 {ctx.guild.name}"
+    )
     grid = [[0 for _ in range(7)] for _ in range(6)]
     """grid = [[0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
@@ -1572,11 +1629,13 @@ async def puissance4(ctx):
     async def checkWin(grid, tour):
         for row in range(len(grid) - 1, -1, -1):
             for col in range(0, len(grid[row])):
-                if await checkRight(grid, row, col, 0, tour) \
-                        or await checkLeft(grid, row, col, 0, tour) \
-                        or await checkUp(grid, row, col, 0, tour) \
-                        or await checkLeftDiag(grid, row, col, 0, tour) \
-                        or await checkRightDiag(grid, row, col, 0, tour):
+                if (
+                    await checkRight(grid, row, col, 0, tour)
+                    or await checkLeft(grid, row, col, 0, tour)
+                    or await checkUp(grid, row, col, 0, tour)
+                    or await checkLeftDiag(grid, row, col, 0, tour)
+                    or await checkRightDiag(grid, row, col, 0, tour)
+                ):
                     return True
         return False
 
@@ -1635,7 +1694,11 @@ async def puissance4(ctx):
     await yellowMessage.add_reaction("🟡")
 
     def check(reaction, user):
-        return user != bot.user and str(reaction.emoji) == "🟡" and reaction.message.id == yellowMessage.id
+        return (
+            user != bot.user
+            and str(reaction.emoji) == "🟡"
+            and reaction.message.id == yellowMessage.id
+        )
 
     try:
         reaction, user = await bot.wait_for("reaction_add", timeout=60.0, check=check)
@@ -1649,7 +1712,12 @@ async def puissance4(ctx):
     await redMessage.add_reaction("🔴")
 
     def check(reaction, user):
-        return user != bot.user and user != yellow and str(reaction.emoji) == "🔴" and reaction.message.id == redMessage.id
+        return (
+            user != bot.user
+            and user != yellow
+            and str(reaction.emoji) == "🔴"
+            and reaction.message.id == redMessage.id
+        )
 
     try:
         reaction, user = await bot.wait_for("reaction_add", timeout=60.0, check=check)
@@ -1691,19 +1759,36 @@ async def puissance4(ctx):
             await gridMessage.add_reaction("6️⃣")
             await gridMessage.add_reaction("7️⃣")
         elif tour % 2 == 0:
-            await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
+            await updateGrid(
+                grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage
+            )
         else:
-            await updateGrid(grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage)
+            await updateGrid(
+                grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage
+            )
 
         if tour % 2 == 0:
+
             def check(reaction, user):
-                return user == red and str(reaction.emoji) in numbers and reaction.message.id == gridMessage.id
+                return (
+                    user == red
+                    and str(reaction.emoji) in numbers
+                    and reaction.message.id == gridMessage.id
+                )
+
         else:
+
             def check(reaction, user):
-                return user == yellow and str(reaction.emoji) in numbers and reaction.message.id == gridMessage.id
+                return (
+                    user == yellow
+                    and str(reaction.emoji) in numbers
+                    and reaction.message.id == gridMessage.id
+                )
 
         try:
-            reaction, user = await bot.wait_for("reaction_add", timeout=120.0, check=check)
+            reaction, user = await bot.wait_for(
+                "reaction_add", timeout=120.0, check=check
+            )
 
             await gridMessage.remove_reaction(reaction, user)
 
@@ -1714,24 +1799,42 @@ async def puissance4(ctx):
             if tour > 6 and await checkWin(grid, tour):
                 if tour % 2 == 0:
                     print(
-                        f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
+                        f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
+                    )
                     await addScoreLeaderboard(red.id, red)
                     await addLoseLeaderboard(yellow.id, yellow)
                     await gridMessage.add_reaction("✅")
-                    await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
-                    text = redPing + " gagne ! **Score actuel : " \
-                        + await getScoreLeaderBoard(red.id) \
-                        + " victoires** - " + await getPlaceLeaderbord(red.id)
+                    await updateGrid(
+                        grid,
+                        "Tour n°" + str(tour) + " - " + redPing + "\n",
+                        gridMessage,
+                    )
+                    text = (
+                        redPing
+                        + " gagne ! **Score actuel : "
+                        + await getScoreLeaderBoard(red.id)
+                        + " victoires** - "
+                        + await getPlaceLeaderbord(red.id)
+                    )
                 else:
                     print(
-                        f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
+                        f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
+                    )
                     await addScoreLeaderboard(yellow.id, yellow)
                     await addLoseLeaderboard(red.id, red)
                     await gridMessage.add_reaction("✅")
-                    await updateGrid(grid, "Tour n°" + str(tour) + " - " + yellowPing + "\n", gridMessage)
-                    text = yellowPing + " gagne ! **Score actuel : " \
-                        + await getScoreLeaderBoard(yellow.id) \
-                        + " victoires** - " + await getPlaceLeaderbord(yellow.id)
+                    await updateGrid(
+                        grid,
+                        "Tour n°" + str(tour) + " - " + yellowPing + "\n",
+                        gridMessage,
+                    )
+                    text = (
+                        yellowPing
+                        + " gagne ! **Score actuel : "
+                        + await getScoreLeaderBoard(yellow.id)
+                        + " victoires** - "
+                        + await getPlaceLeaderbord(yellow.id)
+                    )
                 await ctx.send(text)
                 end = True
 
@@ -1740,12 +1843,20 @@ async def puissance4(ctx):
                 await addScoreLeaderboard(red.id, red)
                 await gridMessage.add_reaction("✅")
                 print(
-                    f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}")
-                text = "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n" \
-                       "**Score de " + yellowPing + " : " \
-                       + await getScoreLeaderBoard(yellow.id) +\
-                       " victoires !**\n **Score de " +\
-                       redPing + " : " + await getScoreLeaderBoard(red.id) + " victoires !**"
+                    f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}"
+                )
+                text = (
+                    "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
+                    "**Score de "
+                    + yellowPing
+                    + " : "
+                    + await getScoreLeaderBoard(yellow.id)
+                    + " victoires !**\n **Score de "
+                    + redPing
+                    + " : "
+                    + await getScoreLeaderBoard(red.id)
+                    + " victoires !**"
+                )
                 await ctx.send(text)
                 end = True
 
@@ -1754,24 +1865,38 @@ async def puissance4(ctx):
             await gridMessage.add_reaction("⌛")
             if tour % 2 == 0:
                 print(
-                    f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
-                await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
+                    f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
+                )
+                await updateGrid(
+                    grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage
+                )
                 await addScoreLeaderboard(yellow.id, yellow)
                 await addLoseLeaderboard(red.id, red)
-                text = redPing + " n'a pas joué ! Alors **"\
-                    + yellowPing + " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "\
-                    + await getScoreLeaderBoard(yellow.id) + \
-                    " victoires - " + await getPlaceLeaderbord(yellow.id)
+                text = (
+                    redPing
+                    + " n'a pas joué ! Alors **"
+                    + yellowPing
+                    + " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "
+                    + await getScoreLeaderBoard(yellow.id)
+                    + " victoires - "
+                    + await getPlaceLeaderbord(yellow.id)
+                )
             else:
-                print(
-                    f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
-                await updateGrid(grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage)
+                print(f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}")
+                await updateGrid(
+                    grid, "Tour n°" + str(tour) + " - " + redPing + "\n", gridMessage
+                )
                 await addScoreLeaderboard(red.id, red)
                 await addLoseLeaderboard(yellow.id, yellow)
-                text = yellowPing + " n'a pas joué ! Alors **" \
-                    + redPing + " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "\
-                    + await getScoreLeaderBoard(red.id)\
-                    + " victoires - " + await getPlaceLeaderbord(red.id)
+                text = (
+                    yellowPing
+                    + " n'a pas joué ! Alors **"
+                    + redPing
+                    + " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
+                    + await getScoreLeaderBoard(red.id)
+                    + " victoires - "
+                    + await getPlaceLeaderbord(red.id)
+                )
             await ctx.send(text)
             end = True
 
@@ -1830,7 +1955,8 @@ async def addScoreLeaderboard(id, name):
                 leaderboard[i][3] = leaderboard[i][1]
             else:
                 leaderboard[i][3] = str(
-                    round(float(leaderboard[i][1]) / float(leaderboard[i][2]), 2))
+                    round(float(leaderboard[i][1]) / float(leaderboard[i][2]), 2)
+                )
     if not isIn:
         line = (str(id) + "-1-0-1-" + str(name) + "\n").split("-")
         leaderboard.append(line)
@@ -1854,7 +1980,8 @@ async def addLoseLeaderboard(id, name):
                 leaderboard[i][3] = leaderboard[i][1]
             else:
                 leaderboard[i][3] = str(
-                    round(float(leaderboard[i][1]) / float(leaderboard[i][2]), 2))
+                    round(float(leaderboard[i][1]) / float(leaderboard[i][2]), 2)
+                )
     if not isIn:
         line = (str(id) + "-0-1-0-" + str(name) + "\n").split("-")
         leaderboard.append(line)
@@ -1871,8 +1998,7 @@ async def classement(ctx):
     for i in range(len(leaderboard)):
         leaderboard[i] = leaderboard[i].split("-")
 
-    numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣",
-               "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     text = "Le classement du puissance 4 est composé de : \n\n"
     leaderSize = 5
     if len(leaderboard) <= leaderSize:
@@ -1882,34 +2008,57 @@ async def classement(ctx):
             text += "Avec le plus de victoires : \n"
             for i in range(len(leaderboard)):
                 name = leaderboard[i]
-                text += numbers[i] + " : **" + name[4].replace(
-                    "\n", "") + "** avec **" + name[1] + " victoires**\n"
+                text += (
+                    numbers[i]
+                    + " : **"
+                    + name[4].replace("\n", "")
+                    + "** avec **"
+                    + name[1]
+                    + " victoires**\n"
+                )
 
             leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
             text += "\nAvec le plus grand ratio Victoire/Défaite\n"
             for i in range(len(leaderboard)):
                 name = leaderboard[i]
-                text += numbers[i] + " : **" + name[4].replace("\n", "") + \
-                    "** avec **" + name[3] + " V/D** (" + \
-                    str(round(
-                        int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n"
+                text += (
+                    numbers[i]
+                    + " : **"
+                    + name[4].replace("\n", "")
+                    + "** avec **"
+                    + name[3]
+                    + " V/D** ("
+                    + str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))
+                    + "%)\n"
+                )
     else:
         text += "Avec le plus de victoires : \n"
         for i in range(leaderSize):
             name = leaderboard[i]
-            text += numbers[i] + " : **" + name[4].replace(
-                "\n", "") + "** avec **" + name[1] + " victoires**\n"
-        text += "*+" + str(len(leaderboard) - leaderSize) + \
-            " autres joueurs*\n\n"
+            text += (
+                numbers[i]
+                + " : **"
+                + name[4].replace("\n", "")
+                + "** avec **"
+                + name[1]
+                + " victoires**\n"
+            )
+        text += "*+" + str(len(leaderboard) - leaderSize) + " autres joueurs*\n\n"
 
         leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
         text += "Avec le plus grand ratio Victoire/Défaite\n"
         for i in range(leaderSize):
             name = leaderboard[i]
-            text += numbers[i] + " : **" + name[4].replace("\n", "") + \
-                "** avec **" + name[3] + " V/D** (" + \
-                str(round(int(name[1]) / (int(name[1]) +
-                                          int(name[2])) * 100, 2)) + "%)\n"
+            text += (
+                numbers[i]
+                + " : **"
+                + name[4].replace("\n", "")
+                + "** avec **"
+                + name[3]
+                + " V/D** ("
+                + str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))
+                + "%)\n"
+            )
         text += "*+" + str(len(leaderboard) - leaderSize) + " autres joueurs*"
 
     await ctx.send(text)
@@ -1930,17 +2079,21 @@ async def monRang(ctx):
 
     for i in range(len(leaderboard)):
         if str(ctx.author.id) in leaderboard[i]:
-            await ctx.send(f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des victoires,"
-                           f" avec **{leaderboard[i][1]} victoires** !")
+            await ctx.send(
+                f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des victoires,"
+                f" avec **{leaderboard[i][1]} victoires** !"
+            )
             break
     leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
     print(leaderboard)
     for i in range(len(leaderboard)):
         name = leaderboard[i]
         if str(ctx.author.id) in name:
-            await ctx.send(f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des ratios,"
-                           f" avec **{name[3]} V/D**"
-                           f" ({str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))}%) !")
+            await ctx.send(
+                f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des ratios,"
+                f" avec **{name[3]} V/D**"
+                f" ({str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))}%) !"
+            )
             print(round(33.3333333333333333, 2))
             return
     await ctx.send("Mmmmh... Tu n'es pas dans le classement, essaies de jouer !")
@@ -1961,7 +2114,10 @@ async def ask(ctx):
 
     text = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "")
     text.replace("’", "")
-    print(f">>({ctx.author.name} {time.asctime()}) - A demandé '{text}' - {ctx.guild.name} : ", end="")
+    print(
+        f">>({ctx.author.name} {time.asctime()}) - A demandé '{text}' - {ctx.guild.name} : ",
+        end="",
+    )
 
     if text == "":
         await ctx.send("Pose une question andouille")
@@ -1981,16 +2137,19 @@ async def ask(ctx):
 
     counter += ctx.author.id
 
-    responses = ["Bah oui",
-                 "Qui sait ? 👀",
-                 "Absolument pas. Non. Jamais.",
-                 "Demande à ta mère",
-                 "Bientôt, tkt frr",
-                 "https://tenor.com/view/well-yes-but-actually-no-well-yes-no-yes-yes-no-gif-13736934",
-                 "Peut-être bien écoute",
-                 "Carrément ma poule"]
+    responses = [
+        "Bah oui",
+        "Qui sait ? 👀",
+        "Absolument pas. Non. Jamais.",
+        "Demande à ta mère",
+        "Bientôt, tkt frr",
+        "https://tenor.com/view/well-yes-but-actually-no-well-yes-no-yes-yes-no-gif-13736934",
+        "Peut-être bien écoute",
+        "Carrément ma poule",
+    ]
 
     await ctx.send(responses[counter % len(responses)])
     print(responses[counter % len(responses)])
+
 
 bot.run(secret.TOKEN)
