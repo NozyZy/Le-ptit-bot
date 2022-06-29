@@ -1,5 +1,6 @@
 import asyncio
 import time
+import secret
 from datetime import date
 
 import discord
@@ -952,6 +953,8 @@ async def game(ctx):
         await reponse.add_reaction("☹")
     else:
         user = str(msg.author.nick)
+        if user == "None":
+            user = str(msg.author.name)
         text = f"**{user}** a gagné !"
         print(f"{user} a gagné")
         await ctx.send(text)
@@ -1143,16 +1146,16 @@ async def prime(ctx, nb: int):
         if nb <= n_max:
             await ctx.send("Primo no")
             return
-            for i in range(biggest, nb + 1, 2):
-                if await is_prime(i):
-                    text += str(i) + "\n"
-            Fprime = open("txt/primes.txt", "a+")
-            Fprime.write(text)
-            Fprime.close()
+            # for i in range(biggest, nb + 1, 2):
+            #     if await is_prime(i):
+            #         text += str(i) + "\n"
+            # Fprime = open("txt/primes.txt", "a+")
+            # Fprime.write(text)
+            # Fprime.close()
 
-            if nb > 14064991:  # 8Mb file limit
-                text = f"Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
-                await ctx.send(text)
+            # if nb > 14064991:  # 8Mb file limit
+            #     text = f"Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
+            #     await ctx.send(text)
         else:
             text = f"Ca va me prendre trop de temps, on y va petit à petit, ok ? (max : {int(n_max)})"
             await ctx.send(text)
