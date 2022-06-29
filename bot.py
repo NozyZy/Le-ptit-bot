@@ -868,7 +868,7 @@ async def game(ctx):
         await reponse.add_reaction("☹")
     else:
         user = str(msg.author.nick)
-        if user is None:
+        if user == "None":
             user = str(msg.author.name)
         text = f"**{user}** a gagné !"
         print(f"{user} a gagné")
