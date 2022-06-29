@@ -1,16 +1,15 @@
 import asyncio
 import time
-import secret
+from datetime import date
+
 import discord
 import googletrans
+import secret
 import youtube_dl
-
-from datetime import date
 from discord.ext import commands
 from googletrans import Translator
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+from PIL import Image, ImageDraw, ImageFont
+
 from fonctions import *
 
 # ID : 653563141002756106
