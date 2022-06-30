@@ -621,13 +621,13 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - Is going fast !")
             day = today.strftime("%d")
             month = today.strftime("%m")
-            gos = ["https://tenor.com/view/mpreg-sonic-sonicispegrant-gif-24582614",
-                 "https://tenor.com/view/sonic-the-hedgehog-gif-24044854",
-                 "https://tenor.com/view/ugly-sonic-chip-n-dale-rescue-rangers-laugh-mock-human-teeth-gif-25734240",
-                 "https://tenor.com/view/sonic-floss-sonic-flossing-sonic-the-hedgehog-movie-gif-16310252",
-                 "https://tenor.com/view/run-gotta-go-fast-fast-zoom-coming-gif-15534185",
-                 "https://tenor.com/view/sonic-movie2-sonic-dance-sonic-the-hedgehog-raise-the-roof-party-gif-25481691",
-                 "https://tenor.com/view/sonic-gif-7633557"]
+            gos = ["https://c.tenor.com/LJn9eialwjgAAAAC/sonic-the-hedgehog.gif",
+                 "https://c.tenor.com/w0BpwA8t3QEAAAAC/sonic-movie2-sonic-dance.gif",
+                 "https://c.tenor.com/L8fy18ZJ7JEAAAAC/run-gotta-go-fast.gif",
+                 "https://c.tenor.com/2NUm_masBmEAAAAC/sonic-floss.gif",
+                 "https://c.tenor.com/jozKhaebUZ4AAAAS/ugly-sonic-chip-n-dale-rescue-rangers.gif",
+                 "https://c.tenor.com/Znb6cHabDbAAAAAS/mpreg-sonic.gif",
+                 "https://c.tenor.com/BfBt0RyGkTwAAAAC/sonic.gif"]
             embed = discord.Embed(
                   title="Gotta GO fast!",
                   description="You spin'n'go",
