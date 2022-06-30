@@ -618,22 +618,22 @@ async def on_message(message):
             await channel.send("Cacao !")
 
         if MESSAGE == "go":
-          printf(f">>({user.name} {time.asctime()}) - Is going fast !")
-          day = today.strftime("%d")
-          month = today.strftime("%m")
-          gos = ["https://tenor.com/view/mpreg-sonic-sonicispegrant-gif-24582614",
-               "https://tenor.com/view/sonic-the-hedgehog-gif-24044854",
-               "https://tenor.com/view/ugly-sonic-chip-n-dale-rescue-rangers-laugh-mock-human-teeth-gif-25734240",
-               "https://tenor.com/view/sonic-floss-sonic-flossing-sonic-the-hedgehog-movie-gif-16310252",
-               "https://tenor.com/view/run-gotta-go-fast-fast-zoom-coming-gif-15534185",
-               "https://tenor.com/view/sonic-movie2-sonic-dance-sonic-the-hedgehog-raise-the-roof-party-gif-25481691",
-               "https://tenor.com/view/sonic-gif-7633557"]
-          embed = discord.Embed(
-                title="Gotta GO fast!",
-                description="You spin'n'go",
-                color=0x174B96,
-                url="https://github.com/BenjaminLesieux/Gotta-Go-Fast",
-            )
+            print(f">>({user.name} {time.asctime()}) - Is going fast !")
+            day = today.strftime("%d")
+            month = today.strftime("%m")
+            gos = ["https://tenor.com/view/mpreg-sonic-sonicispegrant-gif-24582614",
+                 "https://tenor.com/view/sonic-the-hedgehog-gif-24044854",
+                 "https://tenor.com/view/ugly-sonic-chip-n-dale-rescue-rangers-laugh-mock-human-teeth-gif-25734240",
+                 "https://tenor.com/view/sonic-floss-sonic-flossing-sonic-the-hedgehog-movie-gif-16310252",
+                 "https://tenor.com/view/run-gotta-go-fast-fast-zoom-coming-gif-15534185",
+                 "https://tenor.com/view/sonic-movie2-sonic-dance-sonic-the-hedgehog-raise-the-roof-party-gif-25481691",
+                 "https://tenor.com/view/sonic-gif-7633557"]
+            embed = discord.Embed(
+                  title="Gotta GO fast!",
+                  description="You spin'n'go",
+                  color=0x174B96,
+                  url="https://github.com/BenjaminLesieux/Gotta-Go-Fast",
+              )
             go = gos[((int(user.id) // 365 + int(day) * 5) // int(month)) % len(gos)]
             embed.set_thumbnail(url=random.choice([
               "https://ih1.redbubble.net/image.1040577258.9748/st,small,507x507-pad,600x600,f8f8f8.jpg",
