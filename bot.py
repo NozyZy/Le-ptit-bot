@@ -398,7 +398,7 @@ async def on_message(message):
                 print("S'est fait répondre avec le dico (ah)")
                 await channel.send(finndAndReplace("a", dicoLines))
 
-        if MESSAGE == "oh" and rdnb > 3:
+        if MESSAGE == "oh" and rdnb >= 2:
             print(f">>({user.name} {time.asctime()}) - ", end="")
             if rdnb >= 4:
                 print("S'est fait répondre (oh)")
@@ -414,7 +414,7 @@ async def on_message(message):
                 print("S'est fait répondre par le dico (oh)")
                 await channel.send(finndAndReplace("o", dicoLines))
 
-        if MESSAGE == "eh" and rdnb > 3:
+        if MESSAGE == "eh" and rdnb >= 2:
             print(f">>({user.name} {time.asctime()}) - ", end="")
             if rdnb >= 4:
                 print("S'est fait répondre (eh)")
