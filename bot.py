@@ -754,7 +754,7 @@ async def on_message(message):
         if MESSAGE == "kachow":
             responses = [
                 "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
-                "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
+                "https://i.pinimg.com/originals/3a/8b/03/3a8b036011946ab59ea2a8c353372d2b.gif",
             ]
             await channel.send(random.choice(responses))
 
