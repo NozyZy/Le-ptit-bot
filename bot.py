@@ -616,6 +616,15 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - A dit chaud")
             await channel.send("Cacao !")
 
+        di = ["dy", "di"]
+        for index, i in iter(enumerate(MESSAGE.split(" "))):
+            if any(i in MESSAGE for i in di):
+                message = (MESSAGE.split(" ")[index][2:].replace(",",
+                                                                 "").replace(
+                                                                     ".", ""))
+                if len(message) > 4:  # random number to avoid "Dit moi" => "t"
+                    await channel.send(message + " !")
+
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
             day = today.strftime("%d")
