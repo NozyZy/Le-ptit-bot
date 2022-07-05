@@ -616,14 +616,15 @@ async def on_message(message):
         if MESSAGE == "chaud" or MESSAGE == "cho":
             print(f">>({user.name} {time.asctime()}) - A dit chaud")
             await channel.send("Cacao !")
-            
+
         di = ["dy", "di"]
         for index, i in iter(enumerate(MESSAGE.split(" "))):
             if any(i in MESSAGE for i in di):
-                message = MESSAGE.split(' ')[index][2:].replace(",", "").replace(".", "")
-                if len(message) > 4: # random number to avoid "Dit moi" => "t"
+                message = MESSAGE.split(' ')[index][2:].replace(
+                    ",", "").replace(".", "")
+                if len(message) > 4:  # random number to avoid "Dit moi" => "t"
                     await channel.send(message + " !")
-            
+
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
             day = today.strftime("%d")
@@ -740,8 +741,7 @@ async def on_message(message):
             embed.set_author(
                 name="Le p'tit god",
                 url="https://github.com/NozyZy/Le-ptit-bot",
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
             )
             embed.set_image(url=god[0])
             embed.set_footer(text=god[1])
@@ -1249,8 +1249,7 @@ def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(
             song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         ))
 
     def next(_):
@@ -1596,8 +1595,7 @@ async def amongus(ctx):
                 embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**",
                                       color=random.choice(color))
                 embed.set_thumbnail(
-                    url=
-                    "https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
                 )
 
                 for user in playersID[i]:
