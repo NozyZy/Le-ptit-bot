@@ -8896,6 +8896,7 @@ kabane
 kable
 kaboom
 kachi
+kachow
 kafe
 kagari
 kagemori

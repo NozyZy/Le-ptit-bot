@@ -658,7 +658,7 @@ async def on_message(message):
             embed.set_footer(text="SOinc")
             print("GOes fast today")
             await channel.send("GOtta GO fast !", embed=embed)
-            
+
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
             day = today.strftime("%d")
