@@ -622,7 +622,7 @@ async def on_message(message):
                 msg = (MESSAGE.split(" ")[index][2:]
                            .replace(",", "").replace(".", ""))
                 if len(msg) > 4:  # random number to avoid "Dit moi" => "t"
-                    await channel.send(msg + " !")
+                    await channel.send(msg.capitalize() + " !")
 
 
         if MESSAGE == "go":
