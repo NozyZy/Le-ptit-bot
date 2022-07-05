@@ -9,7 +9,9 @@ import youtube_dl
 from discord.ext import commands
 from discord.ext.commands import UnexpectedQuoteError
 from googletrans import Translator
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 
 from fonctions import *
 
