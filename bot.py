@@ -622,7 +622,7 @@ async def on_message(message):
             if any(i in MESSAGE for i in di):
                 message = MESSAGE.split(' ')[index][2:].replace(",", "").replace(".", "")
                 if len(message) > 4: # random number to avoid "Dit moi" => "t"
-                    await channel.send(message)
+                    await channel.send(message + " !")
             
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
