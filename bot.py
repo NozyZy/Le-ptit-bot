@@ -490,7 +490,7 @@ async def on_message(message):
             await channel.send(
                 "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif"
             )
-        
+
         if (MESSAGE.startswith("t'es sur")
                 or MESSAGE.startswith("t sur")) and rdnb > 3:
             print(
@@ -733,8 +733,7 @@ async def on_message(message):
             embed.set_author(
                 name="Le p'tit god",
                 url="https://github.com/NozyZy/Le-ptit-bot",
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
             )
             embed.set_image(url=god[0])
             embed.set_footer(text=god[1])
@@ -751,14 +750,14 @@ async def on_message(message):
             )
             image = ["images/tellermeme.png", "images/bigard.jpeg"]
             await channel.send(file=discord.File(random.choice(image)))
-        
+
         if MESSAGE == "kachow":
-          responses = [
-              "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
-              "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
-          ]
-          await channel.send(random.choice(responses))
-          
+            responses = [
+                "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
+                "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
+            ]
+            await channel.send(random.choice(responses))
+
         if MESSAGE == "stonks":
             print(f">>({user.name} {time.asctime()}) - Stonked")
             await channel.send(file=discord.File("images/stonks.png"))
@@ -1249,8 +1248,7 @@ def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(
             song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         ))
 
     def next(_):
@@ -1596,8 +1594,7 @@ async def amongus(ctx):
                 embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**",
                                       color=random.choice(color))
                 embed.set_thumbnail(
-                    url=
-                    "https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
                 )
 
                 for user in playersID[i]:
