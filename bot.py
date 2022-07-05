@@ -615,8 +615,8 @@ async def on_message(message):
         if MESSAGE == "chaud" or MESSAGE == "cho":
             print(f">>({user.name} {time.asctime()}) - A dit chaud")
             await channel.send("Cacao !")
-
-            di = ["dy", "di"]
+        
+        di = ["dy", "di"]
         for index, i in iter(enumerate(MESSAGE.split(" "))):
             if any(i in MESSAGE for i in di):
                 message = (MESSAGE.split(" ")[index][2:].replace(",",
