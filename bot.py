@@ -616,14 +616,14 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - A dit chaud")
             await channel.send("Cacao !")
 
-            di = ["dy", "di"]
-        for index, i in iter(enumerate(MESSAGE.split(" "))):
-            if any(i in MESSAGE for i in di):
-                message = (MESSAGE.split(" ")[index][2:].replace(",",
-                                                                 "").replace(
-                                                                     ".", ""))
+        di = ["dy", "di"]
+        for index, word in enumerate(MESSAGE.split(" ")):
+            if any(word.startswith(i) for i in di):
+                print(word)
+                message = MESSAGE.split(" ")[index][2:].replace(",", "").replace(".", "")
+                print(message)
                 if len(message) > 4:  # random number to avoid "Dit moi" => "t"
-                    await channel.send(message + " !")
+                    print(message + " !")
 
         if MESSAGE == "go":
             print(f">>({user.name} {time.asctime()}) - Is going fast !")
