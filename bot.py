@@ -624,6 +624,7 @@ async def on_message(message):
                 if len(msg) > 4:  # random number to avoid "Dit moi" => "t"
                     await channel.send(msg + " !")
 
+
         if MESSAGE == "go":
             print(f">>({user.name} {time.asctime()}) - Is going fast !")
             day = today.strftime("%d")

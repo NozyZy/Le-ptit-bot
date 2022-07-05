@@ -5342,6 +5342,7 @@ désole
 désolé
 désolé
 désolée
+désorlaus
 désormais
 déstabilisation
 déstabiliser
@@ -6527,6 +6528,7 @@ fizzbuzzc
 fiât
 fièvre
 fiérement
+fjedzejfhiodzfhzof
 fjeifjo
 fjoejf
 fk
@@ -8896,6 +8898,7 @@ kabane
 kable
 kaboom
 kachi
+kachow
 kafe
 kagari
 kagemori
@@ -11219,6 +11222,7 @@ nous
 nousossi
 nouv
 nouveau
+nouveauté
 nouveautés
 nouveaux
 nouvel
