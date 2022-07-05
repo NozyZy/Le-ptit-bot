@@ -148,3 +148,6 @@ true
 you.isEmpty
 
 >> True
+sus
+L'adresse ip de ta mère c'est 1.1.1.1
+L'adresse ip de ta mère c'est 0.0.0.0

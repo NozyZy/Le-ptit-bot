@@ -616,7 +616,7 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - A dit chaud")
             await channel.send("Cacao !")
 
-        di = ["dy", "di"]
+            di = ["dy", "di"]
         for index, i in iter(enumerate(MESSAGE.split(" "))):
             if any(i in MESSAGE for i in di):
                 message = (MESSAGE.split(" ")[index][2:].replace(",",
@@ -625,6 +625,40 @@ async def on_message(message):
                 if len(message) > 4:  # random number to avoid "Dit moi" => "t"
                     await channel.send(message + " !")
 
+        if MESSAGE == "go":
+            print(f">>({user.name} {time.asctime()}) - Is going fast !")
+            day = today.strftime("%d")
+            month = today.strftime("%m")
+            gos = ["https://c.tenor.com/LJn9eialwjgAAAAC/sonic-the-hedgehog.gif",
+                 "https://c.tenor.com/w0BpwA8t3QEAAAAC/sonic-movie2-sonic-dance.gif",
+                 "https://c.tenor.com/L8fy18ZJ7JEAAAAC/run-gotta-go-fast.gif",
+                 "https://c.tenor.com/2NUm_masBmEAAAAC/sonic-floss.gif",
+                 "https://c.tenor.com/jozKhaebUZ4AAAAS/ugly-sonic-chip-n-dale-rescue-rangers.gif",
+                 "https://c.tenor.com/Znb6cHabDbAAAAAS/mpreg-sonic.gif",
+                 "https://c.tenor.com/BfBt0RyGkTwAAAAC/sonic.gif"]
+            embed = discord.Embed(
+                  title="Gotta GO fast!",
+                  description="You spin'n'go",
+                  color=0x174B96,
+                  url="https://github.com/BenjaminLesieux/Gotta-Go-Fast",
+              )
+            go = gos[((int(user.id) // 365 + int(day) * 5) // int(month)) % len(gos)]
+            embed.set_thumbnail(url=random.choice([
+              "https://ih1.redbubble.net/image.1040577258.9748/st,small,507x507-pad,600x600,f8f8f8.jpg",
+              "https://static.wikia.nocookie.net/meme/images/4/42/1385136139955.png/revision/latest?cb=20150207013804",
+              "https://www.pngitem.com/pimgs/m/135-1357735_transparent-sanic-png-sonic-meme-png-png-download.png",
+            ]))
+            embed.set_author(
+                name="Le p'tit god",
+                url="https://github.com/NozyZy/Le-ptit-bot",
+                icon_url=
+                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+            )
+            embed.set_image(url=go)
+            embed.set_footer(text="SOinc")
+            print("GOes fast today")
+            await channel.send("GOtta GO fast !", embed=embed)
+            
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
             day = today.strftime("%d")
