@@ -1,6 +1,5 @@
 import asyncio
 import time
-import secret
 from datetime import date
 
 import discord
@@ -617,6 +616,15 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - A dit chaud")
             await channel.send("Cacao !")
 
+            di = ["dy", "di"]
+        for index, i in iter(enumerate(MESSAGE.split(" "))):
+            if any(i in MESSAGE for i in di):
+                message = (MESSAGE.split(" ")[index][2:].replace(",",
+                                                                 "").replace(
+                                                                     ".", ""))
+                if len(message) > 4:  # random number to avoid "Dit moi" => "t"
+                    await channel.send(message + " !")
+
         if MESSAGE == "go":
             print(f">>({user.name} {time.asctime()}) - Is going fast !")
             day = today.strftime("%d")
@@ -785,6 +793,13 @@ async def on_message(message):
             )
             image = ["images/tellermeme.png", "images/bigard.jpeg"]
             await channel.send(file=discord.File(random.choice(image)))
+
+        if MESSAGE == "kachow":
+            responses = [
+                "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
+                "https://i.pinimg.com/originals/3a/8b/03/3a8b036011946ab59ea2a8c353372d2b.gif",
+            ]
+            await channel.send(random.choice(responses))
 
         if MESSAGE == "stonks":
             print(f">>({user.name} {time.asctime()}) - Stonked")
