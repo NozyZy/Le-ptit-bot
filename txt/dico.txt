@@ -2618,6 +2618,7 @@ chamallow
 chambre
 chambres
 chambrées
+chameau
 champ
 champagne
 champignon
@@ -2675,6 +2676,7 @@ charbonne
 charbonnes
 charge
 chargement
+chargements
 charger
 charges
 chargesn
@@ -3754,6 +3756,7 @@ courts
 cous
 cousa
 cousin
+cousins
 cout
 coute
 coutenu
@@ -3802,6 +3805,7 @@ cracovie
 craft
 craignos
 crains
+craint
 crak
 crakc
 cramax
@@ -4075,6 +4079,8 @@ dakor
 dal
 dalle
 dallon
+dalmacien
+dalmatien
 dam
 damaged
 damen
@@ -4553,6 +4559,7 @@ différent
 différente
 différentes
 différents
+différrence
 différé
 dig
 digeste
@@ -4593,6 +4600,9 @@ diona
 dioscord
 diplome
 diplomes
+dipustes
+dipute
+diputes
 diqtance
 dir
 dira
@@ -4674,6 +4684,7 @@ disponibles
 dispos
 disposant
 disposition
+dispute
 dispy
 disque
 dissapointed
@@ -4741,6 +4752,7 @@ djoko
 djomb
 djé
 dkajz
+dkgjycb
 dklfkdlfkdlf
 dkpçyza
 dkuovf
@@ -4961,6 +4973,7 @@ dtc
 dterminant
 dtes
 dtgrbf
+dtruc
 du
 dualité
 dubitatif
@@ -7758,6 +7771,7 @@ hihihi
 hihihihhi
 hihihihi
 hihiihih
+hiih
 hilarant
 him
 himejima
@@ -8570,6 +8584,7 @@ ite
 item
 items
 iter
+iterateur
 iteratif
 its
 itsu
@@ -13621,6 +13636,7 @@ quotes
 quotidienne
 quotidiennes
 quou
+ququentin
 qussi
 qustion
 quyujf
@@ -16271,6 +16287,7 @@ surnom
 surnote
 surpirs
 surprenant
+surprend
 surpris
 surprise
 surrounding
@@ -17668,6 +17685,7 @@ vessalius
 vesseau
 veste
 veu
+veuc
 veuch
 veulent
 veur
@@ -17677,6 +17695,7 @@ veuth
 veux
 vexer
 vf
+vg
 vgod
 vgr
 vhd
