@@ -490,7 +490,7 @@ async def on_message(message):
             await channel.send(
                 "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif"
             )
-
+        
         if (MESSAGE.startswith("t'es sur")
                 or MESSAGE.startswith("t sur")) and rdnb > 3:
             print(
@@ -751,7 +751,14 @@ async def on_message(message):
             )
             image = ["images/tellermeme.png", "images/bigard.jpeg"]
             await channel.send(file=discord.File(random.choice(image)))
-
+        
+        if MESSAGE == "kachow":
+          responses = [
+              "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
+              "https://c.tenor.com/FfimHvu74ccAAAAC/kachow-backdriving-blink-mcqueen-cars-last-race.gif",
+          ]
+          await channel.send(random.choice(responses))
+          
         if MESSAGE == "stonks":
             print(f">>({user.name} {time.asctime()}) - Stonked")
             await channel.send(file=discord.File("images/stonks.png"))
