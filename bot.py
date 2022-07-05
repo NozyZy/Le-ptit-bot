@@ -619,13 +619,10 @@ async def on_message(message):
         di = ["dy", "di"]
         for index, word in enumerate(MESSAGE.split(" ")):
             if any(word.startswith(i) for i in di):
-                print(word)
-                message = (MESSAGE.split(" ")[index][2:].replace(",",
-                                                                 "").replace(
-                                                                     ".", ""))
-                print(message)
-                if len(message) > 4:  # random number to avoid "Dit moi" => "t"
-                    print(message + " !")
+                msg = (MESSAGE.split(" ")[index][2:]
+                           .replace(",", "").replace(".", ""))
+                if len(msg) > 4:  # random number to avoid "Dit moi" => "t"
+                    await channel.send(msg + " !")
 
         if MESSAGE == "go":
             print(f">>({user.name} {time.asctime()}) - Is going fast !")
