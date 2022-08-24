@@ -621,7 +621,7 @@ async def on_message(message):
             if any(word.startswith(i) for i in di):
                 msg = (MESSAGE.split(" ")[index][2:]
                            .replace(",", "").replace(".", ""))
-                if len(msg) > 4:  # random number to avoid "Dit moi" => "t"
+                if len(msg) > 4 and rdnb > 3:  # random number to avoid "Dit moi" => "t"
                     await channel.send(msg.capitalize() + " !")
 
 
