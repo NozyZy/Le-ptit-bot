@@ -742,8 +742,8 @@ async def on_message(message):
                     "Brynhild",
                 ],
                 [
-                    "https://i.pinimg.com/originals/f3/d7/6a/f3d76ad179d4f4242002e54e990a5e2c.jpg",
-                    "Quirinus",
+                    "https://static.wikia.nocookie.net/omniversal-battlefield/images/7/73/Sun_Wukong_%28Art%29.jpg/revision/latest?cb=20210823031548",
+                    "Sun Wukong",
                 ],
                 [
                     "https://i.redd.it/7q9as4hojtd61.jpg",
@@ -758,9 +758,13 @@ async def on_message(message):
                     "Hades",
                 ],
                 [
-                    "https://i.pinimg.com/564x/8a/80/04/8a80043fcb5da678a16e33b0183da0d8.jpg",
+                    "shorturl.at/ABLO0",
                     "Ereshkigal",
                 ],
+                [
+                    "https://www.nautiljon.com/images/description/00/37/1635269992331_image.jpg",
+                    "Asclepius",
+                ]
             ]
             embed = discord.Embed(
                 title="This is God",
