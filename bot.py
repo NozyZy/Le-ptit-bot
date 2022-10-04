@@ -513,17 +513,20 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith(
-                "au pied") and message.author.id == 359743894042443776:
-            print(f">>({user.name} {time.asctime()}) - Le maitre m'a appelé")
+        if MESSAGE.startswith("au pied"):
+                if message.author.id == 359743894042443776:
+                        print(f">>({user.name} {time.asctime()}) - Le maitre m'a appelé")
 
-            reponses = [
-                "wouf wouf",
-                "Maître ?",
-                "*s'agenouille*\nComment puis-je vous être utile ?",
-                "*Nous vous devons une reconnaissance éternelllllllle*",
-            ]
-            await channel.send(random.choice(reponses))
+                        reponses = [
+                                "wouf wouf",
+		                "Maître ?",
+                                "*s'agenouille*\nComment puis-je vous être utile ?",
+                                "*Nous vous devons une reconnaissance éternelllllllle*",
+                        ]
+                else:
+                        print(f">>({user.name} {time.asctime()}) - Un faux maître m'a appelé")
+                        reponses=["ratio", "ptdr t ki ?", "mais lèche moi le pied", "vous êtes ?", "*vu*", "<@359743894042443776> quelqu'un cherche à vous usurper maître.", "dégage."]
+                await channel.send(random.choice(reponses))
 
         if "<@!761898936364695573>" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - A parlé de mon pote")
