@@ -4,16 +4,16 @@ from datetime import date
 
 import discord
 import googletrans
-import youtube_dl
 import requests
+import secret
+import youtube_dl
+from bs4 import BeautifulSoup
+from discord.ext import commands
+from googletrans import Translator
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-from discord.ext import commands
-from googletrans import Translator
-from bs4 import BeautifulSoup
 
-import secret
 from fonctions import *
 
 # ID : 653563141002756106
@@ -67,7 +67,7 @@ async def on_message(message):
         return
 
     if (str(channel.id) +
-        "\n") in bansLines:  # option to ban reactions from some channels
+            "\n") in bansLines:  # option to ban reactions from some channels
         await bot.process_commands(message)
         return
 
@@ -236,10 +236,10 @@ async def on_message(message):
             await channel.send("┬─┬ ノ( ゜-゜ノ)")
 
         if (MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez")
-            or MESSAGE.startswith("savez vous")
-            or MESSAGE.startswith("savez-vous")
-            or MESSAGE.startswith("savais-tu")
-            or MESSAGE.startswith("savais tu")) and rdnb > 3:
+                or MESSAGE.startswith("savez vous")
+                or MESSAGE.startswith("savez-vous")
+                or MESSAGE.startswith("savais-tu")
+                or MESSAGE.startswith("savais tu")) and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A demandé si on savait")
             reponses = [
                 "J'en ai vraiment rien à faire tu sais ?",
@@ -267,14 +267,14 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE in [
-            "bite",
-            "zizi",
-            "teub",
-            "zboub",
-            "penis",
-            "chybre",
-            "chybrax",
-            "chibre",
+                "bite",
+                "zizi",
+                "teub",
+                "zboub",
+                "penis",
+                "chybre",
+                "chybrax",
+                "chibre",
         ]:
             print(f">>({user.name} {time.asctime()}) - A parlé de bite")
             text = "8" + "=" * random.randint(0, int(
@@ -340,7 +340,7 @@ async def on_message(message):
             await message.add_reaction("❤")
 
         if (MESSAGE.startswith("hein")
-            or MESSAGE.startswith("1")) and rdnb > 3:
+                or MESSAGE.startswith("1")) and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A commencé par 1",
                   end="")
             reponses = ["deux", "2", "deux ?", "2 😏"]
@@ -482,9 +482,9 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if (MESSAGE in [
-            "facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"
+                "facepalm", "damn", "fait chier", "fais chier", "ptn", "putain"
         ] or MESSAGE.startswith("pff")
-            or MESSAGE.startswith("no..")) and rdnb > 3:
+                or MESSAGE.startswith("no..")) and rdnb > 3:
             print(f">>({user.name} {time.asctime()}) - A gifé Conteville")
 
             await channel.send(
@@ -492,7 +492,7 @@ async def on_message(message):
             )
 
         if (MESSAGE.startswith("t'es sur")
-            or MESSAGE.startswith("t sur")) and rdnb > 3:
+                or MESSAGE.startswith("t sur")) and rdnb > 3:
             print(
                 f">>({user.name} {time.asctime()}) - A demandé si on était sur"
             )
@@ -505,7 +505,7 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if (MESSAGE.startswith("ah ouais")
-            or MESSAGE.startswith("ah bon")) and rdnb > 3:
+                or MESSAGE.startswith("ah bon")) and rdnb > 3:
             print(
                 f">>({user.name} {time.asctime()}) - S'est intérrogé de la véracité du dernier propos"
             )
@@ -515,19 +515,30 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("au pied"):
-                if message.author.id == 359743894042443776:
-                        print(f">>({user.name} {time.asctime()}) - Le maitre m'a appelé")
+            if message.author.id == 359743894042443776:
+                print(
+                    f">>({user.name} {time.asctime()}) - Le maitre m'a appelé")
 
-                        reponses = [
-                                "wouf wouf",
-		                "Maître ?",
-                                "*s'agenouille*\nComment puis-je vous être utile ?",
-                                "*Nous vous devons une reconnaissance éternelllllllle*",
-                        ]
-                else:
-                        print(f">>({user.name} {time.asctime()}) - Un faux maître m'a appelé")
-                        reponses=["ratio", "ptdr t ki ?", "mais lèche moi le pied", "vous êtes ?", "*vu*", "<@359743894042443776> quelqu'un cherche à vous usurper maître.", "dégage."]
-                await channel.send(random.choice(reponses))
+                reponses = [
+                    "wouf wouf",
+                    "Maître ?",
+                    "*s'agenouille*\nComment puis-je vous être utile ?",
+                    "*Nous vous devons une reconnaissance éternelllllllle*",
+                ]
+            else:
+                print(
+                    f">>({user.name} {time.asctime()}) - Un faux maître m'a appelé"
+                )
+                reponses = [
+                    "ratio",
+                    "ptdr t ki ?",
+                    "mais lèche moi le pied",
+                    "vous êtes ?",
+                    "*vu*",
+                    "<@359743894042443776> quelqu'un cherche à vous usurper maître.",
+                    "dégage.",
+                ]
+            await channel.send(random.choice(reponses))
 
         if "<@!761898936364695573>" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - A parlé de mon pote")
@@ -623,9 +634,11 @@ async def on_message(message):
         di = ["dy", "di"]
         for index, word in enumerate(MESSAGE.split(" ")):
             if any(word.startswith(i) for i in di):
-                msg = (MESSAGE.split(" ")[index][2:]
-                       .replace(",", "").replace(".", ""))
-                if len(msg) > 4 and rdnb > 3:  # random number to avoid "Dit moi" => "t"
+                msg = MESSAGE.split(" ")[index][2:].replace(",", "").replace(
+                    ".", "")
+                if len(
+                        msg
+                ) > 4 and rdnb > 3:  # random number to avoid "Dit moi" => "t"
                     await channel.send(msg.capitalize() + " !")
 
         if MESSAGE == "go":
@@ -1086,7 +1099,7 @@ async def calcul(ctx, *text):
             return
         rd = float(nb1 / nb2)
     elif symb == "^":
-        rd = nb1 ** nb2
+        rd = nb1**nb2
     text = str(nb1) + str(symb) + str(nb2) + "=" + str(rd)
     print(text)
     print(f"A demandé de calculer {text}")
@@ -1557,7 +1570,7 @@ async def amongus(ctx):
         if nbEquip == 0:
             tailleEquip.append(tailleMax)
             while tailleListe > 0 and tailleMin < tailleEquip[
-                0] and nbEquip < 8:
+                    0] and nbEquip < 8:
                 tailleListe -= tailleEquip[0]
                 nbEquip += 1
 
@@ -1596,7 +1609,7 @@ async def amongus(ctx):
             time.sleep(1)
             timeLeft -= 1
             await firstMessage.edit(content=message +
-                                            f" Il reste {str(timeLeft)} sec")
+                                    f" Il reste {str(timeLeft)} sec")
         await firstMessage.edit(content="Inscriptions fermées !")
 
         firstMessage = await firstMessage.channel.fetch_message(firstMessage.id
@@ -1936,11 +1949,11 @@ async def puissance4(ctx):
                     f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}"
                 )
                 text = (
-                        "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
-                        "**Score de " + yellowPing + " : " +
-                        await getScoreLeaderBoard(yellow.id) +
-                        " victoires !**\n **Score de " + redPing + " : " +
-                        await getScoreLeaderBoard(red.id) + " victoires !**")
+                    "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
+                    "**Score de " + yellowPing + " : " +
+                    await getScoreLeaderBoard(yellow.id) +
+                    " victoires !**\n **Score de " + redPing + " : " +
+                    await getScoreLeaderBoard(red.id) + " victoires !**")
                 await ctx.send(text)
                 end = True
 
@@ -1957,10 +1970,10 @@ async def puissance4(ctx):
                 await addScoreLeaderboard(yellow.id, yellow)
                 await addLoseLeaderboard(red.id, red)
                 text = (
-                        redPing + " n'a pas joué ! Alors **" + yellowPing +
-                        " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "
-                        + await getScoreLeaderBoard(yellow.id) + " victoires - " +
-                        await getPlaceLeaderbord(yellow.id))
+                    redPing + " n'a pas joué ! Alors **" + yellowPing +
+                    " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "
+                    + await getScoreLeaderBoard(yellow.id) + " victoires - " +
+                    await getPlaceLeaderbord(yellow.id))
             else:
                 print(
                     f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
@@ -1971,10 +1984,10 @@ async def puissance4(ctx):
                 await addScoreLeaderboard(red.id, red)
                 await addLoseLeaderboard(yellow.id, yellow)
                 text = (
-                        yellowPing + " n'a pas joué ! Alors **" + redPing +
-                        " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
-                        + await getScoreLeaderBoard(red.id) + " victoires - " +
-                        await getPlaceLeaderbord(red.id))
+                    yellowPing + " n'a pas joué ! Alors **" + redPing +
+                    " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
+                    + await getScoreLeaderBoard(red.id) + " victoires - " +
+                    await getPlaceLeaderbord(red.id))
             await ctx.send(text)
             end = True
 
@@ -2099,9 +2112,9 @@ async def classement(ctx):
                 name = leaderboard[i]
                 text += (numbers[i] + " : **" + name[4].replace("\n", "") +
                          "** avec **" + name[3] + " V/D** (" + str(
-                            round(
-                                int(name[1]) /
-                                (int(name[1]) + int(name[2])) * 100, 2)) +
+                             round(
+                                 int(name[1]) /
+                                 (int(name[1]) + int(name[2])) * 100, 2)) +
                          "%)\n")
     else:
         text += "Avec le plus de victoires : \n"
@@ -2118,9 +2131,9 @@ async def classement(ctx):
             name = leaderboard[i]
             text += (numbers[i] + " : **" + name[4].replace("\n", "") +
                      "** avec **" + name[3] + " V/D** (" + str(
-                        round(
-                            int(name[1]) /
-                            (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n")
+                         round(
+                             int(name[1]) /
+                             (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n")
         text += "*+" + str(len(leaderboard) - leaderSize) + " autres joueurs*"
 
     await ctx.send(text)
@@ -2218,9 +2231,9 @@ async def ask(ctx):
 async def skin(ctx):
     url = "https://mskins.net"
     response = requests.get(url + "/en/skins/random")
-    soup = BeautifulSoup(response.text, 'html.parser')
-    tag = soup.find_all('a')[62]
-    img = tag.find('img')['src']
+    soup = BeautifulSoup(response.text, "html.parser")
+    tag = soup.find_all("a")[62]
+    img = tag.find("img")["src"]
     author = img.split("/")[-1].split("-")[0]
     embed = discord.Embed(
         title="Skin of %s" % author,
@@ -2228,10 +2241,13 @@ async def skin(ctx):
         color=0xECCE8B,
         url=url + "/en/skins/random",
     )
-    embed.set_thumbnail(url="https://imagepng.org/wp-content/uploads/2017/08/minecraft-icone-icon.png")
+    embed.set_thumbnail(
+        url=
+        "https://imagepng.org/wp-content/uploads/2017/08/minecraft-icone-icon.png"
+    )
     embed.set_author(
         name=author,
-        url=tag['href'],
+        url=tag["href"],
         icon_url=
         "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
     )
