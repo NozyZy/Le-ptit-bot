@@ -2240,8 +2240,8 @@ async def skin(ctx):
     img = tag.find("img")["src"]
     author = img.split("/")[-1].split("-")[0]
     embed = discord.Embed(
-        title="Skin of %s" % author,
-        description="Random minecraft skin",
+        description="Skin of %s" % author,
+        title="Random minecraft skin",
         color=0xECCE8B,
         url=url + "/en/skins/random",
     )
