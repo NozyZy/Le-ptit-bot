@@ -758,8 +758,8 @@ async def on_message(message):
                     "Brynhild",
                 ],
                 [
-                    "https://i.pinimg.com/originals/f3/d7/6a/f3d76ad179d4f4242002e54e990a5e2c.jpg",
-                    "Quirinus",
+                    "https://static.wikia.nocookie.net/omniversal-battlefield/images/7/73/Sun_Wukong_%28Art%29.jpg/revision/latest?cb=20210823031548",
+                    "Sun Wukong",
                 ],
                 [
                     "https://i.redd.it/7q9as4hojtd61.jpg",
@@ -774,9 +774,13 @@ async def on_message(message):
                     "Hades",
                 ],
                 [
-                    "https://i.pinimg.com/564x/8a/80/04/8a80043fcb5da678a16e33b0183da0d8.jpg",
+                    "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/6ec0d49d-038d-4900-b498-c8cc3863c8e8/dd2bzrv-c474cf5f-386e-44b4-89f8-e0e69827e1a1.jpg/v1/fill/w_800,h_1000,q_75,strp/ereshkigal_by_irenhorrors_dd2bzrv-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTAwMCIsInBhdGgiOiJcL2ZcLzZlYzBkNDlkLTAzOGQtNDkwMC1iNDk4LWM4Y2MzODYzYzhlOFwvZGQyYnpydi1jNDc0Y2Y1Zi0zODZlLTQ0YjQtODlmOC1lMGU2OTgyN2UxYTEuanBnIiwid2lkdGgiOiI8PTgwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.Svr-kqOYRHqmLSi0VW3YORKkt-q8WdvC8FaKvlWxbz0",
                     "Ereshkigal",
                 ],
+                [
+                    "https://www.nautiljon.com/images/description/00/37/1635269992331_image.jpg",
+                    "Asclepius",
+                ]
             ]
             embed = discord.Embed(
                 title="This is God",
