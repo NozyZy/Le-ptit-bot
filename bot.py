@@ -758,7 +758,7 @@ async def on_message(message):
                     "Hades",
                 ],
                 [
-                    "shorturl.at/ABLO0",
+                    "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/6ec0d49d-038d-4900-b498-c8cc3863c8e8/dd2bzrv-c474cf5f-386e-44b4-89f8-e0e69827e1a1.jpg/v1/fill/w_800,h_1000,q_75,strp/ereshkigal_by_irenhorrors_dd2bzrv-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTAwMCIsInBhdGgiOiJcL2ZcLzZlYzBkNDlkLTAzOGQtNDkwMC1iNDk4LWM4Y2MzODYzYzhlOFwvZGQyYnpydi1jNDc0Y2Y1Zi0zODZlLTQ0YjQtODlmOC1lMGU2OTgyN2UxYTEuanBnIiwid2lkdGgiOiI8PTgwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.Svr-kqOYRHqmLSi0VW3YORKkt-q8WdvC8FaKvlWxbz0",
                     "Ereshkigal",
                 ],
                 [
