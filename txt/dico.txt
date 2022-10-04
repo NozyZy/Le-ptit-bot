@@ -11983,6 +11983,7 @@ oep
 oeu
 oeufs
 oeuvre
+oeux
 of
 ofc
 off
@@ -16220,6 +16221,7 @@ shop
 short
 shortcut
 shortly
+shorturl
 shot
 shotgun
 should

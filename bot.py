@@ -21,11 +21,10 @@ from fonctions import *
 
 intents = discord.Intents.default()
 intents.members = True
-client = discord.Client(intents=intents)
+client = discord.Client()
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
-                   case_insensitive=True,
-                   intents=intents)
+                   case_insensitive=True)
 tgFile = open("txt/tg.txt", "r+")
 nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
@@ -2217,8 +2216,8 @@ async def ask(ctx):
 
 @bot.command()
 async def skin(ctx):
-    url = "https://mskins.net/en/skins/random"
-    response = requests.get(url)
+    url = "https://mskins.net"
+    response = requests.get(url + "/en/skins/random")
     soup = BeautifulSoup(response.text, 'html.parser')
     tag = soup.find_all('a')[62]
     img = tag.find('img')['src']
@@ -2227,7 +2226,7 @@ async def skin(ctx):
         title="Skin of %s" % author,
         description="Random minecraft skin",
         color=0xECCE8B,
-        url=url,
+        url=url + "/en/skins/random",
     )
     embed.set_thumbnail(url="https://imagepng.org/wp-content/uploads/2017/08/minecraft-icone-icon.png")
     embed.set_author(
@@ -2236,7 +2235,7 @@ async def skin(ctx):
         icon_url=
         "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
     )
-    embed.set_image(url=img)
+    embed.set_image(url=url + img)
     embed.set_footer(text="%s - by mskins.net" % author)
     await ctx.send("Get skinned", embed=embed)
 
