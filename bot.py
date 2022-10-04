@@ -4,16 +4,14 @@ from datetime import date
 
 import discord
 import googletrans
-import youtube_dl
 import requests
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+import secret
+import youtube_dl
+from bs4 import BeautifulSoup
 from discord.ext import commands
 from googletrans import Translator
-from bs4 import BeautifulSoup
+from PIL import Image, ImageDraw, ImageFont
 
-import secret
 from fonctions import *
 
 # ID : 653563141002756106
