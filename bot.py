@@ -114,7 +114,13 @@ async def on_message(message):
         dicoFile.close()
 
     # stock file full of insults (yes I know...)
-    # --
+    fichierInsulte = open("txt/insultes.txt", "r")
+    linesInsultes = fichierInsulte.readlines()
+    insultes = []
+    for line in linesInsultes:
+        line = line.replace("\n", "")
+        insultes.append(line)
+    fichierInsulte.close()
 
     if message.content.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
