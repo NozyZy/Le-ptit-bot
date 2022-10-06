@@ -7,6 +7,7 @@ import googletrans
 import requests
 import secret
 import youtube_dl
+import json
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from googletrans import Translator
@@ -677,6 +678,27 @@ async def on_message(message):
             embed.set_footer(text="SOinc")
             print("GOes fast today")
             await channel.send("GOtta GO fast !", embed=embed)
+
+        if MESSAGE == "kanye":
+            url = "https://api.kanye.rest/"
+            response = requests.get(url)
+            json_p = response.content.decode('utf-8')
+            quote = json.loads(json_p)['quote']
+
+            embed = discord.Embed(
+                description="Kanye said",
+                title=quote,
+                color=0xfed400,
+                url=url
+            )
+            embed.set_author(
+                name="Kanye West",
+                url=url,
+                icon_url=
+                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+            )
+            embed.set_footer(text="provided by kanye.rest")
+            await channel.send("Kanyeah", embed=embed)
 
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
@@ -2185,8 +2207,7 @@ async def myRank(ctx):
 
 @bot.command()
 async def github(ctx):
-    await ctx.send("Mais avec plaisir !\nhttps://github.com/NozyZy/Le-ptit-bot"
-                   )
+    await ctx.send("Mais avec plaisir !\nhttps://github.com/NozyZy/Le-ptit-bot")
 
 
 @bot.command()
@@ -2259,5 +2280,37 @@ async def skin(ctx):
     embed.set_footer(text="%s - by mskins.net" % author)
     await ctx.send("Get skinned", embed=embed)
 
+
+@bot.command()
+async def activity(ctx):
+    args = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "").strip()
+    print(args, len(args))
+    participants = 0
+    if len(args) > 0 and args.isnumeric():
+        participants = int(args)
+    url = "https://www.boredapi.com/api/activity"
+    if participants > 0:
+        url += f"?participants={participants}"
+
+    response = requests.get(url)
+    json_p = response.content.decode('utf-8')
+    activity = json.loads(json_p)
+    print(activity)
+    author = ctx.message.author.display_name
+    embed = discord.Embed(
+        title=activity['activity'],
+        color=0xECCE8B,
+        url=activity['link'],
+    )
+    embed.add_field(name="Type", value=activity['type'])
+    embed.add_field(name="Participants", value=activity['participants'])
+    embed.set_author(
+        name=author,
+        url=url,
+        icon_url=
+        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+    )
+    embed.set_footer(text="provided by boredapi.com")
+    await ctx.send("Use `--activity <nb>` to chose participants", embed=embed)
 
 bot.run(secret.TOKEN)
