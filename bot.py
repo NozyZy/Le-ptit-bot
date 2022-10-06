@@ -2280,6 +2280,25 @@ async def skin(ctx):
     embed.set_footer(text="%s - by mskins.net" % author)
     await ctx.send("Get skinned", embed=embed)
 
+@bot.command()
+async def panda(ctx):
+    url = "https://generatorfun.com"
+    response = requests.get(url + "/random-panda-image")
+    soup = BeautifulSoup(response.text, "html.parser")
+    img = soup.find_all("img")[0]["src"]
+    embed = discord.Embed(
+        title="Take that Panda",
+        color=0xffffff,
+        url=url + "/random-panda-image",
+    )
+    embed.set_author(
+        name=ctx.message.author.display_name,
+        icon_url=
+        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+    )
+    embed.set_image(url=url + "/" + img)
+    embed.set_footer(text="panda - by generatorfun.com")
+    await ctx.send("🐼", embed=embed)
 
 @bot.command()
 async def activity(ctx):
