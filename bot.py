@@ -7,6 +7,7 @@ import googletrans
 import requests
 import secret
 import youtube_dl
+import json
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from googletrans import Translator
@@ -677,6 +678,27 @@ async def on_message(message):
             embed.set_footer(text="SOinc")
             print("GOes fast today")
             await channel.send("GOtta GO fast !", embed=embed)
+
+        if MESSAGE == "kanye":
+            url = "https://api.kanye.rest/"
+            response = requests.get(url)
+            json_p = response.content.decode('utf-8')
+            quote = json.loads(json_p)['quote']
+
+            embed = discord.Embed(
+                description="Kanye said",
+                title=quote,
+                color=0xfed400,
+                url=url
+            )
+            embed.set_author(
+                name="Kanye West",
+                url=url,
+                icon_url=
+                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+            )
+            embed.set_footer(text="provided by kanye.rest")
+            await channel.send("Kanyeah", embed=embed)
 
         if MESSAGE.startswith("god"):
             print(f">>({user.name} {time.asctime()}) - ", end="")
