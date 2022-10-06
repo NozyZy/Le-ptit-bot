@@ -5771,6 +5771,7 @@ efreicraft
 efreidoc
 efreien
 efreitir
+efreussite
 eft
 eg
 egain
@@ -7765,7 +7766,6 @@ grogu
 grondé
 groot
 gros
-grosb
 grosse
 grosses
 grossir
@@ -12301,7 +12301,7 @@ oublié
 oubliée
 oubliées
 oubliés
-oubli�
+oubli�
 ouch
 oue
 ouej
