@@ -7575,7 +7575,6 @@ gniac
 gnie
 gnon
 go
-goal
 goals
 goat
 goatesque
@@ -19610,6 +19609,6 @@ zéro
 î
 île
 îles
-�viter
+�viter
 �a
 �tudiante
