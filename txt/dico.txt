@@ -3175,6 +3175,7 @@ closest
 clotures
 cloud
 cloudflare
+clown
 clpa
 club
 clubrezo
@@ -12300,6 +12301,7 @@ oublié
 oubliée
 oubliées
 oubliés
+oubli�
 ouch
 oue
 ouej
@@ -19609,6 +19611,6 @@ zéro
 î
 île
 îles
-�viter
 �a
 �tudiante
+�viter

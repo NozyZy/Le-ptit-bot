@@ -114,13 +114,7 @@ async def on_message(message):
         dicoFile.close()
 
     # stock file full of insults (yes I know...)
-    fichierInsulte = open("txt/insultes.txt", "r")
-    linesInsultes = fichierInsulte.readlines()
-    insultes = []
-    for line in linesInsultes:
-        line = line.replace("\n", "")
-        insultes.append(line)
-    fichierInsulte.close()
+    # --
 
     if message.content.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
@@ -2284,9 +2278,8 @@ async def skin(ctx):
 @bot.command()
 async def activity(ctx):
     args = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "").strip()
-    print(args, len(args))
     participants = 0
-    if len(args) > 0 and args.isnumeric():
+    if len(args) > 0 and args.isnumeric() and int(args) > 0:
         participants = int(args)
     url = "https://www.boredapi.com/api/activity"
     if participants > 0:
@@ -2295,7 +2288,6 @@ async def activity(ctx):
     response = requests.get(url)
     json_p = response.content.decode('utf-8')
     activity = json.loads(json_p)
-    print(activity)
     author = ctx.message.author.display_name
     embed = discord.Embed(
         title=activity['activity'],
@@ -2304,6 +2296,7 @@ async def activity(ctx):
     )
     embed.add_field(name="Type", value=activity['type'])
     embed.add_field(name="Participants", value=activity['participants'])
+    embed.add_field(name="Difficulty", value=str(100*(1-activity['accessibility'])) + "%")
     embed.set_author(
         name=author,
         url=url,
