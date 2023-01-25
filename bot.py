@@ -141,6 +141,9 @@ async def on_message(message):
         if "<@!653563141002756106>" in MESSAGE:
             await channel.send("T'es un marrant toi")
             print("A tenté d'appeler le bot")
+        elif "<@!269156684155453451>" in MESSAGE:
+            await channel.send("non")
+            print("Appel blacklisté")
         elif "<@" not in MESSAGE:
 
             await channel.send(
