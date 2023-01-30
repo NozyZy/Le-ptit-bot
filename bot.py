@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 from datetime import date
 
@@ -7,14 +8,10 @@ import googletrans
 import requests
 import secret
 import youtube_dl
-import json
-
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from googletrans import Translator
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 from fonctions import *
 
