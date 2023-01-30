@@ -1,3 +1,3 @@
 @echo off
-python bot.py %*
+python main.py %*
 pause
