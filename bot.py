@@ -636,8 +636,9 @@ async def on_message(message):
         di = ["dy", "di"]
         for index, word in enumerate(MESSAGE.split(" ")):
             if any(word.startswith(i) for i in di) and word[2] != 'n':
-                msg = MESSAGE.split(" ")[index][2:].replace(",", "").replace(".", "")
-                if len(msg) > 4 and rdnb > 3:  
+                msg = MESSAGE.split(" ")[index][2:].replace(
+                    ",", "").replace(".", "")
+                if len(msg) > 4 and rdnb > 3:
                   # random number to avoid "Dit moi" => "t"
                     await channel.send(msg.capitalize() + " !")
                     return
@@ -671,8 +672,7 @@ async def on_message(message):
             embed.set_author(
                 name="Le p'tit god",
                 url="https://github.com/NozyZy/Le-ptit-bot",
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
             )
             embed.set_image(url=go)
             embed.set_footer(text="SOinc")
@@ -694,8 +694,7 @@ async def on_message(message):
             embed.set_author(
                 name="Kanye West",
                 url=url,
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
             )
             embed.set_footer(text="provided by kanye.rest")
             await channel.send("Kanyeah", embed=embed)
@@ -864,8 +863,7 @@ async def on_message(message):
             embed.set_author(
                 name="Le p'tit god",
                 url="https://github.com/NozyZy/Le-ptit-bot",
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
             )
             embed.set_image(url=god[0])
             embed.set_footer(text=god[1])
@@ -1380,8 +1378,7 @@ def playSong(clt, queue, song):
     source = discord.PCMVolumeTransformer(
         discord.FFmpegPCMAudio(
             song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+            before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
         ))
 
     def next(_):
@@ -1727,8 +1724,7 @@ async def amongus(ctx):
                 embed = discord.Embed(title=f"**Equipe n°{str(i + 1)}**",
                                       color=random.choice(color))
                 embed.set_thumbnail(
-                    url=
-                    "https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
+                    url="https://tse1.mm.bing.net/th?id=OIP.3WhrRCJd4_GTM2VaWSC4SAAAAA&pid=Api"
                 )
 
                 for user in playersID[i]:
@@ -2311,18 +2307,17 @@ async def skin(ctx):
         url=url + "/en/skins/random",
     )
     embed.set_thumbnail(
-        url=
-        "https://imagepng.org/wp-content/uploads/2017/08/minecraft-icone-icon.png"
+        url="https://imagepng.org/wp-content/uploads/2017/08/minecraft-icone-icon.png"
     )
     embed.set_author(
         name=author,
         url=tag["href"],
-        icon_url=
-        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+        icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
     )
     embed.set_image(url=url + img)
     embed.set_footer(text="%s - by mskins.net" % author)
     await ctx.send("Get skinned", embed=embed)
+
 
 @bot.command()
 async def panda(ctx):
@@ -2337,16 +2332,17 @@ async def panda(ctx):
     )
     embed.set_author(
         name=ctx.message.author.display_name,
-        icon_url=
-        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+        icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
     )
     embed.set_image(url=url + "/" + img)
     embed.set_footer(text="panda - by generatorfun.com")
     await ctx.send("🐼", embed=embed)
 
+
 @bot.command()
 async def activity(ctx):
-    args = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "").strip()
+    args = ctx.message.content.replace(
+        str(ctx.prefix) + str(ctx.command), "").strip()
     participants = 0
     if len(args) > 0 and args.isnumeric() and int(args) > 0:
         participants = int(args)
@@ -2365,12 +2361,12 @@ async def activity(ctx):
     )
     embed.add_field(name="Type", value=activity['type'])
     embed.add_field(name="Participants", value=activity['participants'])
-    embed.add_field(name="Difficulty", value=str(100*(1-activity['accessibility'])) + "%")
+    embed.add_field(name="Difficulty", value=str(
+        100*(1-activity['accessibility'])) + "%")
     embed.set_author(
         name=author,
         url=url,
-        icon_url=
-        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+        icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
     )
     embed.set_footer(text="provided by boredapi.com")
     await ctx.send("Use `--activity <nb>` to chose participants", embed=embed)
