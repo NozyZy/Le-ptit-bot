@@ -781,6 +781,50 @@ async def on_message(message):
                     "https://www.nautiljon.com/images/description/00/37/1635269992331_image.jpg",
                     "Asclepius",
                 ],
+                [
+                    "https://cdnb.artstation.com/p/assets/images/images/056/675/953/large/gabriel-flauzino-thorcolour.jpg",
+                    "Thor",
+                ],
+                [
+                    "https://i.pinimg.com/originals/ae/68/50/ae68509b78c017ecba1f08d64c59c7f8.jpg",
+                    "Amon",
+                ],
+                [
+                    "https://cdna.artstation.com/p/assets/images/images/006/489/730/large/boyan-petrov-thoth12.jpg",
+                    "Thoth",
+                ],
+                [
+                    "https://cdnb.artstation.com/p/assets/images/images/011/390/921/large/mohamed-sax-sobek.jpg",
+                    "Sobek",
+                ],
+                [
+                    "https://cdnb.artstation.com/p/assets/images/images/012/343/689/large/yiye-gong-img-20180806-173554.jpg",
+                    "Dio",
+                ],
+                [
+                    "https://upload.wikimedia.org/wikipedia/commons/6/69/Sucellus_MAN_St_Germain.jpg",
+                    "Sucellos",
+                ],
+                [
+                    "https://i.pinimg.com/originals/fa/8f/b2/fa8fb2e1f6ec3e529c119b05c2c5c649.png",
+                    "Gaïa",
+                ],
+                [
+                    "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8809c8cd-04d2-4fc2-bc24-f9e2460d0f36/d8vo0pe-00f82d4e-4560-462d-9d19-594b1455f009.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzg4MDljOGNkLTA0ZDItNGZjMi1iYzI0LWY5ZTI0NjBkMGYzNlwvZDh2bzBwZS0wMGY4MmQ0ZS00NTYwLTQ2MmQtOWQxOS01OTRiMTQ1NWYwMDkuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.w8B7yWVQ2_wrZKZvJ_p9JzrXymLB3XWWmEdOx-JXmP4",
+                    "Anu",
+                ],
+                [
+                    "https://cdna.artstation.com/p/assets/images/images/019/778/880/large/ekaterina-chesalova-enki.jpg",
+                    "Enki",
+                ],
+                [
+                    "https://cdna.artstation.com/p/assets/images/images/030/081/254/large/victoria-ponomarenko-2-zin-enlil-a5.jpg",
+                    "Enlil",
+                ],
+                [
+                    "https://i.pinimg.com/originals/01/61/ec/0161ecc12f56d0310f332d6e2714bd6c.png",
+                    "Marduk",
+                ],
             ]
             embed = discord.Embed(
                 title="This is God",
