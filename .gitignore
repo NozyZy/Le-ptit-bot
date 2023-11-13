@@ -132,6 +132,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+venv
 /venv
 ./venv
 /venv/etc/bash_completion.d/youtube-dl.bash-completion
