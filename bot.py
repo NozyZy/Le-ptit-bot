@@ -2344,6 +2344,58 @@ async def panda(ctx):
     embed.set_footer(text="panda - by generatorfun.com")
     await ctx.send("🐼", embed=embed)
 
+ips = list(range(3, 40)) + list(range(80, 150))
+
+@bot.command()
+async def dhcp(ctx, iprange: str):
+    if ips:
+        message = "Réagis avec ✅ pour obtenir une ip !"
+        totalTime = 3
+        timeLeft = totalTime
+        firstMessage = await ctx.send(
+            f"Réagis avec ✅ pour obtenir une ip ! Il reste {timeLeft} sec")
+
+        yes = "✅"
+
+        await firstMessage.add_reaction(yes)
+
+        for _ in range(totalTime):
+            time.sleep(1)
+            timeLeft -= 1
+            await firstMessage.edit(content=message +
+                                    f" Il reste {str(timeLeft)} sec")
+        await firstMessage.edit(content="Haha ya plus d'IP !")
+
+        firstMessage = await firstMessage.channel.fetch_message(firstMessage.id)
+        users = set()
+        for reaction in firstMessage.reactions:
+
+            if str(reaction.emoji) == yes:
+                async for user in reaction.users():
+                    if user.id != bot.user.id:
+                        users.add(user)
+        text = """
+        Suis les étapes suivantes :
+        - Paramètres **Ethernet**
+            - Paramètres **IP** : modifier
+        - Manuel
+        - IPv4 : **activé**
+        - Adresse ip **{0}.{1}**
+        - **SI WINDOWS 11 :**
+            - Préfixe sous-réseaux : **255.255.255.0**
+        - **SI WINDOWS 10 :**
+            - Longueur du préfixe sous-réseaux : **24**
+        - Passerelle : **10.10.51.1**
+        """
+
+        for i in range(5):
+            for user in users:
+                ip = ips.pop(0)
+                await user.send(text.format(iprange, ip))
+    else:
+        await ctx.send("Sah ya plus d'IP")
+
+
 @bot.command()
 async def activity(ctx):
     args = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "").strip()
