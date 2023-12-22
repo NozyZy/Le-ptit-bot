@@ -148,7 +148,7 @@ async def on_message(message):
             await channel.send(
                 "Tu veux appeler quelqu'un ? Bah tag le ! *Mondieu...*")
             print("A tenté d'appeler sans taguer")
-        elif not message.author.guild_permissions.administrator:
+        elif not message.author.guild_permissions.administrator or not message.author.id == 359743894042443776 or not message.author.id == 249276960180666368) :
             await channel.send("Dommage, tu n'as pas le droit ¯\_(ツ)_/¯")
             print("A tenté d'appeler sans les droits")
         else:
