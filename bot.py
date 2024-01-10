@@ -469,7 +469,7 @@ async def on_message(message):
 
         if MESSAGE.startswith("quoi") and rdnb > 2:
             print(f">>({user.name} {time.asctime()}) - A demandé quoi")
-            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯"]
+            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯", "coubeh"]
 
             await channel.send(random.choice(reponses))
 
@@ -1691,7 +1691,7 @@ async def amongus(ctx):
                 async for user in reaction.users():
                     users.add(user)
 
-        ids = [i for i in range(23)]
+        ids = []
         for user in users:
             if user.id != bot.user.id:
                 ids.append(user.id)
