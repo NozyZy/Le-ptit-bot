@@ -1691,7 +1691,7 @@ async def amongus(ctx):
                 async for user in reaction.users():
                     users.add(user)
 
-        ids = [i for i in range(23)]
+        ids = []
         for user in users:
             if user.id != bot.user.id:
                 ids.append(user.id)
