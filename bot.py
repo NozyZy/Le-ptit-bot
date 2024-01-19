@@ -469,7 +469,7 @@ async def on_message(message):
 
         if MESSAGE.startswith("quoi") and rdnb > 2:
             print(f">>({user.name} {time.asctime()}) - A demandé quoi")
-            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯", "coubeh"]
+            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯", "coubeh", "drilatère"]
 
             await channel.send(random.choice(reponses))
 
@@ -934,14 +934,15 @@ async def on_message(message):
                         and MESSAGE[i + 2] == "d" and MESSAGE[i + 3] == " "):
                     await channel.send(file=discord.File("images/pd.jpg"))
 
-        if "oof" in MESSAGE and rdnb >= 3:
+        if "oof" in MESSAGE and rdnb >= 5:
             print(f">>({user.name} {time.asctime()}) - oof")
             reponses = [
                 "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif",
-                "https://tenor.com/view/oh-snap-surprise-shocked-johncena-gif-5026702",
+                "https://tenor.com/view/yay-smile-happy-cute-oof-gif-16086929",
                 "https://tenor.com/view/oof-damn-wow-ow-size-gif-16490485",
-                "https://tenor.com/view/oof-simpsons-gif-14031953",
-                "https://tenor.com/view/yikes-michael-scott-the-office-my-bad-oof-gif-13450971",
+                "https://tenor.com/view/big-oof-size-small-medium-switch-gif-17355313",
+                "https://tenor.com/view/oof-saturday-night-live-ouch-yikes-oh-dear-gif-23826406",
+                "https://tenor.com/view/big-oof-yikes-gif-15532766",
             ]
             await channel.send(random.choice(reponses))
 
