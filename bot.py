@@ -130,7 +130,7 @@ async def on_message(message):
     for line in linesBranlette:
         line = line.replace("\n", "")
         branlette.append(line)
-    fichierInsulte.close()
+    fichierBranlette.close()
 
 
 
