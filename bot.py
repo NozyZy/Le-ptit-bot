@@ -155,7 +155,7 @@ async def on_message(message):
         if len(mot) <= 2:
             await channel.send("super la Branlette...")
             return
-        if mot.startswith(("jme", "j'me", "jm'")):
+        if not mot.startswith(("jme", "j'me", "jm'")):
             await channel.send("C'est moi qui ME, alors JME... stp 🍆")
             return
         mot = mot+'\n'
