@@ -156,9 +156,9 @@ async def on_message(message):
             await channel.send("super la Branlette...")
             return
         mot = "\n" + mot
-        fichierInsulte = open("txt/branlette.txt", "a")
-        fichierInsulte.write(mot)
-        fichierInsulte.close()
+        fichierBranlette = open("txt/branlette.txt", "a")
+        fichierBranlette.write(mot)
+        fichierBranlette.close()
         print("Nouvelle branlette :", mot)
         await channel.send("Je retiens...")
 
