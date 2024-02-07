@@ -123,6 +123,17 @@ async def on_message(message):
         insultes.append(line)
     fichierInsulte.close()
 
+    # stock file full of branlettes (yes I know...)
+    fichierBranlette = open("txt/branlette.txt", "r")
+    linesBranlette = fichierBranlette.readlines()
+    branlette = []
+    for line in linesBranlette:
+        line = line.replace("\n", "")
+        branlette.append(line)
+    fichierInsulte.close()
+
+
+
     if message.content.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
         mot = str(message.content)
@@ -135,6 +146,20 @@ async def on_message(message):
         fichierInsulte.write(mot)
         fichierInsulte.close()
         print("Nouvelle insulte :", mot)
+        await channel.send("Je retiens...")
+
+    if message.content.startswith("--addBranlette"):
+        print(f">>({user.name} {time.asctime()})", end=" - ")
+        mot = str(message.content)
+        mot = mot.replace(mot[0:12], "")
+        if len(mot) <= 2:
+            await channel.send("super la Branlette...")
+            return
+        mot = "\n" + mot
+        fichierInsulte = open("txt/branlette.txt", "a")
+        fichierInsulte.write(mot)
+        fichierInsulte.close()
+        print("Nouvelle branlette :", mot)
         await channel.send("Je retiens...")
 
     # ping a people 10 time, once every 3 sec
@@ -566,6 +591,11 @@ async def on_message(message):
                     print(f">>({user.name} {time.asctime()}) - A insulté")
                     return
 
+        if "branle" in MESSAGE:
+
+            await channel.send(random.choice(branlette))
+            return
+
         if MESSAGE == "cheh" or MESSAGE == "sheh":
             print(f">>({user.name} {time.asctime()}) - A dit cheh")
             if rdnb >= 3:
@@ -964,6 +994,7 @@ async def on_message(message):
             " **--serverInfo** pour connaître les infos du server\n"
             " **--clear** *nb* pour supprimer *nb* messages\n"
             " **--addInsult** pour ajouter des insultes et **tg** pour te faire insulter\n"
+            " **--addBranlette** pour ajouter une expression de branlette et **branle** pour en avoir une\n"
             " **--game** pour jouer au jeu du **clap**\n"
             " **--presentation** et **--master** pour créer des memes\n"
             " **--repeat** pour que je répète ce qui vient après l'espace\n"
