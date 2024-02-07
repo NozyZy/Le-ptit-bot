@@ -137,11 +137,11 @@ async def on_message(message):
     if message.content.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
         mot = str(message.content)
-        mot = mot.replace(mot[0:12], "")
+        mot = ' '.join(mot.split()[1:])
         if len(mot) <= 2:
             await channel.send("Sympa l'insulte...")
             return
-        mot = "\n" + mot
+        mot = mot+'\n'
         fichierInsulte = open("txt/insultes.txt", "a")
         fichierInsulte.write(mot)
         fichierInsulte.close()
@@ -151,11 +151,11 @@ async def on_message(message):
     if message.content.startswith("--addBranlette"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
         mot = str(message.content)
-        mot = mot.replace(mot[0:12], "")
+        mot = ' '.join(mot.split()[1:])
         if len(mot) <= 2:
             await channel.send("super la Branlette...")
             return
-        mot = "\n" + mot
+        mot = mot+'\n'
         fichierBranlette = open("txt/branlette.txt", "a")
         fichierBranlette.write(mot)
         fichierBranlette.close()
