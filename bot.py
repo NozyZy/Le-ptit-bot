@@ -134,10 +134,9 @@ async def on_message(message):
 
 
 
-    if message.content.startswith("--addInsult"):
+    if MESSAGE.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
-        mot = str(message.content)
-        mot = ' '.join(mot.split()[1:])
+        mot = ' '.join(MESSAGE.split()[1:])
         if len(mot) <= 2:
             await channel.send("Sympa l'insulte...")
             return
@@ -148,14 +147,13 @@ async def on_message(message):
         print("Nouvelle insulte :", mot)
         await channel.send("Je retiens...")
 
-    if message.content.startswith("--addBranlette"):
+    if MESSAGE.startswith("--addBranlette"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
-        mot = str(message.content)
-        mot = ' '.join(mot.split()[1:])
+        mot = ' '.join(MESSAGE.split()[1:])
         if len(mot) <= 2:
             await channel.send("super la Branlette...")
             return
-        if not mot.startswith(("jme", "j'me", "jm'")):
+        if not mot.startswith(("jme", "j'me", "jm'", "je m")):
             await channel.send("C'est moi qui ME, alors JME... stp 🍆")
             return
         mot = mot+'\n'
