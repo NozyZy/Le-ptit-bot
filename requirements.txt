@@ -22,7 +22,7 @@ httpcore==0.9.1
 httplib2==0.18.1
 httpx==0.13.3
 hyperframe==5.2.0
-idna==2.10
+idna==3.7
 lxml==4.6.3
 #meteo-qt==2.1
 multidict==6.0.2
