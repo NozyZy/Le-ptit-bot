@@ -27,7 +27,7 @@ lxml==4.6.3
 #meteo-qt==2.1
 multidict==6.0.2
 PIL-Tools==1.1.0
-Pillow==9.0.1
+Pillow==10.3.0
 #pycairo==1.16.2
 #pycups==2.0.1
 #pycurl==7.43.0.6
