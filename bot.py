@@ -309,6 +309,12 @@ async def on_message(message):
                 today.strftime("%d"))) + "D"
             await channel.send(text)
 
+        if MESSAGE == "pouet":
+          await channel.send("Roooooh ta gueuuuuule putaiiiiin")
+
+        if MESSAGE == "poueth":
+          await channel.send("Poueth poueth !! 🐤")
+
         if (MESSAGE.startswith("stop") or MESSAGE.startswith("arrête")
                 or MESSAGE.startswith("arrete") and rdnb > 3):
             print(f">>({user.name} {time.asctime()}) - A demandé d'arrêter")
