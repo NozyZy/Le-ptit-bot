@@ -134,7 +134,7 @@ async def on_message(message):
 
 
 
-    if MESSAGE.startswith("--addInsult"):
+    if message.content.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
         mot = ' '.join(MESSAGE.split()[1:])
         if len(mot) <= 2:
@@ -147,7 +147,7 @@ async def on_message(message):
         print("Nouvelle insulte :", mot)
         await channel.send("Je retiens...")
 
-    if MESSAGE.startswith("--addBranlette"):
+    if message.content.startswith("--addBranlette"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
         mot = ' '.join(MESSAGE.split()[1:])
         if len(mot) <= 2:
