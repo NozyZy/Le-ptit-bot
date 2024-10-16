@@ -939,14 +939,14 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - LEEROOOOOOOOOOYY")
             await channel.send(file=discord.File("sounds/Leeroy Jenkins.mp3"))
 
-        if "pute" in MESSAGE and rdnb > 4:
-            print(f">>({user.name} {time.asctime()}) - Le pute")
-            reponses = [
-                "https://tenor.com/view/mom-gif-10756105",
-                "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
-                "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg",
-            ]
-            await channel.send(random.choice(reponses))
+       # if "pute" in MESSAGE and rdnb > 4:
+       #     print(f">>({user.name} {time.asctime()}) - Le pute")
+       #     reponses = [
+       #         "https://tenor.com/view/mom-gif-10756105",
+       #         "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
+       #         "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg",
+       #     ]
+       #    await channel.send(random.choice(reponses))
 
         if "guillotine" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - Le guillotine")
