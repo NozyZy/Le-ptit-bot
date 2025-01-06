@@ -797,12 +797,12 @@ async def on_message(message):
                     "Tezcatlipoca",
                 ],
                 [
-                    "https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api",
+                    "https://www.spiritmiracle.com/wp-content/uploads/2023/04/goddess-venus-cupid.jpg",
                     "Venus",
                 ],
                 [
-                    "https://c.tenor.com/nMkmGwGH8s8AAAAd/elon-musk-smoke.gif",
-                    "Elon Musk",
+                    "https://image.tensorartassets.com/cdn-cgi/image//posts/images/613335434814121629/5f9b14dc-12f8-45f4-8cfd-8fb38dc3cb02.jpg",
+                    "God zilla",
                 ],
                 [
                     "https://www.writersandy.com/uploads/1/2/5/4/12545559/published/goddess-inanna2.jpg?1524448024",
@@ -822,7 +822,7 @@ async def on_message(message):
                 ],
                 [
                     "https://i.redd.it/7q9as4hojtd61.jpg",
-                    "Apollo (Supreme god)",
+                    "Apollo",
                 ],
                 [
                     "https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg",
@@ -884,6 +884,18 @@ async def on_message(message):
                     "https://i.pinimg.com/originals/01/61/ec/0161ecc12f56d0310f332d6e2714bd6c.png",
                     "Marduk",
                 ],
+                [
+                    "https://static.wikia.nocookie.net/villains/images/7/72/Lovecraft-cthulhu.jpg/revision/latest?cb=20151128095138",
+                    "Cthulhu",
+                ],
+                [
+                    "https://tolkiengateway.net/w/images/4/48/Elena_Kukanova_-_Vana_the_Ever-Young.jpg",
+                    "Vána",
+                ],
+                [
+                    "https://static.wikia.nocookie.net/dragonball/images/7/7d/BeerusWikia_%283%29.jpg/revision/latest?cb=20240224003806",
+                    "Beerus",
+                ]
             ]
             embed = discord.Embed(
                 title="This is God",
