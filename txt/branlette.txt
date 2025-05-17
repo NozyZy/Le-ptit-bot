@@ -5,7 +5,6 @@ Jme Lebron le James
 Jme systemd le Debian
 Jme smite le drake
 Jme qemu le proxmox
-Jme qemu le proxmox
 Jme nginx l'apache
 Jme masdak le code pénal
 j'me vide le cache
@@ -55,7 +54,6 @@ j'me pocket le monster
 jm'overclock le gpu
 j'me cyber la night
 j'me for fun la challenger
-j'me corosync le proxmox
 je me vi la caytlin
 je m'overflow le buffer
 jme qr le code
@@ -63,7 +61,6 @@ je me luigi le ceo
 j'me cherche le stage
 j'me peach le mario
 je m'echelonne la matrice
-jme salt le steak hashé
 jme bousille le bouseux
 jme jinx l'arcane
 je me bourguine le bourguignon
@@ -72,3 +69,18 @@ jme caillasse le racaillou
 jm'ulti le garen
 jme échelonne la matrice
 j'me kibana l'elastic
+j'me couche 8 le modèle osi
+j'me soc l'incident
+j'me smash le burger
+j'me smash le bros
+j'me semaphore la synchronisation
+j'me malloc le pointeur
+j'me factorise le n
+j'me reverse le proxy
+j'me golden le ticket
+j'me tralalero le tralala
+j'me moodle le myefrei
+jm'en évade l'edr
+jme compile les shaders
+j'me frigo le camelo
+jmen inspecte l'élément
