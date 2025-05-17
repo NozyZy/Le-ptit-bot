@@ -116,18 +116,44 @@ async def on_message(message):
     # insultes = fichierInsulte.read().split("\n")
     # fichierInsulte.close()
 
+    # stock file full of branlettes (yes I know...)
+    fichierBranlette = open("txt/branlette.txt", "r")
+    linesBranlette = fichierBranlette.readlines()
+    branlette = []
+    for line in linesBranlette:
+        line = line.replace("\n", "")
+        branlette.append(line)
+    fichierBranlette.close()
+
+
+
     if message.content.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
-        mot = str(message.content)
-        mot = mot.replace(mot[0:12], "")
+        mot = ' '.join(MESSAGE.split()[1:])
         if len(mot) <= 2:
             await channel.send("Sympa l'insulte...")
             return
-        mot = "\n" + mot
+        mot = mot+'\n'
         fichierInsulte = open("txt/insultes.txt", "a")
         fichierInsulte.write(mot)
         fichierInsulte.close()
         print("Nouvelle insulte :", mot)
+        await channel.send("Je retiens...")
+
+    if message.content.startswith("--addBranlette"):
+        print(f">>({user.name} {time.asctime()})", end=" - ")
+        mot = ' '.join(MESSAGE.split()[1:])
+        if len(mot) <= 2:
+            await channel.send("super la Branlette...")
+            return
+        if not mot.startswith(("jme", "j'me", "jm'", "je m")):
+            await channel.send("C'est moi qui ME, alors JME... stp 🍆")
+            return
+        mot = mot+'\n'
+        fichierBranlette = open("txt/branlette.txt", "a")
+        fichierBranlette.write(mot)
+        fichierBranlette.close()
+        print("Nouvelle branlette :", mot)
         await channel.send("Je retiens...")
 
     # ping a people 10 time, once every 3 sec
@@ -275,6 +301,12 @@ async def on_message(message):
             text = "8" + "=" * random.randint(0, int(
                 today.strftime("%d"))) + "D"
             await channel.send(text)
+
+        if MESSAGE == "pouet":
+          await channel.send("Roooooh ta gueuuuuule putaiiiiin")
+
+        if MESSAGE == "poueth":
+          await channel.send("Poueth poueth !! 🐤")
 
         if (MESSAGE.startswith("stop") or MESSAGE.startswith("arrête")
                 or MESSAGE.startswith("arrete") and rdnb > 3):
@@ -463,7 +495,7 @@ async def on_message(message):
 
         if MESSAGE.startswith("quoi") and rdnb > 2:
             print(f">>({user.name} {time.asctime()}) - A demandé quoi")
-            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯"]
+            reponses = ["feur", "hein ?", "nan laisse", "oublie", "rien", "😯", "coubeh", "drilatère"]
 
             await channel.send(random.choice(reponses))
 
@@ -559,6 +591,11 @@ async def on_message(message):
                         await message.add_reaction("🇬")
                     print(f">>({user.name} {time.asctime()}) - A insulté")
                     return
+
+        if "branle" in MESSAGE:
+
+            await channel.send(random.choice(branlette))
+            return
 
         if MESSAGE == "cheh" or MESSAGE == "sheh":
             print(f">>({user.name} {time.asctime()}) - A dit cheh")
@@ -754,12 +791,12 @@ async def on_message(message):
                     "Tezcatlipoca",
                 ],
                 [
-                    "https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api",
+                    "https://www.spiritmiracle.com/wp-content/uploads/2023/04/goddess-venus-cupid.jpg",
                     "Venus",
                 ],
                 [
-                    "https://c.tenor.com/nMkmGwGH8s8AAAAd/elon-musk-smoke.gif",
-                    "Elon Musk",
+                    "https://image.tensorartassets.com/cdn-cgi/image//posts/images/613335434814121629/5f9b14dc-12f8-45f4-8cfd-8fb38dc3cb02.jpg",
+                    "God zilla",
                 ],
                 [
                     "https://www.writersandy.com/uploads/1/2/5/4/12545559/published/goddess-inanna2.jpg?1524448024",
@@ -779,7 +816,7 @@ async def on_message(message):
                 ],
                 [
                     "https://i.redd.it/7q9as4hojtd61.jpg",
-                    "Apollo (Supreme god)",
+                    "Apollo",
                 ],
                 [
                     "https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg",
@@ -841,6 +878,18 @@ async def on_message(message):
                     "https://i.pinimg.com/originals/01/61/ec/0161ecc12f56d0310f332d6e2714bd6c.png",
                     "Marduk",
                 ],
+                [
+                    "https://static.wikia.nocookie.net/villains/images/7/72/Lovecraft-cthulhu.jpg/revision/latest?cb=20151128095138",
+                    "Cthulhu",
+                ],
+                [
+                    "https://tolkiengateway.net/w/images/4/48/Elena_Kukanova_-_Vana_the_Ever-Young.jpg",
+                    "Vána",
+                ],
+                [
+                    "https://static.wikia.nocookie.net/dragonball/images/7/7d/BeerusWikia_%283%29.jpg/revision/latest?cb=20240224003806",
+                    "Beerus",
+                ]
             ]
             embed = discord.Embed(
                 title="This is God",
@@ -896,14 +945,14 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - LEEROOOOOOOOOOYY")
             await channel.send(file=discord.File("sounds/Leeroy Jenkins.mp3"))
 
-        if "pute" in MESSAGE and rdnb > 4:
-            print(f">>({user.name} {time.asctime()}) - Le pute")
-            reponses = [
-                "https://tenor.com/view/mom-gif-10756105",
-                "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
-                "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg",
-            ]
-            await channel.send(random.choice(reponses))
+       # if "pute" in MESSAGE and rdnb > 4:
+       #     print(f">>({user.name} {time.asctime()}) - Le pute")
+       #     reponses = [
+       #         "https://tenor.com/view/mom-gif-10756105",
+       #         "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
+       #         "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg",
+       #     ]
+       #    await channel.send(random.choice(reponses))
 
         if "guillotine" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - Le guillotine")
@@ -928,14 +977,15 @@ async def on_message(message):
                         and MESSAGE[i + 2] == "d" and MESSAGE[i + 3] == " "):
                     await channel.send(file=discord.File("images/pd.jpg"))
 
-        if "oof" in MESSAGE and rdnb >= 3:
+        if "oof" in MESSAGE and rdnb >= 5:
             print(f">>({user.name} {time.asctime()}) - oof")
             reponses = [
                 "https://media.discordapp.net/attachments/636579760419504148/811916705663025192/image0.gif",
-                "https://tenor.com/view/oh-snap-surprise-shocked-johncena-gif-5026702",
+                "https://tenor.com/view/yay-smile-happy-cute-oof-gif-16086929",
                 "https://tenor.com/view/oof-damn-wow-ow-size-gif-16490485",
-                "https://tenor.com/view/oof-simpsons-gif-14031953",
-                "https://tenor.com/view/yikes-michael-scott-the-office-my-bad-oof-gif-13450971",
+                "https://tenor.com/view/big-oof-size-small-medium-switch-gif-17355313",
+                "https://tenor.com/view/oof-saturday-night-live-ouch-yikes-oh-dear-gif-23826406",
+                "https://tenor.com/view/big-oof-yikes-gif-15532766",
             ]
             await channel.send(random.choice(reponses))
 
@@ -1111,6 +1161,7 @@ async def on_message(message):
             " **--serverInfo** pour connaître les infos du server\n"
             " **--clear** *nb* pour supprimer *nb* messages\n"
             " **--addInsult** pour ajouter des insultes et **tg** pour te faire insulter\n"
+            " **--addBranlette** pour ajouter une expression de branlette et **branle** pour en avoir une\n"
             " **--game** pour jouer au jeu du **clap**\n"
             " **--presentation** et **--master** pour créer des memes\n"
             " **--repeat** pour que je répète ce qui vient après l'espace\n"
@@ -1825,7 +1876,7 @@ async def amongus(ctx):
                 async for user in reaction.users():
                     users.add(user)
 
-        ids = [i for i in range(23)]
+        ids = []
         for user in users:
             if user.id != bot.user.id:
                 ids.append(user.id)
