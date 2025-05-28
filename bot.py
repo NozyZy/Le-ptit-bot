@@ -112,7 +112,7 @@ async def on_message(message):
         dicoFile.close()
 
     # stock file full of insults (yes I know...)
-    fichierInsulte = open("txt/insultes.txt", "r+", "utf-8")
+    fichierInsulte = open("txt/insultes.txt", "r+", encoding="utf-8")
     insultes = fichierInsulte.read().split("\n")
     fichierInsulte.close()
 
