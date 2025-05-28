@@ -112,9 +112,9 @@ async def on_message(message):
         dicoFile.close()
 
     # stock file full of insults (yes I know...)
-    # fichierInsulte = open("txt/insultes.txt", "r+", "utf-8")
-    # insultes = fichierInsulte.read().split("\n")
-    # fichierInsulte.close()
+    fichierInsulte = open("txt/insultes.txt", "r+", "utf-8")
+    insultes = fichierInsulte.read().split("\n")
+    fichierInsulte.close()
 
     # stock file full of branlettes (yes I know...)
     fichierBranlette = open("txt/branlette.txt", "r")
@@ -1020,12 +1020,8 @@ async def on_message(message):
         await channel.send("Troppi")
     if MESSAGE.capitalize().startswith("Frigo"):
         await channel.send("Camelo")
-    if MESSAGE.capitalize().startswith("La"):
-        await channel.send("Vaca Saturno Saturnita")
     if MESSAGE.capitalize().startswith("Ballerina"):
         await channel.send("Cappucina")
-    if MESSAGE.capitalize().startswith("U"):
-        await channel.send("Din Din Din Din Dun Ma Din Din Din Dun")
     if MESSAGE.capitalize().startswith("Trulimero"):
         await channel.send("Trulicina")
     if MESSAGE.capitalize().startswith("Girafa"):
@@ -1034,8 +1030,6 @@ async def on_message(message):
         await channel.send("Bandito")
     if MESSAGE.capitalize().startswith("Frulli"):
         await channel.send("Frulla")
-    if MESSAGE.capitalize().startswith("Ta"):
-        await channel.send("Ta Ta Ta Ta Ta Ta Ta Ta Ta Ta Sahur")
     if MESSAGE.capitalize().startswith("Brri"):
         await channel.send("Brri Bicus Dicus Bombicus")
     if MESSAGE.capitalize().startswith("Tric"):
@@ -1048,8 +1042,6 @@ async def on_message(message):
         await channel.send("Ananasini")
     if MESSAGE.capitalize().startswith("Garamararamararaman"):
         await channel.send("dan Madudungdung tak tuntung perkuntung")
-    if MESSAGE.capitalize().startswith("Il"):
-        await channel.send("Cacto Hipopotamo")
     if MESSAGE.capitalize().startswith("Blueberrinni"):
         await channel.send("Octopussini")
     if MESSAGE.capitalize().startswith("Rhino"):
@@ -1072,8 +1064,6 @@ async def on_message(message):
         await channel.send("Lololo")
     if MESSAGE.capitalize().startswith("Crocodildo"):
         await channel.send("Penisini")
-    if MESSAGE.capitalize().startswith("Matteooooooooooooo"):
-        await channel.send("")
     if MESSAGE.capitalize().startswith("Špijuniro"):
         await channel.send("Golubiro")
     if MESSAGE.capitalize().startswith("Elephantuchi"):
