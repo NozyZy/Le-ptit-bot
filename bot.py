@@ -331,8 +331,8 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - A balancé la table")
             await channel.send("┬─┬ ノ( ゜-゜ノ)")
 
-        if "lucas" in MESSAGE:
-            print(f">>({user.name} {time.asctime()}) - A dit Lucas")
+        if MESSAGE.strip(".;,?! \"')").endswith("lucas"):
+            print(f">>({user.name} {time.asctime()}) - A dit Lucas (goubet)")
             await channel.send("goubet")
 
         if (MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez")
