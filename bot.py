@@ -18,17 +18,23 @@ from fonctions import *
 # ID : 653563141002756106
 # https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
-client = discord.Client()
+client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
-                   case_insensitive=True)
+                   case_insensitive=True,
+                   intents=intents)
 tgFile = open("txt/tg.txt", "r+")
 nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
 tgFile.close()
 
+GUILD_IDS = [
+    410766134569074691,
+    1193546302970146846,
+    1420660433722802188
+]
 
 # On ready message
 @bot.event
@@ -38,6 +44,14 @@ async def on_ready():
     print("Logged in as")
     print(bot.user.name)
     print(bot.user.id)
+    print("Synchronizing slash commands for guilds :")
+    for guild_id in GUILD_IDS:
+        guild = discord.Object(id=guild_id)
+        try:
+            await bot.tree.sync(guild=guild)
+            print(f"\t- {guild_id}")
+        except Exception as e:
+            print(f"\t- Failed for {guild_id}, reason : {e}")
     print("------")
 
 
@@ -668,7 +682,7 @@ async def on_message(message):
         for index, word in enumerate(MESSAGE.split(" ")):
             if any(word.startswith(i) for i in di) and word[2] != 'n':
                 msg = MESSAGE.split(" ")[index][2:].replace(",", "").replace(".", "")
-                if len(msg) > 4 and rdnb > 3:  
+                if len(msg) > 4 and rdnb > 3:
                   # random number to avoid "Dit moi" => "t"
                     await channel.send(msg.capitalize() + " !")
                     return
@@ -751,12 +765,16 @@ async def on_message(message):
                     userID += MESSAGE[i]
                     i += 1
                 userID = int(userID)
+            if userID == 890084641317478400 and rdnb >= 3:
+                await channel.send("Lâche l'affaire David")
+                print("C'était David")
+                return
             if userID % 5 != (int(day) + int(month)) % 5:
                 await channel.send("Not today (☞ﾟヮﾟ)☞")
                 print("N'est pas dieu aujourd'hui")
                 return
             user = await message.guild.fetch_member(userID)
-            pfp = user.avatar_url
+            pfp = user.avatar.url
             gods = [
                 [
                     "https://tse4.mm.bing.net/th?id=OIP.IXAIL06o83HxXHGjKHqZMAHaKe&pid=Api",
@@ -1179,7 +1197,7 @@ async def clear(ctx, nombre: int):
     print(
         f">>({ctx.author.name} {time.asctime()}) - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}"
     )
-    messages = await ctx.channel.history(limit=nombre + 1).flatten()
+    messages = [message async for message in ctx.channel.history(limit=nombre + 1, oldest_first=False)]
     for message in messages:
         await message.delete()
 
@@ -1189,7 +1207,7 @@ async def repeat(ctx, *text):
     print(
         f">>({ctx.author.name} {time.asctime()}) - A demandé de répéter {' '.join(text)} messages"
     )
-    messages = await ctx.channel.history(limit=1).flatten()
+    messages = ctx.channel.history(limit=1)
     for message in messages:
         await message.delete()
     await ctx.send(" ".join(text))
@@ -1491,6 +1509,19 @@ async def prime(ctx, nb: int):
         await ctx.send(text, file=discord.File("txt/prime.txt"))
     nbprime -= 1
     print(f"A demandé de claculer tous les nombres premiers juqu'à {nb}")
+
+@bot.tree.command(name="isprime", description="Es-tu prime ?")
+async def isPrime(interaction: discord.Interaction, nb: int):
+    if nb > 99999997979797979797979777797:
+        await interaction.send(
+            "C'est trop gros, ca va tout casser, demande à papa Google :D", ephemeral=True)
+        print("too big")
+    elif await is_prime(nb):
+        await interaction.add_reaction("👍")
+        print("oui")
+    else:
+        await interaction.add_reaction("👎")
+        print("non")
 
 
 @bot.command()  # find if 'nb' is a prime number, reacts to the message
@@ -1941,13 +1972,215 @@ async def amongus(ctx):
         f">>({ctx.author.name} {time.asctime()}) - La game Among Us a prit fin {ctx.guild.name}"
     )
 
+FLAG = "`CYBN{Y0u_Kn0w_hOW_7o_Pl4Y_P0w3R_4}`"
+FLAG2 = "`CYBN{DR4wiNG_w1Th0Ut_P4p3r_c4N_H4pP3n}`"
 
+@bot.tree.command(name="flag", description="Envoie un message éphémère")
+async def flag(interaction: discord.Interaction):
+    win, draw = [int(s) for s in (await getScoreLeaderBoard(interaction.user.id, filename="pve.txt"))]
+    if win >= 3:
+        await interaction.response.send_message("Allez tiens ton flag : " + FLAG, ephemeral=True)
+    if draw > 0:
+        await interaction.response.send_message("Ca c'est le bonus pour l'égalité : " + FLAG2, ephemeral=True)
+    if not(draw > 0) and not(win >= 3):
+        await interaction.response.send_message("Va falloir gagner au Puissance 4 si tu veux un flag : `--p4`", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"Wtf, envoi un MP aux admins en montrant ce message stp : {draw}, {win}, {interaction.user.id}", ephemeral=True)
+
+
+#@bot.tree.command(name="puissance4", description="Joue au puissance 4 !")
 @bot.command()
-async def puissance4(ctx):
+async def puissance4(interaction):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A lancé une partie de puissance 4 {ctx.guild.name}"
+        f">>({interaction.author.name} {time.asctime()}) - A lancé une partie de puissance 4 {interaction.guild.name}"
     )
-    grid = [[0 for _ in range(7)] for _ in range(6)]
+
+    import copy
+
+    ROWS = 6
+    COLS = 7
+
+    def valid_moves(grid):
+        return [c for c in range(COLS) if grid[0][c] == 0]
+
+    def simulate_move(grid, col, player):
+        new_grid = copy.deepcopy(grid)
+        for r in reversed(range(ROWS)):
+            if new_grid[r][col] == 0:
+                new_grid[r][col] = player
+                break
+        return new_grid
+
+    def is_winning_move(grid, player):
+        for r in range(ROWS):
+            for c in range(COLS - 3):
+                if all(grid[r][c+i] == player for i in range(4)):
+                    return True
+        for r in range(ROWS - 3):
+            for c in range(COLS):
+                if all(grid[r+i][c] == player for i in range(4)):
+                    return True
+        for r in range(ROWS - 3):
+            for c in range(COLS - 3):
+                if all(grid[r+i][c+i] == player for i in range(4)):
+                    return True
+        for r in range(3, ROWS):
+            for c in range(COLS - 3):
+                if all(grid[r-i][c+i] == player for i in range(4)):
+                    return True
+        return False
+
+    def evaluate_window(window, player):
+        opponent = 2 if player == 1 else 1
+        score = 0
+        # Offensive
+        if window.count(player) == 4:
+            score += 200
+        elif window.count(player) == 3 and window.count(0) == 1:
+            score += 25
+        elif window.count(player) == 2 and window.count(0) == 2:
+            score += 6
+        # Défensive — mais moins pénalisante qu’avant
+        if window.count(opponent) == 3 and window.count(0) == 1:
+            score -= 40
+        elif window.count(opponent) == 2 and window.count(0) == 2:
+            score -= 2
+        return score
+
+    def score_position(grid, player):
+        score = 0
+        # Bonus central plus marqué
+        center_col = [grid[r][COLS // 2] for r in range(ROWS)]
+        score += center_col.count(player) * 6
+        # Lignes horizontales
+        for r in range(ROWS):
+            for c in range(COLS - 3):
+                score += evaluate_window([grid[r][c+i] for i in range(4)], player)
+        # Colonnes verticales
+        for r in range(ROWS - 3):
+            for c in range(COLS):
+                score += evaluate_window([grid[r+i][c] for i in range(4)], player)
+        # Diagonales
+        for r in range(ROWS - 3):
+            for c in range(COLS - 3):
+                score += evaluate_window([grid[r+i][c+i] for i in range(4)], player)
+        for r in range(3, ROWS):
+            for c in range(COLS - 3):
+                score += evaluate_window([grid[r-i][c+i] for i in range(4)], player)
+        return score
+
+    def future_win_potential(grid, player):
+        """Nombre de coups qui mèneraient à une victoire au prochain tour."""
+        count = 0
+        for col in valid_moves(grid):
+            if is_winning_move(simulate_move(grid, col, player), player):
+                count += 1
+        return count
+
+    def minimax(grid, depth, maximizing, alpha, beta, offensive_factor):
+        bot = 1
+        human = 2
+        valid_cols = valid_moves(grid)
+        if depth == 0 or not valid_cols:
+            return (None, score_position(grid, bot))
+
+        if maximizing:
+            value = -float("inf")
+            best_col = random.choice(valid_cols)
+            for col in valid_cols:
+                new_grid = simulate_move(grid, col, bot)
+                if is_winning_move(new_grid, bot):
+                    return (col, 1_000_000)
+                _, new_score = minimax(new_grid, depth - 1, False, alpha, beta, offensive_factor)
+                # 🔥 Bonus offensif : créer des menaces doubles
+                new_score += future_win_potential(new_grid, bot) * 20 * offensive_factor
+                if new_score > value:
+                    value = new_score
+                    best_col = col
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break
+            return best_col, value
+        else:
+            value = float("inf")
+            best_col = random.choice(valid_cols)
+            for col in valid_cols:
+                new_grid = simulate_move(grid, col, human)
+                if is_winning_move(new_grid, human):
+                    return (col, -1_000_000)
+                _, new_score = minimax(new_grid, depth - 1, True, alpha, beta, offensive_factor)
+                new_score -= future_win_potential(new_grid, human) * 15
+                if new_score < value:
+                    value = new_score
+                    best_col = col
+                beta = min(beta, value)
+                if alpha >= beta:
+                    break
+            return best_col, value
+
+    def choose_ai_move(grid, difficulty="moyen", playstyle="offensif"):
+        """
+        difficulty: "facile", "moyen", "difficile"
+        playstyle: "equilibre", "offensif", "defensif"
+        """
+        bot = 1
+        human = 2
+        valid_cols = valid_moves(grid)
+
+        # Config selon niveau
+        if difficulty == "facile":
+            depth = 1
+            randomness = 0.3
+        elif difficulty == "moyen":
+            depth = 2
+            randomness = 0.1
+        else:
+            depth = 3
+            randomness = 0.07
+
+        # Ajuste le style de jeu
+        offensive_factor = 1.0
+        if playstyle == "offensif":
+            offensive_factor = 1.5
+        elif playstyle == "defensif":
+            offensive_factor = 0.7
+
+        # 1️⃣ Gagner immédiatement
+        for col in valid_cols:
+            if is_winning_move(simulate_move(grid, col, bot), bot):
+                return col
+
+        # 2️⃣ Bloquer une victoire immédiate
+        for col in valid_cols:
+            if is_winning_move(simulate_move(grid, col, human), human):
+                return col
+
+        # 3️⃣ Choisir via minimax
+        col, _ = minimax(grid, depth, True, -float("inf"), float("inf"), offensive_factor)
+
+        # 4️⃣ 10 % de hasard
+        if random.random() < randomness:
+            col = random.choice(valid_cols)
+        return col
+
+    async def send_mp(user, type="win"):
+        time.sleep(4)
+        if type == "win":
+            await user.send("Coucou")
+            time.sleep(4)
+            await user.send("Ok bien joué")
+            time.sleep(7)
+            await user.send("T'es sûr de mériter le flag ?")
+            time.sleep(9)
+            await user.send("Bon vasy le flag tu me fais pitié : `CYBN{Y0u_Kn0w_hOW_7o_Pl4Y_P0w3R_4}`")
+        elif type == "draw":
+            await user.send("Stylé l'égalité, je pensais pas que ca arriverait :clap:")
+            time.sleep(4)
+            await user.send("Tu es de ma trempe pour réussir ça, j'aime bien, bel adversaire")
+            time.sleep(3)
+            await user.send("Allez tiens un petit cadeau, il rapporte pas beaucoup de points mais c'est toujours sympa : `CYBN{DR4wiNG_w1Th0Ut_P4p3r_c4N_H4pP3n}`")
+
+    grid = [[0 for _ in range(COLS)] for _ in range(ROWS)]
     """grid = [[0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
@@ -2050,7 +2283,7 @@ async def puissance4(ctx):
     end = False
     numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
 
-    yellowMessage = await ctx.send("**⬇ Joueur jaune ⬇**")
+    yellowMessage = await interaction.send("**⬇ Joueur jaune ⬇**")
     await yellowMessage.add_reaction("🟡")
 
     def check(reaction, user):
@@ -2066,32 +2299,38 @@ async def puissance4(ctx):
         await yellowMessage.edit(content="Pas de joueur jaune ❌")
         return
     print(
-        f">>({yellow} {time.asctime()}) - Est le joueur jaune {ctx.guild.name}"
+        f">>({yellow} {time.asctime()}) - Est le joueur jaune {interaction.guild.name}"
     )
 
-    redMessage = await ctx.send("**⬇ Joueur rouge ⬇**")
-    await redMessage.add_reaction("🔴")
+    mode = "pvp"
 
-    def check(reaction, user):
-        return (user != bot.user and user != yellow
-                and str(reaction.emoji) == "🔴"
-                and reaction.message.id == redMessage.id)
+    if mode == "pvp":
+        redMessage = await interaction.send("**⬇ Joueur rouge ⬇**")
+        await redMessage.add_reaction("🔴")
 
-    try:
-        reaction, user = await bot.wait_for("reaction_add",
-                                            timeout=60.0,
-                                            check=check)
-        red = user
-    except asyncio.TimeoutError:
-        await redMessage.edit(content="Pas de joueur rouge ❌")
-        return
-    print(f">>({red} {time.asctime()}) - Est le joueur red {ctx.guild.name}")
+        def check(reaction, user):
+            return (user != bot.user and user != yellow
+                    and str(reaction.emoji) == "🔴"
+                    and reaction.message.id == redMessage.id)
+
+        try:
+            reaction, user = await bot.wait_for("reaction_add",
+                                                timeout=60.0,
+                                                check=check)
+            red = user
+        except asyncio.TimeoutError:
+            await redMessage.edit(content="Pas de joueur rouge ❌")
+            return
+        print(f">>({red} {time.asctime()}) - Est le joueur red {interaction.guild.name}")
+    elif mode == "pve":
+        red = bot.user
+        redMessage = await interaction.send("Je serai l'adversaire rouge, tiens-toi prêt 😈")
 
     yellowPing = "<@!" + str(yellow.id) + "> 🟡"
     redPing = "<@!" + str(red.id) + "> 🔴"
 
     text = yellowPing + " et " + redPing + " tenez vous prêts !"
-    gridMessage = await ctx.send(text)
+    gridMessage = await interaction.send(text)
 
     time.sleep(5)
 
@@ -2128,10 +2367,14 @@ async def puissance4(ctx):
                              gridMessage)
 
         if tour % 2 == 0:
-
-            def check(reaction, user):
-                return (user == red and str(reaction.emoji) in numbers
-                        and reaction.message.id == gridMessage.id)
+            if mode == "pvp":
+                def check(reaction, user):
+                    return (user == red and str(reaction.emoji) in numbers
+                            and reaction.message.id == gridMessage.id)
+            elif mode == "pve":
+                col = choose_ai_move(grid, difficulty="difficile", playstyle="offensif")
+                await addChip(grid, col, tour)
+                # Do some auto play
 
         else:
 
@@ -2140,66 +2383,106 @@ async def puissance4(ctx):
                         and reaction.message.id == gridMessage.id)
 
         try:
-            reaction, user = await bot.wait_for("reaction_add",
-                                                timeout=120.0,
-                                                check=check)
+            if not(tour % 2 == 0 and mode == "pve"):
+                reaction, user = await bot.wait_for("reaction_add",
+                                                    timeout=120.0,
+                                                    check=check)
 
-            await gridMessage.remove_reaction(reaction, user)
+                await gridMessage.remove_reaction(reaction, user)
 
-            for i in range(len(numbers)):
-                if str(reaction.emoji) == numbers[i]:
-                    await addChip(grid, i, tour)
+                for i in range(len(numbers)):
+                    if str(reaction.emoji) == numbers[i]:
+                        await addChip(grid, i, tour)
 
             if tour > 6 and await checkWin(grid, tour):
+                sent = False
                 if tour % 2 == 0:
-                    print(
-                        f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
-                    )
-                    await addScoreLeaderboard(red.id, red)
-                    await addLoseLeaderboard(yellow.id, yellow)
-                    await gridMessage.add_reaction("✅")
-                    await updateGrid(
-                        grid,
-                        "Tour n°" + str(tour) + " - " + redPing + "\n",
-                        gridMessage,
-                    )
-                    text = (redPing + " gagne ! **Score actuel : " +
-                            await getScoreLeaderBoard(red.id) +
-                            " victoires** - " +
-                            await getPlaceLeaderbord(red.id))
+                    loser   = yellow
+                    winner  = red
+                    ping    = redPing
+                    if mode == "pve":
+                        messages = [
+                            "Hop-là, ca dégage la racaille", 
+                            "Robots 1 - 0 Humain", 
+                            "Pas de flag pour toi ce soir 🤠", 
+                            "Tu pensais vraiment pouvoir me battre ?",
+                            "Trop facile",
+                            "Ptdr tu l'avais pas vu genre ?",
+                            "C'est pas avec ce niveau que tu arriveras à flagguer...",
+                            "Try again. Noob.",
+                            "Je me suis presque ennuyé tiens",
+                            "Retourne aux challs Intro, ils sont plus de ton niveau"
+                        ]
+                        print(
+                            f">>({loser} {time.asctime()}) - A perdu contre le bot au P4 (noob)"
+                        )
+                        await changeScoreLeaderboard(loser.id, loser, win=False, filename="pve.txt")
+                        text = f"{ping} gagne ! (c'est moi)\n{random.choice(messages)}"
                 else:
-                    print(
-                        f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
-                    )
-                    await addScoreLeaderboard(yellow.id, yellow)
-                    await addLoseLeaderboard(red.id, red)
-                    await gridMessage.add_reaction("✅")
-                    await updateGrid(
-                        grid,
-                        "Tour n°" + str(tour) + " - " + yellowPing + "\n",
-                        gridMessage,
-                    )
-                    text = (yellowPing + " gagne ! **Score actuel : " +
-                            await getScoreLeaderBoard(yellow.id) +
+                    loser   = red
+                    winner  = yellow
+                    ping    = yellowPing
+                    if mode == "pve":
+                        print(
+                            f">>({winner} {time.asctime()}) - A gagné contre le bot au P4 (gg)"
+                        )
+                        await changeScoreLeaderboard(winner.id, winner, win=True, filename="pve.txt")
+                        score = int((await getScoreLeaderBoard(winner.id, filename="pve.txt"))[0])
+                        if score == 3:
+                            text = ping + " remporte ses 3 victoires d'affilé ! Voilà le flag : ||t'as vraiment cru que j'allais donner le flag en public ? Regarde tes DM petit filou, ou fais `/flag`||"
+                            await interaction.send(text)
+                            await send_mp(winner)
+                            sent = True
+                            # send MP
+                            # flag, gg
+                        elif score > 3:
+                            text = f"Allez t'as gagné {ping}, t'es content avec tes {score} victoires d'affilé ? T'as déjà eu ton flag, va jouer ailleurs..."
+                            # ouais bon on a compris
+                        else:
+                            text = f"{ping} remporte la victoire ! **Score actuel : {score} / 3** - Plus que {3-score} avant le flag"
+                            # play again
+                print(
+                    f">>({winner} {time.asctime()}) - Est le gagnant vs {loser} ! {interaction.guild.name}"
+                )
+                if mode == "pvp":
+                    await addScoreLeaderboard(winner.id, winner)
+                    await addLoseLeaderboard(loser.id, loser)
+                await gridMessage.add_reaction("✅")
+                await updateGrid(
+                    grid,
+                    "Tour n°" + str(tour) + " - " + ping + "\n",
+                    gridMessage,
+                )
+                if mode == "pvp":
+                    text = (ping + " gagne ! **Score actuel : " +
+                            (await getScoreLeaderBoard(winner.id))[0] +
                             " victoires** - " +
-                            await getPlaceLeaderbord(yellow.id))
-                await ctx.send(text)
+                            await getPlaceLeaderbord(winner.id))
+                if not sent:
+                    await interaction.send(text)
                 end = True
 
             elif tour >= 42:
-                await addScoreLeaderboard(yellow.id, yellow)
-                await addScoreLeaderboard(red.id, red)
                 await gridMessage.add_reaction("✅")
                 print(
-                    f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}"
+                    f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {interaction.guild.name}"
                 )
-                text = (
-                    "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
-                    "**Score de " + yellowPing + " : " +
-                    await getScoreLeaderBoard(yellow.id) +
-                    " victoires !**\n **Score de " + redPing + " : " +
-                    await getScoreLeaderBoard(red.id) + " victoires !**")
-                await ctx.send(text)
+                if mode == "pvp":
+                    await addScoreLeaderboard(yellow.id, yellow)
+                    await addScoreLeaderboard(red.id, red)
+                    text = (
+                        "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
+                        "**Score de " + yellowPing + " : " +
+                        (await getScoreLeaderBoard(yellow.id))[0] +
+                        " victoires !**\n **Score de " + redPing + " : " +
+                        (await getScoreLeaderBoard(red.id))[0] + " victoires !**")
+                    await interaction.send(text)
+                elif mode == "pve":
+                    text = "Ah bah une égalité tiens, c'est rare... Viens on en discute en MP? Sinon fais `/flag`"
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt", draw=True)
+                    await interaction.send(text)
+                    await send_mp(yellow, type="draw")
+
                 end = True
 
         except asyncio.TimeoutError:
@@ -2207,7 +2490,7 @@ async def puissance4(ctx):
             await gridMessage.add_reaction("⌛")
             if tour % 2 == 0:
                 print(
-                    f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
+                    f">>({yellow} {time.asctime()}) - Est le gagnant ! {interaction.guild.name}"
                 )
                 await updateGrid(
                     grid, "Tour n°" + str(tour) + " - " + redPing + "\n",
@@ -2217,23 +2500,29 @@ async def puissance4(ctx):
                 text = (
                     redPing + " n'a pas joué ! Alors **" + yellowPing +
                     " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "
-                    + await getScoreLeaderBoard(yellow.id) + " victoires - " +
+                    + (await getScoreLeaderBoard(yellow.id))[0] + " victoires - " +
                     await getPlaceLeaderbord(yellow.id))
+
             else:
                 print(
-                    f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
+                    f">>({red} {time.asctime()}) - Est le gagnant ! {interaction.guild.name}"
                 )
                 await updateGrid(
                     grid, "Tour n°" + str(tour) + " - " + redPing + "\n",
                     gridMessage)
-                await addScoreLeaderboard(red.id, red)
-                await addLoseLeaderboard(yellow.id, yellow)
-                text = (
-                    yellowPing + " n'a pas joué ! Alors **" + redPing +
-                    " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
-                    + await getScoreLeaderBoard(red.id) + " victoires - " +
-                    await getPlaceLeaderbord(red.id))
-            await ctx.send(text)
+
+                if mode == "pvp":
+                    await addScoreLeaderboard(red.id, red)
+                    await addLoseLeaderboard(yellow.id, yellow)
+                    text = (
+                        yellowPing + " n'a pas joué ! Alors **" + redPing +
+                        " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
+                        + (await getScoreLeaderBoard(red.id))[0] + " victoires - " +
+                        await getPlaceLeaderbord(red.id))
+                elif mode == "pve":
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt")
+                    text = f"J'en connais un qui est parti flag d'autres challs, et a abandonné le miens... Bah t'as perdu {yellowPing}, cheh"
+            await interaction.send(text)
             end = True
 
         tour += 1
@@ -2244,8 +2533,8 @@ async def p4(ctx):
     await puissance4(ctx)
 
 
-async def updateLeaderboard(liste):
-    file = open("txt/leaderboard.txt", "w+")
+async def updateLeaderboard(liste, filename="leaderboard.txt"):
+    file = open("txt/" + filename, "w+")
     for line in liste:
         line = "-".join(line)
         if line[len(line) - 1] != "\n":
@@ -2254,15 +2543,15 @@ async def updateLeaderboard(liste):
     file.close()
 
 
-async def getScoreLeaderBoard(id):
-    file = open("txt/leaderboard.txt", "r+")
+async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
+    file = open("txt/" + filename, "r+")
     leaderboard = file.readlines()
     file.close()
     for i in range(len(leaderboard)):
         if str(id) in leaderboard[i]:
             leaderboard[i] = leaderboard[i].split("-")
-            return leaderboard[i][1].replace("\n", "")
-
+            return leaderboard[i][1].replace("\n", ""), leaderboard[i][2].replace("\n", "")
+    return "0", "0"
 
 async def getPlaceLeaderbord(id):
     file = open("txt/leaderboard.txt", "r+")
@@ -2275,6 +2564,33 @@ async def getPlaceLeaderbord(id):
                 return "1er/" + str(len(leaderboard))
             else:
                 return str(i) + "e/" + str(len(leaderboard))
+
+
+async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt", draw=False):
+    file = open("txt/" + filename, "r+")
+    leaderboard = file.readlines()
+    file.close()
+    isIn = False
+    for i in range(len(leaderboard)):
+        leaderboard[i] = leaderboard[i].split("-")
+        if str(id) in leaderboard[i]:
+            isIn = True
+            leaderboard[i][1] = "0" if not win else str(int(leaderboard[i][1]) + 1)
+            leaderboard[i][2] = leaderboard[i][2] if not draw else "1"
+            if int(leaderboard[i][2]) == 0:
+                leaderboard[i][3] = leaderboard[i][1]
+            else:
+                leaderboard[i][3] = str(
+                    round(
+                        float(leaderboard[i][1]) / float(leaderboard[i][2]),
+                        2))
+    if not isIn:
+        line = (str(id) + "-1-0-1-" + str(name) + "\n").split("-")
+        leaderboard.append(line)
+
+    print(leaderboard)
+    leaderboard.sort(reverse=True, key=lambda score: int(score[1]))
+    await updateLeaderboard(leaderboard, filename=filename)
 
 
 async def addScoreLeaderboard(id, name):
@@ -2601,5 +2917,14 @@ async def activity(ctx):
     )
     embed.set_footer(text="provided by boredapi.com")
     await ctx.send("Use `--activity <nb>` to chose participants", embed=embed)
+
+@bot.command()
+async def sync(ctx):
+    print("sync command")
+    if ctx.author.id == 359743894042443776:
+        await bot.tree.sync()
+        await ctx.send('Command tree synced.')
+    else:
+        await ctx.send('You must be the owner to use this command!')
 
 bot.run(secret.TOKEN)
