@@ -5,6 +5,7 @@ secret.py
 txt/admin.txt
 txt/names.txt
 txt/ShPeu.txt
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

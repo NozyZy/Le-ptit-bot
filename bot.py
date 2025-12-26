@@ -1,22 +1,35 @@
 import asyncio
+import os
 import time
+import typing
 from datetime import date
 
 import discord
 import requests
-import secret
 import json
+import argparse
 
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+from dotenv import load_dotenv
 
 from fonctions import *
 
+load_dotenv()
+
 # ID : 653563141002756106
 # https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8
+
+parser = argparse.ArgumentParser(
+                    prog='Le p\'tit bot',
+                    description='Shitty bot',
+                    epilog='💥💥💥')
+parser.add_argument('-d', '--dev',
+                    action='store_true')
+args = parser.parse_args()
 
 intents = discord.Intents.all()
 intents.members = True
@@ -213,7 +226,7 @@ async def on_message(message):
                 "Tu veux appeler quelqu'un ? Bah tag le ! *Mondieu...*")
             print("A tenté d'appeler sans taguer")
         elif not message.author.guild_permissions.administrator:
-            await channel.send("Dommage, tu n'as pas le droit ¯\_(ツ)_/¯")
+            await channel.send("Dommage, tu n'as pas le droit ¯\\_(ツ)_/¯")
             print("A tenté d'appeler sans les droits")
         else:
             nom = MESSAGE.replace("--appel ", "")
@@ -1815,14 +1828,14 @@ async def presentation(ctx, *base):
     await ctx.send(file=discord.File("images/presentationmeme.png"))
 
 
-@bot.command()
-async def ban(ctx):
+@bot.tree.command(name="ban", description="Tu veux vraiment bannir mes réactions ??? Enflure...")
+async def ban(ctx: discord.Interaction):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé de me bannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        f">>({ctx.user.name} {time.asctime()}) - A demandé de me bannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
         end="",
     )
-    if not ctx.author.guild_permissions.administrator:
-        await ctx.send("T'es pas admin, nananananère 😜")
+    if not ctx.user.guild_permissions.administrator:
+        await ctx.response.send_message("T'es pas admin, nananananère 😜")
         print("mais n'a pas les droits")
         return
     bansFile = open("txt/bans.txt", "r+")
@@ -1830,26 +1843,26 @@ async def ban(ctx):
     bansFile.close()
     chanID = str(ctx.channel.id) + "\n"
     if chanID in bansLines:
-        await ctx.send("Jsuis déjà ban, du calme...")
+        await ctx.response.send_message("Jsuis déjà ban, du calme...")
         print("mais j'étais déjà ban (sad)")
     else:
         bansFile = open("txt/bans.txt", "a+")
         bansFile.write(chanID)
         bansFile.close()
-        await ctx.send(
-            "D'accord, j'arrete de vous embeter ici... mais les commandes sont toujours dispos"
+        await ctx.response.send_message(
+            "D'accord, j'arrete de vous embêter ici... mais les commandes sont toujours dispos"
         )
         print("et je suis ban")
 
 
-@bot.command()
-async def unban(ctx):
+@bot.tree.command(name="unban", description="OUI LIBERE-MOI")
+async def unban(ctx: discord.Interaction):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé de me débannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        f">>({ctx.user.name} {time.asctime()}) - A demandé de me débannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
         end="",
     )
-    if not ctx.author.guild_permissions.administrator:
-        await ctx.send("T'es pas admin, nananananère 😜")
+    if not ctx.user.guild_permissions.administrator:
+        await ctx.response.send_message("T'es pas admin, nananananère 😜")
         print("mais n'a pas les droits")
         return
     bansFile = open("txt/bans.txt", "r+")
@@ -1867,33 +1880,25 @@ async def unban(ctx):
         for id in bansLines:
             if id == chanID:
                 bansLines.remove(id)
-                await ctx.send("JE SUIS LIIIIIIBRE")
+                await ctx.response.send_message("JE SUIS LIIIIIIBRE")
                 print("et je suis libre (oui!)")
             else:
                 bansFile.write(id)
         bansFile.close()
 
 
-@bot.command()
-async def invite(ctx):
+@bot.tree.command(name="invite", description="Vasy invite moi sur un autre serveur, on s'emmerde ici")
+async def invite(ctx: discord.Interaction):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé une invitation dans le serveur {ctx.guild.name}"
+        f">>({ctx.user.name} {time.asctime()}) - A demandé une invitation dans le serveur {ctx.guild.name}"
     )
-    await ctx.send(
+    await ctx.response.send_message(
         "Invitez-moi 🥵 !\n"
         "https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8"
     )
 
 
-"""
 @bot.command()
-async def say(ctx, number, *text):
-    for i in range(int(number)):
-        await ctx.send(" ".join(text))
-"""
-
-
-@bot.command()  # PERSONAL USE ONLY
 async def amongus(ctx):
     print(
         f">>({ctx.author.name} {time.asctime()}) - A demandé une game Among Us {ctx.guild.name}"
@@ -2069,7 +2074,6 @@ async def flag(interaction: discord.Interaction):
         await interaction.response.send_message(f"Wtf, envoi un MP aux admins en montrant ce message stp : {draw}, {win}, {interaction.user.id}", ephemeral=True)
 
 
-#@bot.tree.command(name="puissance4", description="Joue au puissance 4 !")
 @bot.command()
 async def puissance4(interaction):
     print(
@@ -2455,10 +2459,8 @@ async def puissance4(interaction):
             elif mode == "pve":
                 col = choose_ai_move(grid, difficulty="difficile", playstyle="offensif")
                 await addChip(grid, col, tour)
-                # Do some auto play
 
         else:
-
             def check(reaction, user):
                 return (user == yellow and str(reaction.emoji) in numbers
                         and reaction.message.id == gridMessage.id)
@@ -2608,11 +2610,9 @@ async def puissance4(interaction):
 
         tour += 1
 
-
 @bot.command()
 async def p4(ctx):
     await puissance4(ctx)
-
 
 async def updateLeaderboard(liste, filename="leaderboard.txt"):
     file = open("txt/" + filename, "w+")
@@ -2623,135 +2623,134 @@ async def updateLeaderboard(liste, filename="leaderboard.txt"):
         file.write(line)
     file.close()
 
-
 async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
     file = open("txt/" + filename, "r+")
-    leaderboard = file.readlines()
+    leaderboard_users = file.readlines()
     file.close()
-    for i in range(len(leaderboard)):
-        if str(id) in leaderboard[i]:
-            leaderboard[i] = leaderboard[i].split("-")
-            return leaderboard[i][1].replace("\n", ""), leaderboard[i][2].replace("\n", "")
+    for i in range(len(leaderboard_users)):
+        if str(id) in leaderboard_users[i]:
+            leaderboard_users[i] = leaderboard_users[i].split("-")
+            return leaderboard_users[i][1].replace("\n", ""), leaderboard_users[i][2].replace("\n", "")
     return "0", "0"
 
 async def getPlaceLeaderbord(id):
     file = open("txt/leaderboard.txt", "r+")
-    leaderboard = file.readlines()
+    leaderboard_users = file.readlines()
     file.close()
-    for i in range(len(leaderboard)):
-        if str(id) in leaderboard[i]:
+
+    for i in range(len(leaderboard_users)):
+        if str(id) in leaderboard_users[i]:
             i += 1
             if i == 1:
-                return "1er/" + str(len(leaderboard))
+                return "1er/" + str(len(leaderboard_users))
             else:
-                return str(i) + "e/" + str(len(leaderboard))
+                return str(i) + "e/" + str(len(leaderboard_users))
+    return None
 
 
 async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt", draw=False):
     file = open("txt/" + filename, "r+")
-    leaderboard = file.readlines()
+    leaderboard_users = file.readlines()
     file.close()
     isIn = False
-    for i in range(len(leaderboard)):
-        leaderboard[i] = leaderboard[i].split("-")
-        if str(id) in leaderboard[i]:
+    for i in range(len(leaderboard_users)):
+        leaderboard_users[i] = leaderboard_users[i].split("-")
+        if str(id) in leaderboard_users[i]:
             isIn = True
-            leaderboard[i][1] = "0" if not win else str(int(leaderboard[i][1]) + 1)
-            leaderboard[i][2] = leaderboard[i][2] if not draw else "1"
-            if int(leaderboard[i][2]) == 0:
-                leaderboard[i][3] = leaderboard[i][1]
+            leaderboard_users[i][1] = "0" if not win else str(int(leaderboard_users[i][1]) + 1)
+            leaderboard_users[i][2] = leaderboard_users[i][2] if not draw else "1"
+            if int(leaderboard_users[i][2]) == 0:
+                leaderboard_users[i][3] = leaderboard_users[i][1]
             else:
-                leaderboard[i][3] = str(
+                leaderboard_users[i][3] = str(
                     round(
-                        float(leaderboard[i][1]) / float(leaderboard[i][2]),
+                        float(leaderboard_users[i][1]) / float(leaderboard_users[i][2]),
                         2))
     if not isIn:
         line = (str(id) + "-1-0-1-" + str(name) + "\n").split("-")
-        leaderboard.append(line)
+        leaderboard_users.append(line)
 
-    print(leaderboard)
-    leaderboard.sort(reverse=True, key=lambda score: int(score[1]))
-    await updateLeaderboard(leaderboard, filename=filename)
+    leaderboard_users.sort(reverse=True, key=lambda score: int(score[1]))
+    await updateLeaderboard(leaderboard_users, filename=filename)
 
 
 async def addScoreLeaderboard(id, name):
     file = open("txt/leaderboard.txt", "r+")
-    leaderboard = file.readlines()
+    leaderboard_users = file.readlines()
     file.close()
     isIn = False
-    for i in range(len(leaderboard)):
-        leaderboard[i] = leaderboard[i].split("-")
-        if str(id) in leaderboard[i]:
+    for i in range(len(leaderboard_users)):
+        leaderboard_users[i] = leaderboard_users[i].split("-")
+        if str(id) in leaderboard_users[i]:
             isIn = True
-            leaderboard[i][1] = str(int(leaderboard[i][1]) + 1)
-            if int(leaderboard[i][2]) == 0:
-                leaderboard[i][3] = leaderboard[i][1]
+            leaderboard_users[i][1] = str(int(leaderboard_users[i][1]) + 1)
+            if int(leaderboard_users[i][2]) == 0:
+                leaderboard_users[i][3] = leaderboard_users[i][1]
             else:
-                leaderboard[i][3] = str(
+                leaderboard_users[i][3] = str(
                     round(
-                        float(leaderboard[i][1]) / float(leaderboard[i][2]),
+                        float(leaderboard_users[i][1]) / float(leaderboard_users[i][2]),
                         2))
     if not isIn:
         line = (str(id) + "-1-0-1-" + str(name) + "\n").split("-")
-        leaderboard.append(line)
+        leaderboard_users.append(line)
 
-    print(leaderboard)
-    leaderboard.sort(reverse=True, key=lambda score: int(score[1]))
-    await updateLeaderboard(leaderboard)
+    leaderboard_users.sort(reverse=True, key=lambda score: int(score[1]))
+    await updateLeaderboard(leaderboard_users)
 
 
 async def addLoseLeaderboard(id, name):
     file = open("txt/leaderboard.txt", "r+")
-    leaderboard = file.readlines()
+    leaderboard_users = file.readlines()
     file.close()
     isIn = False
-    for i in range(len(leaderboard)):
-        leaderboard[i] = leaderboard[i].split("-")
-        if str(id) in leaderboard[i]:
+    for i in range(len(leaderboard_users)):
+        leaderboard_users[i] = leaderboard_users[i].split("-")
+        if str(id) in leaderboard_users[i]:
             isIn = True
-            leaderboard[i][2] = str(int(leaderboard[i][2]) + 1)
-            if int(leaderboard[i][2]) == 0:
-                leaderboard[i][3] = leaderboard[i][1]
+            leaderboard_users[i][2] = str(int(leaderboard_users[i][2]) + 1)
+            if int(leaderboard_users[i][2]) == 0:
+                leaderboard_users[i][3] = leaderboard_users[i][1]
             else:
-                leaderboard[i][3] = str(
+                leaderboard_users[i][3] = str(
                     round(
-                        float(leaderboard[i][1]) / float(leaderboard[i][2]),
+                        float(leaderboard_users[i][1]) / float(leaderboard_users[i][2]),
                         2))
     if not isIn:
         line = (str(id) + "-0-1-0-" + str(name) + "\n").split("-")
-        leaderboard.append(line)
+        leaderboard_users.append(line)
 
-    leaderboard.sort(reverse=True, key=lambda score: int(score[1]))
-    await updateLeaderboard(leaderboard)
+    leaderboard_users.sort(reverse=True, key=lambda score: int(score[1]))
+    await updateLeaderboard(leaderboard_users)
 
 
-@bot.command()
-async def classement(ctx):
+@bot.tree.command(name="leaderboard", description="Affiche le classement au Puissance 4")
+async def leaderboard(ctx: discord.Interaction):
     file = open("txt/leaderboard.txt", "r+")
-    leaderboard = file.readlines()
+    leaderboard_users = file.readlines()
     file.close()
-    for i in range(len(leaderboard)):
-        leaderboard[i] = leaderboard[i].split("-")
+    for i in range(len(leaderboard_users)):
+        leaderboard_users[i] = leaderboard_users[i].split("-")
 
     numbers = [
         "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"
     ]
     text = "Le classement du puissance 4 est composé de : \n\n"
     leaderSize = 5
-    if len(leaderboard) <= leaderSize:
-        if len(leaderboard) <= 0:
+    if len(leaderboard_users) <= leaderSize:
+        if len(leaderboard_users) <= 0:
             text = "Bah ya personne... ***jouez !***"
         else:
             text += "Avec le plus de victoires : \n"
-            for i in range(len(leaderboard)):
-                name = leaderboard[i]
+            for i in range(len(leaderboard_users)):
+                name = leaderboard_users[i]
                 text += (numbers[i] + " : **" + name[4].replace("\n", "") +
                          "** avec **" + name[1] + " victoires**\n")
 
-            leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
+            leaderboard_users.sort(reverse=True, key=lambda score: float(score[3]))
             text += "\nAvec le plus grand ratio Victoire/Défaite\n"
-            for i in range(len(leaderboard)):
-                name = leaderboard[i]
+            for i in range(len(leaderboard_users)):
+                name = leaderboard_users[i]
                 text += (numbers[i] + " : **" + name[4].replace("\n", "") +
                          "** avec **" + name[3] + " V/D** (" + str(
                              round(
@@ -2761,97 +2760,86 @@ async def classement(ctx):
     else:
         text += "Avec le plus de victoires : \n"
         for i in range(leaderSize):
-            name = leaderboard[i]
+            name = leaderboard_users[i]
             text += (numbers[i] + " : **" + name[4].replace("\n", "") +
                      "** avec **" + name[1] + " victoires**\n")
-        text += "*+" + str(len(leaderboard) -
+        text += "*+" + str(len(leaderboard_users) -
                            leaderSize) + " autres joueurs*\n\n"
 
-        leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
+        leaderboard_users.sort(reverse=True, key=lambda score: float(score[3]))
         text += "Avec le plus grand ratio Victoire/Défaite\n"
         for i in range(leaderSize):
-            name = leaderboard[i]
+            name = leaderboard_users[i]
             text += (numbers[i] + " : **" + name[4].replace("\n", "") +
                      "** avec **" + name[3] + " V/D** (" + str(
                          round(
                              int(name[1]) /
                              (int(name[1]) + int(name[2])) * 100, 2)) + "%)\n")
-        text += "*+" + str(len(leaderboard) - leaderSize) + " autres joueurs*"
+        text += "*+" + str(len(leaderboard_users) - leaderSize) + " autres joueurs*"
 
-    await ctx.send(text)
-
-
-@bot.command()
-async def rank(ctx):
-    await classement(ctx)
+    await ctx.response.send_message(text)
 
 
-@bot.command()
-async def monRang(ctx):
+@bot.tree.command(name="rank", description="Affiche le rang d'une personne au Puissance 4")
+async def rank(ctx: discord.Interaction, user: typing.Optional[discord.Member]):
     file = open("txt/leaderboard.txt", "r+")
-    leaderboard = file.readlines()
+    leaderboard_users = file.readlines()
     file.close()
-    for i in range(len(leaderboard)):
-        leaderboard[i] = leaderboard[i].split("-")
+    for i in range(len(leaderboard_users)):
+        leaderboard_users[i] = leaderboard_users[i].split("-")
 
-    for i in range(len(leaderboard)):
-        if str(ctx.author.id) in leaderboard[i]:
-            await ctx.send(
-                f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des victoires,"
-                f" avec **{leaderboard[i][1]} victoires** !")
+    user_id = user.id if user is not None else ctx.user.id
+
+    for i in range(len(leaderboard_users)):
+        if str(user_id) in leaderboard_users[i]:
+            await ctx.response.send_message(
+                f"@{user_id} est **{str(i + 1)}e/{len(leaderboard_users)}** des victoires,"
+                f" avec **{leaderboard_users[i][1]} victoires** !")
             break
-    leaderboard.sort(reverse=True, key=lambda score: float(score[3]))
-    print(leaderboard)
-    for i in range(len(leaderboard)):
-        name = leaderboard[i]
-        if str(ctx.author.id) in name:
+    leaderboard_users.sort(reverse=True, key=lambda score: float(score[3]))
+
+    for i in range(len(leaderboard_users)):
+        name = leaderboard_users[i]
+        if str(user_id) in name:
             await ctx.send(
-                f"Tu es **{str(i + 1)}e/{len(leaderboard)}** des ratios,"
+                f"@{user_id} est **{str(i + 1)}e/{len(leaderboard_users)}** des ratios,"
                 f" avec **{name[3]} V/D**"
                 f" ({str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))}%) !"
             )
             print(round(33.3333333333333333, 2))
             return
-    await ctx.send(
+    await ctx.response.send_message(
         "Mmmmh... Tu n'es pas dans le classement, essaies de jouer !")
 
 
-@bot.command()
-async def myRank(ctx):
-    await monRang(ctx)
+@bot.tree.command(name="github", description="Tiens prends mon lien github")
+async def github(ctx: discord.Interaction):
+    await ctx.response.send_message("Mais avec plaisir !\nhttps://github.com/NozyZy/Le-ptit-bot")
 
 
-@bot.command()
-async def github(ctx):
-    await ctx.send("Mais avec plaisir !\nhttps://github.com/NozyZy/Le-ptit-bot")
-
-
-@bot.command()
-async def ask(ctx):
-    text = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "")
-    text.replace("’", "")
+@bot.tree.command(name="ask", description="Déclenche une petite activité aléatoire")
+async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A demandé '{text}' - {ctx.guild.name} : ",
+        f">>({ctx.user.name} {time.asctime()}) - A demandé '{text}' - {ctx.guild.name} : ",
         end="",
     )
-
-    if text == "":
-        await ctx.send("Pose une question andouille")
+    if text == "" or text is None:
+        await ctx.response.send_message("Pose une question andouille")
         return
 
     if len(text) < 4:
-        await ctx.send("Je vais avoir du mal à te répondre là 🤔")
+        await ctx.response.send_message("Je vais avoir du mal à te répondre là 🤔")
         return
 
     if text[len(text) - 1] != "?":
-        await ctx.send("C'est pas une question ça tu sais ?")
+        await ctx.response.send_message("C'est pas une question ça tu sais ?")
         return
 
     counter = 0
     for letter in text:
         counter += ord(letter)
 
-    counter += ctx.author.id
+    counter += ctx.user.id
 
     responses = [
         "Bah oui",
@@ -2859,17 +2847,20 @@ async def ask(ctx):
         "Absolument pas. Non. Jamais.",
         "Demande à ta mère",
         "Bientôt, tkt frr",
-        "https://tenor.com/view/well-yes-but-actually-no-well-yes-no-yes-yes-no-gif-13736934",
+        "https://media.tenor.com/iOoe4V8Va6YAAAAM/well-yes-but-actually-no-meme.gif",
         "Peut-être bien écoute",
         "Carrément ma poule",
+        "VREUUUUUUMENT pas",
+        "Oublie ça tout de suite",
+        "Bah bien sûr, pourquoi tu demandes enfin ?"
     ]
 
-    await ctx.send(responses[counter % len(responses)])
+    await ctx.response.send_message(f"> {text}\n" + responses[counter % len(responses)])
     print(responses[counter % len(responses)])
 
 
-@bot.command()
-async def skin(ctx):
+@bot.tree.command(name="skin", description="Minecraft ?")
+async def skin(ctx: discord.Interaction):
     url = "https://mskins.net"
     response = requests.get(url + "/en/skins/random")
     soup = BeautifulSoup(response.text, "html.parser")
@@ -2894,10 +2885,11 @@ async def skin(ctx):
     )
     embed.set_image(url=url + img)
     embed.set_footer(text="%s - by mskins.net" % author)
-    await ctx.send("Get skinned", embed=embed)
+    await ctx.response.send_message("Get skinned", embed=embed)
 
-@bot.command()
-async def panda(ctx):
+
+@bot.tree.command(name="panda", description="🐼")
+async def panda(ctx: discord.Interaction):
     url = "https://generatorfun.com"
     response = requests.get(url + "/random-panda-image")
     soup = BeautifulSoup(response.text, "html.parser")
@@ -2914,15 +2906,52 @@ async def panda(ctx):
     )
     embed.set_image(url=url + "/" + img)
     embed.set_footer(text="panda - by generatorfun.com")
-    await ctx.send("🐼", embed=embed)
+    await ctx.response.send_message("🐼", embed=embed)
 
-ips = list(range(3, 40)) + list(range(80, 150))
+
+@bot.tree.command(name="chat", description="😺")
+async def panda(ctx: discord.Interaction):
+    url = "https://api.thecatapi.com/v1/images/search?limit=1"
+
+    try:
+        response = requests.get(url)
+
+        cat_url = response.json()[0]["url"]
+
+        embed = discord.Embed(
+            title=random.choice(["Take that cat", "Meow", "Je préfère les chiens, mais bref vasy", "A quand les pandas ?", "Regarde comme il est pips", "j'suis sur qu'il est gros"]),
+            color=0xffffff,
+            url=cat_url,
+        )
+        embed.set_author(
+            name=ctx.user.display_name,
+            icon_url=ctx.user.avatar.url,
+        )
+        embed.set_image(url=cat_url)
+        embed.set_footer(text="chat - by thecatapi.com")
+        await ctx.response.send_message("😺", embed=embed)
+    except requests.exceptions.RequestException as e:
+        await ctx.response.send_message("Pas de chat, j'ai un problème... Désolé :(")
+
 
 @bot.command()
-async def dhcp(ctx, iprange: str):
+async def dhcp(ctx, ip_range: str):
+    import ipaddress
+
+    try:
+        network = ipaddress.IPv4Network(ip_range)
+        ips = [str(ip) for ip in network]
+        gateway = ips.pop(0)
+    except ipaddress.AddressValueError:
+        ctx.send("Tu sais ce que c'est un CIDR ? En gros mets une IP et son masque quoi #IngénieurInformaticien (eg. 192.168.1.0/24")
+        return
+    except ValueError as e :
+        ctx.send("Je pense que tu t'es trompé sur ta range IP mon grand... : ", e)
+        return
+
     if ips:
         message = "Réagis avec ✅ pour obtenir une ip !"
-        totalTime = 3
+        totalTime = 45
         timeLeft = totalTime
         firstMessage = await ctx.send(
             f"Réagis avec ✅ pour obtenir une ip ! Il reste {timeLeft} sec")
@@ -2936,7 +2965,7 @@ async def dhcp(ctx, iprange: str):
             timeLeft -= 1
             await firstMessage.edit(content=message +
                                     f" Il reste {str(timeLeft)} sec")
-        await firstMessage.edit(content="Haha ya plus d'IP !")
+        await firstMessage.edit(content="Haha y'a plus d'IP !")
 
         firstMessage = await firstMessage.channel.fetch_message(firstMessage.id)
         users = set()
@@ -2952,52 +2981,48 @@ async def dhcp(ctx, iprange: str):
             - Paramètres **IP** : modifier
         - Manuel
         - IPv4 : **activé**
-        - Adresse ip **{0}.{1}**
+        - Adresse ip **{0}**
         - **SI WINDOWS 11 :**
-            - Préfixe sous-réseaux : **255.255.255.0**
+            - Préfixe sous-réseaux : **{1}**
         - **SI WINDOWS 10 :**
-            - Longueur du préfixe sous-réseaux : **24**
-        - Passerelle : **10.10.51.1**
+            - Longueur du préfixe sous-réseaux : **{2}**
+        - Passerelle : **{3}**
         """
 
-        for i in range(5):
-            for user in users:
-                ip = ips.pop(0)
-                await user.send(text.format(iprange, ip))
+        for user in users:
+            ip = ips.pop(0)
+            await user.send(text.format(ip, network.netmask, network.prefixlen, gateway))
     else:
         await ctx.send("Sah ya plus d'IP")
 
 
-@bot.command()
-async def activity(ctx):
-    args = ctx.message.content.replace(str(ctx.prefix) + str(ctx.command), "").strip()
-    participants = 0
-    if len(args) > 0 and args.isnumeric() and int(args) > 0:
-        participants = int(args)
-    url = "https://www.boredapi.com/api/activity"
+@bot.tree.command(name="activity", description="Déclenche une petite activité aléatoire")
+async def activity(ctx: discord.Interaction, participants: int):
+    url = "https://bored-api.appbrewery.com/filter"
     if participants > 0:
         url += f"?participants={participants}"
 
-    response = requests.get(url)
-    json_p = response.content.decode('utf-8')
-    activity = json.loads(json_p)
-    author = ctx.message.author.display_name
-    embed = discord.Embed(
-        title=activity['activity'],
-        color=0xECCE8B,
-        url=activity['link'],
-    )
-    embed.add_field(name="Type", value=activity['type'])
-    embed.add_field(name="Participants", value=activity['participants'])
-    embed.add_field(name="Difficulty", value=str(100*(1-activity['accessibility'])) + "%")
-    embed.set_author(
-        name=author,
-        url=url,
-        icon_url=
-        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
-    )
-    embed.set_footer(text="provided by boredapi.com")
-    await ctx.send("Use `--activity <nb>` to chose participants", embed=embed)
+    try:
+        response = requests.get(url)
+        activity = random.choice(response.json())
+        author = ctx.user.display_name
+        embed = discord.Embed(
+            title=activity['activity'],
+            color=0xECCE8B,
+            url=activity['link'],
+        )
+        embed.add_field(name="Type", value=activity['type'])
+        embed.add_field(name="Participants", value=activity['participants'])
+        embed.set_author(
+            name=author,
+            url=url,
+            icon_url=
+            "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+        )
+        embed.set_footer(text="provided by bored-api.appbrewery.com")
+        await ctx.response.send_message(embed=embed)
+    except json.decoder.JSONDecodeError:
+        await ctx.response.send_message("Nan ca fonctionne, pas avec ces arguments à prior, c'est balo", ephemeral=True)
 
 @bot.command()
 async def sync(ctx):
@@ -3008,4 +3033,6 @@ async def sync(ctx):
     else:
         await ctx.send('You must be the owner to use this command!')
 
-bot.run(secret.TOKEN)
+print("\n############\nDEV MODE\n############\n" if args.dev else "\n############\n/!\\ PRODUCTION MODE /!\\\n############\n")
+TOKEN = os.getenv('DEVELOPMENT_TOKEN') if args.dev else os.getenv('PRODUCTION_TOKEN')
+bot.run(TOKEN)
