@@ -30,6 +30,28 @@ nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
 tgFile.close()
 
+# Load server names from file
+def load_server_names():
+    try:
+        with open("txt/server_names.txt", "r") as f:
+            lines = f.readlines()
+            names = {}
+            for line in lines:
+                if ":" in line:
+                    server_id, name = line.strip().split(":", 1)
+                    names[server_id] = name
+            return names
+    except FileNotFoundError:
+        return {}
+
+# Save server names to file
+def save_server_names(server_names):
+    with open("txt/server_names.txt", "w") as f:
+        for server_id, name in server_names.items():
+            f.write(f"{server_id}:{name}\n")
+
+server_names = load_server_names()
+
 GUILD_IDS = [
     410766134569074691,
     1193546302970146846,
@@ -53,6 +75,15 @@ async def on_ready():
         except Exception as e:
             print(f"\t- Failed for {guild_id}, reason : {e}")
     print("------")
+    
+    # Apply saved names to servers
+    for guild in bot.guilds:
+        if str(guild.id) in server_names:
+            try:
+                await guild.me.edit(nick=server_names[str(guild.id)])
+                print(f"Applied saved name '{server_names[str(guild.id)]}' to server {guild.name}")
+            except discord.Forbidden:
+                print(f"No permission to change nickname in server {guild.name}")
 
 
 # Get every message sent, stocked in 'message'
@@ -259,6 +290,50 @@ async def on_message(message):
         text = f"J'ai actuellement {str(len(dicoLines))} mots enregistrés, nickel"
         await channel.send(text)
 
+    # rename bot command (admin only)
+    if MESSAGE.startswith("--rename "):
+        if not message.author.guild_permissions.administrator:
+            await channel.send("❌ Seuls les administrateurs peuvent utiliser cette commande.")
+            return
+        
+        new_name = message.content[9:]  # Remove "--rename "
+        if len(new_name) > 32:
+            await channel.send("❌ Le nom ne peut pas dépasser 32 caractères.")
+            return
+        
+        if len(new_name) == 0:
+            await channel.send("❌ Veuillez spécifier un nom. Usage: `--rename NouveauNom`")
+            return
+        
+        try:
+            await message.guild.me.edit(nick=new_name)
+            server_names[str(message.guild.id)] = new_name
+            save_server_names(server_names)
+            await channel.send(f"✅ Mon nom a été changé en '{new_name}' sur ce serveur.")
+            print(f">>({user.name} {time.asctime()}) - A renommé le bot en '{new_name}' sur {message.guild.name}")
+        except discord.Forbidden:
+            await channel.send("❌ Je n'ai pas la permission de changer mon pseudo sur ce serveur.")
+        except discord.HTTPException as e:
+            await channel.send(f"❌ Erreur lors du changement de nom: {e}")
+
+    # reset bot name to default (admin only)
+    if MESSAGE == "--resetname":
+        if not message.author.guild_permissions.administrator:
+            await channel.send("❌ Seuls les administrateurs peuvent utiliser cette commande.")
+            return
+        
+        try:
+            await message.guild.me.edit(nick=None)
+            if str(message.guild.id) in server_names:
+                del server_names[str(message.guild.id)]
+                save_server_names(server_names)
+            await channel.send("✅ Mon nom a été remis par défaut sur ce serveur.")
+            print(f">>({user.name} {time.asctime()}) - A remis le nom par défaut sur {message.guild.name}")
+        except discord.Forbidden:
+            await channel.send("❌ Je n'ai pas la permission de changer mon pseudo sur ce serveur.")
+        except discord.HTTPException as e:
+            await channel.send(f"❌ Erreur lors du reset du nom: {e}")
+
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
@@ -269,6 +344,10 @@ async def on_message(message):
         if "(╯°□°）╯︵ ┻━┻" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - A balancé la table")
             await channel.send("┬─┬ ノ( ゜-゜ノ)")
+
+        if MESSAGE.strip(".;,?! \"')").endswith("lucas"):
+            print(f">>({user.name} {time.asctime()}) - A dit Lucas (goubet)")
+            await channel.send("goubet")
 
         if (MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez")
                 or MESSAGE.startswith("savez vous")
@@ -1181,6 +1260,8 @@ async def on_message(message):
             " **--isPrime** *nb* pour tester si *nb* est premier\n"
             " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
             " **--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
+            " **--rename** *nouveau_nom* pour changer mon nom sur ce serveur (admin only)\n"
+            " **--resetname** pour remettre mon nom par défaut (admin only)\n"
             " **--invite** pour savoir comment m'inviter\n"
             "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈"
         )
