@@ -90,6 +90,7 @@ async def on_ready():
             except Exception as e:
                 print(f"\t- Failed for {guild_id}, reason : {e}")
     else:
+        print("Synchronizing slash commands...")
         try:
             await bot.tree.sync()
         except Exception as e:
