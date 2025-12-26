@@ -3,15 +3,12 @@ import time
 from datetime import date
 
 import discord
-import googletrans
 import requests
 import secret
-import youtube_dl
 import json
 
 from bs4 import BeautifulSoup
 from discord.ext import commands
-from googletrans import Translator
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
@@ -21,17 +18,45 @@ from fonctions import *
 # ID : 653563141002756106
 # https://discordapp.com/oauth2/authorize?&client_id=653563141002756106&scope=bot&permissions=8
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
-client = discord.Client()
+client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
-                   case_insensitive=True)
+                   case_insensitive=True,
+                   intents=intents)
 tgFile = open("txt/tg.txt", "r+")
 nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
 tgFile.close()
 
+# Load server names from file
+def load_server_names():
+    try:
+        with open("txt/server_names.txt", "r") as f:
+            lines = f.readlines()
+            names = {}
+            for line in lines:
+                if ":" in line:
+                    server_id, name = line.strip().split(":", 1)
+                    names[server_id] = name
+            return names
+    except FileNotFoundError:
+        return {}
+
+# Save server names to file
+def save_server_names(server_names):
+    with open("txt/server_names.txt", "w") as f:
+        for server_id, name in server_names.items():
+            f.write(f"{server_id}:{name}\n")
+
+server_names = load_server_names()
+
+GUILD_IDS = [
+    410766134569074691,
+    1193546302970146846,
+    1420660433722802188
+]
 
 # On ready message
 @bot.event
@@ -41,7 +66,24 @@ async def on_ready():
     print("Logged in as")
     print(bot.user.name)
     print(bot.user.id)
+    print("Synchronizing slash commands for guilds :")
+    for guild_id in GUILD_IDS:
+        guild = discord.Object(id=guild_id)
+        try:
+            await bot.tree.sync(guild=guild)
+            print(f"\t- {guild_id}")
+        except Exception as e:
+            print(f"\t- Failed for {guild_id}, reason : {e}")
     print("------")
+    
+    # Apply saved names to servers
+    for guild in bot.guilds:
+        if str(guild.id) in server_names:
+            try:
+                await guild.me.edit(nick=server_names[str(guild.id)])
+                print(f"Applied saved name '{server_names[str(guild.id)]}' to server {guild.name}")
+            except discord.Forbidden:
+                print(f"No permission to change nickname in server {guild.name}")
 
 
 # Get every message sent, stocked in 'message'
@@ -115,12 +157,8 @@ async def on_message(message):
         dicoFile.close()
 
     # stock file full of insults (yes I know...)
-    fichierInsulte = open("txt/insultes.txt", "r")
-    linesInsultes = fichierInsulte.readlines()
-    insultes = []
-    for line in linesInsultes:
-        line = line.replace("\n", "")
-        insultes.append(line)
+    fichierInsulte = open("txt/insultes.txt", "r+", encoding="utf-8")
+    insultes = fichierInsulte.read().split("\n")
     fichierInsulte.close()
 
     # stock file full of branlettes (yes I know...)
@@ -134,7 +172,7 @@ async def on_message(message):
 
 
 
-    if MESSAGE.startswith("--addInsult"):
+    if message.content.startswith("--addInsult"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
         mot = ' '.join(MESSAGE.split()[1:])
         if len(mot) <= 2:
@@ -147,7 +185,7 @@ async def on_message(message):
         print("Nouvelle insulte :", mot)
         await channel.send("Je retiens...")
 
-    if MESSAGE.startswith("--addBranlette"):
+    if message.content.startswith("--addBranlette"):
         print(f">>({user.name} {time.asctime()})", end=" - ")
         mot = ' '.join(MESSAGE.split()[1:])
         if len(mot) <= 2:
@@ -252,6 +290,50 @@ async def on_message(message):
         text = f"J'ai actuellement {str(len(dicoLines))} mots enregistrés, nickel"
         await channel.send(text)
 
+    # rename bot command (admin only)
+    if MESSAGE.startswith("--rename "):
+        if not message.author.guild_permissions.administrator:
+            await channel.send("❌ Seuls les administrateurs peuvent utiliser cette commande.")
+            return
+        
+        new_name = message.content[9:]  # Remove "--rename "
+        if len(new_name) > 32:
+            await channel.send("❌ Le nom ne peut pas dépasser 32 caractères.")
+            return
+        
+        if len(new_name) == 0:
+            await channel.send("❌ Veuillez spécifier un nom. Usage: `--rename NouveauNom`")
+            return
+        
+        try:
+            await message.guild.me.edit(nick=new_name)
+            server_names[str(message.guild.id)] = new_name
+            save_server_names(server_names)
+            await channel.send(f"✅ Mon nom a été changé en '{new_name}' sur ce serveur.")
+            print(f">>({user.name} {time.asctime()}) - A renommé le bot en '{new_name}' sur {message.guild.name}")
+        except discord.Forbidden:
+            await channel.send("❌ Je n'ai pas la permission de changer mon pseudo sur ce serveur.")
+        except discord.HTTPException as e:
+            await channel.send(f"❌ Erreur lors du changement de nom: {e}")
+
+    # reset bot name to default (admin only)
+    if MESSAGE == "--resetname":
+        if not message.author.guild_permissions.administrator:
+            await channel.send("❌ Seuls les administrateurs peuvent utiliser cette commande.")
+            return
+        
+        try:
+            await message.guild.me.edit(nick=None)
+            if str(message.guild.id) in server_names:
+                del server_names[str(message.guild.id)]
+                save_server_names(server_names)
+            await channel.send("✅ Mon nom a été remis par défaut sur ce serveur.")
+            print(f">>({user.name} {time.asctime()}) - A remis le nom par défaut sur {message.guild.name}")
+        except discord.Forbidden:
+            await channel.send("❌ Je n'ai pas la permission de changer mon pseudo sur ce serveur.")
+        except discord.HTTPException as e:
+            await channel.send(f"❌ Erreur lors du reset du nom: {e}")
+
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
@@ -262,6 +344,10 @@ async def on_message(message):
         if "(╯°□°）╯︵ ┻━┻" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - A balancé la table")
             await channel.send("┬─┬ ノ( ゜-゜ノ)")
+
+        if MESSAGE.strip(".;,?! \"')").endswith("lucas"):
+            print(f">>({user.name} {time.asctime()}) - A dit Lucas (goubet)")
+            await channel.send("goubet")
 
         if (MESSAGE.startswith("tu sais") or MESSAGE.startswith("vous savez")
                 or MESSAGE.startswith("savez vous")
@@ -308,6 +394,12 @@ async def on_message(message):
             text = "8" + "=" * random.randint(0, int(
                 today.strftime("%d"))) + "D"
             await channel.send(text)
+
+        if MESSAGE == "pouet":
+          await channel.send("Roooooh ta gueuuuuule putaiiiiin")
+
+        if MESSAGE == "poueth":
+          await channel.send("Poueth poueth !! 🐤")
 
         if (MESSAGE.startswith("stop") or MESSAGE.startswith("arrête")
                 or MESSAGE.startswith("arrete") and rdnb > 3):
@@ -376,9 +468,10 @@ async def on_message(message):
 
             # waits for a message valiudating further instructions
             def check(m):
+                print(m.content)
                 return (("3" in m.content or "trois" in m.content)
                         and m.channel == message.channel
-                        and not m.startswith("http"))
+                        and not m.content.startswith("http"))
 
             try:
                 await bot.wait_for("message", timeout=60.0, check=check)
@@ -668,7 +761,7 @@ async def on_message(message):
         for index, word in enumerate(MESSAGE.split(" ")):
             if any(word.startswith(i) for i in di) and word[2] != 'n':
                 msg = MESSAGE.split(" ")[index][2:].replace(",", "").replace(".", "")
-                if len(msg) > 4 and rdnb > 3:  
+                if len(msg) > 4 and rdnb > 3:
                   # random number to avoid "Dit moi" => "t"
                     await channel.send(msg.capitalize() + " !")
                     return
@@ -751,12 +844,16 @@ async def on_message(message):
                     userID += MESSAGE[i]
                     i += 1
                 userID = int(userID)
+            if userID == 890084641317478400 and rdnb >= 3:
+                await channel.send("Lâche l'affaire David")
+                print("C'était David")
+                return
             if userID % 5 != (int(day) + int(month)) % 5:
                 await channel.send("Not today (☞ﾟヮﾟ)☞")
                 print("N'est pas dieu aujourd'hui")
                 return
             user = await message.guild.fetch_member(userID)
-            pfp = user.avatar_url
+            pfp = user.avatar.url
             gods = [
                 [
                     "https://tse4.mm.bing.net/th?id=OIP.IXAIL06o83HxXHGjKHqZMAHaKe&pid=Api",
@@ -791,12 +888,12 @@ async def on_message(message):
                     "Tezcatlipoca",
                 ],
                 [
-                    "https://tse2.mm.bing.net/th?id=OIP.8hT9rmQRFhGa11CTdXXPQAHaJ6&pid=Api",
+                    "https://www.spiritmiracle.com/wp-content/uploads/2023/04/goddess-venus-cupid.jpg",
                     "Venus",
                 ],
                 [
-                    "https://c.tenor.com/nMkmGwGH8s8AAAAd/elon-musk-smoke.gif",
-                    "Elon Musk",
+                    "https://image.tensorartassets.com/cdn-cgi/image//posts/images/613335434814121629/5f9b14dc-12f8-45f4-8cfd-8fb38dc3cb02.jpg",
+                    "God zilla",
                 ],
                 [
                     "https://www.writersandy.com/uploads/1/2/5/4/12545559/published/goddess-inanna2.jpg?1524448024",
@@ -816,7 +913,7 @@ async def on_message(message):
                 ],
                 [
                     "https://i.redd.it/7q9as4hojtd61.jpg",
-                    "Apollo (Supreme god)",
+                    "Apollo",
                 ],
                 [
                     "https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg",
@@ -878,6 +975,18 @@ async def on_message(message):
                     "https://i.pinimg.com/originals/01/61/ec/0161ecc12f56d0310f332d6e2714bd6c.png",
                     "Marduk",
                 ],
+                [
+                    "https://static.wikia.nocookie.net/villains/images/7/72/Lovecraft-cthulhu.jpg/revision/latest?cb=20151128095138",
+                    "Cthulhu",
+                ],
+                [
+                    "https://tolkiengateway.net/w/images/4/48/Elena_Kukanova_-_Vana_the_Ever-Young.jpg",
+                    "Vána",
+                ],
+                [
+                    "https://static.wikia.nocookie.net/dragonball/images/7/7d/BeerusWikia_%283%29.jpg/revision/latest?cb=20240224003806",
+                    "Beerus",
+                ]
             ]
             embed = discord.Embed(
                 title="This is God",
@@ -933,14 +1042,14 @@ async def on_message(message):
             print(f">>({user.name} {time.asctime()}) - LEEROOOOOOOOOOYY")
             await channel.send(file=discord.File("sounds/Leeroy Jenkins.mp3"))
 
-        if "pute" in MESSAGE and rdnb > 4:
-            print(f">>({user.name} {time.asctime()}) - Le pute")
-            reponses = [
-                "https://tenor.com/view/mom-gif-10756105",
-                "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
-                "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg",
-            ]
-            await channel.send(random.choice(reponses))
+       # if "pute" in MESSAGE and rdnb > 4:
+       #     print(f">>({user.name} {time.asctime()}) - Le pute")
+       #     reponses = [
+       #         "https://tenor.com/view/mom-gif-10756105",
+       #         "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
+       #         "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg",
+       #     ]
+       #    await channel.send(random.choice(reponses))
 
         if "guillotine" in MESSAGE:
             print(f">>({user.name} {time.asctime()}) - Le guillotine")
@@ -986,6 +1095,150 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
+    if MESSAGE.capitalize().startswith("Tralalero"):
+        await channel.send("Tralala")
+    if MESSAGE.capitalize().startswith("Bombardiro"):
+        await channel.send("Crocodilo")
+    if MESSAGE.capitalize().startswith("Tung"):
+        await channel.send("Tung Tung Tung Tung Tung Tung Tung Tung Sahur")
+    if MESSAGE.capitalize().startswith("Lirilì"):
+        await channel.send("Larilà")
+    if MESSAGE.capitalize().startswith("Boneca"):
+        await channel.send("Ambalabu")
+    if MESSAGE.capitalize().startswith("Brr"):
+        await channel.send("Brr Patapim")
+    if MESSAGE.capitalize().startswith("Chimpanzini"):
+        await channel.send("Bananini")
+    if MESSAGE.capitalize().startswith("Bombombini"):
+        await channel.send("Gusini")
+    if MESSAGE.capitalize().startswith("Capuccino"):
+        await channel.send("Assassino")
+    if MESSAGE.capitalize().startswith("Trippi"):
+        await channel.send("Troppi")
+    if MESSAGE.capitalize().startswith("Frigo"):
+        await channel.send("Camelo")
+    if MESSAGE.capitalize().startswith("Ballerina"):
+        await channel.send("Cappucina")
+    if MESSAGE.capitalize().startswith("Trulimero"):
+        await channel.send("Trulicina")
+    if MESSAGE.capitalize().startswith("Girafa"):
+        await channel.send("Celestre")
+    if MESSAGE.capitalize().startswith("Bobrito"):
+        await channel.send("Bandito")
+    if MESSAGE.capitalize().startswith("Frulli"):
+        await channel.send("Frulla")
+    if MESSAGE.capitalize().startswith("Brri"):
+        await channel.send("Brri Bicus Dicus Bombicus")
+    if MESSAGE.capitalize().startswith("Tric"):
+        await channel.send("Trac Baraboom")
+    if MESSAGE.capitalize().startswith("Cocofanto"):
+        await channel.send("Elefanto")
+    if MESSAGE.capitalize().startswith("Burbaloni"):
+        await channel.send("Lulilolli")
+    if MESSAGE.capitalize().startswith("Orangutini"):
+        await channel.send("Ananasini")
+    if MESSAGE.capitalize().startswith("Garamararamararaman"):
+        await channel.send("dan Madudungdung tak tuntung perkuntung")
+    if MESSAGE.capitalize().startswith("Blueberrinni"):
+        await channel.send("Octopussini")
+    if MESSAGE.capitalize().startswith("Rhino"):
+        await channel.send("Toasterino")
+    if MESSAGE.capitalize().startswith("Zibra"):
+        await channel.send("Zubra Zibralini")
+    if MESSAGE.capitalize().startswith("Graipussi"):
+        await channel.send("Medussi")
+    if MESSAGE.capitalize().startswith("Tigrrullini"):
+        await channel.send("Watermellini")
+    if MESSAGE.capitalize().startswith("Tracotucotulu"):
+        await channel.send("Delapeladustuz")
+    if MESSAGE.capitalize().startswith("Gorillo"):
+        await channel.send("Watermellondrillo")
+    if MESSAGE.capitalize().startswith("Bananita"):
+        await channel.send("Dolfinita")
+    if MESSAGE.capitalize().startswith("Tigroligre"):
+        await channel.send("Frutonni")
+    if MESSAGE.capitalize().startswith("Ballerino"):
+        await channel.send("Lololo")
+    if MESSAGE.capitalize().startswith("Crocodildo"):
+        await channel.send("Penisini")
+    if MESSAGE.capitalize().startswith("Špijuniro"):
+        await channel.send("Golubiro")
+    if MESSAGE.capitalize().startswith("Elephantuchi"):
+        await channel.send("Bananuchi")
+    if MESSAGE.capitalize().startswith("Crocodillo"):
+        await channel.send("Ananasinno")
+
+    if "brainrot" in MESSAGE or "italian" in MESSAGE:
+        brainrots = [
+            {"name": "Tralalero Tralala", "img": "https://i.namu.wiki/i/Xx4c8zAsZSl_4MPCne2ehJGXkxHfLVevSusjY3nVYTGo6qWtCVlia9OCGo9H6dpl22yROFQY2kjq7SkgMyiSUFZdw1uN-itHSOzFo21_xG8Yn08BchnoUkd1I2Lhx81jIwkYzYpKo6WgqYcrTeaUMQ.webp"},
+            {"name": "Bombardiro Crocodilo", "img": "https://i.namu.wiki/i/tDuYiBQRDatd0hIa65v0Q-qWASSh7UI1A9SYkvtF1UybnJvqFU_IGpmkAB_8rlhEZcJVK-inmcK9h4oPEREEJn5-5Ku0LUDlarjM_hsWxoJWYvDsvMxN_hV80nHOOm4lVs-8Sk6SoEoDxn5ih-ShGg.webp"},
+            {"name": "Tung Tung Tung Tung Tung Tung Tung Tung Tung Sahur", "img": "https://i.namu.wiki/i/-YZ0x_wWyQ2z92YKH1hTYwuJQCPJw1TE6zt5q7evVOyAW-k1pXxNWp6VXpNMI_RSfpbPcKsaKEbLGXVADX5zaebZmasNey0DOH9yhopRXX5wPT3KocHxhRLSQ-AYPL_rCeyZamTxN0WN3LzaVMxahA.webp"},
+            {"name": "Lirilì Larilà", "img": "https://i.namu.wiki/i/dbL-iw2P5t7mGWYIAHKWAn5EIYhcAKwYyeCjoWQWqCIcPr0T4a0svt21GzQVAzUWISnr2U_2U90S_i--14dLyF0zx1wXrMCw3IL6CI1tPGa_3pXV82OWUXVoYcJnz8QNyGCVZ27X1psrSdaanFdebQ.webp"},
+            {"name": "Boneca Ambalabu", "img": "https://i.namu.wiki/i/5W9RGh81s6LNY4lZhT65tnbT_9oRiZaHy0kvsajWBZBk9CNQCobnNB9Q_K2TCsP4VrTufhr6LuP0Emj0g8RohJz10W-WjHzPAJcb0ACpiGPGc7kWsrjWx5nmapJcc2M7gTacge6ZwAn8I1lmy_7JlQ.webp"},
+            {"name": "Brr Brr Patapim", "img": "https://i.namu.wiki/i/PccZl7Dts7ykLg5Gl2HGZWAP5vuU74lQHzJ6QBHHBlGmnS5WU7nq-f7muafQtm8lmAu9weOI8fP_FkJ_2WBo2Or9asEWpKqZ0Wh8h8ZxRLy836g997Ew7WQ3l2PW5xqHmNv4vwzfpzqs3Rz41sANyA.webp"},
+            {"name": "Chimpanzini Bananini", "img": "https://i.namu.wiki/i/49pkt4yi1RO-lKVdrxBNSbMMnbPd38Vo4IV-dSdPnt0gHlydhIkrQHqaEtRSM4c_nyGXyYL5woaEqvQZL2A3TYnizNXvO8MTYbh4PEB9xOC3UPudV5lqlX6xNQ_bFOPyPftbvZ0c7YI9ALsGTvfSFQ.webp"},
+            {"name": "Bombombini Gusini", "img": "https://i.namu.wiki/i/NSbDg0Cb8yiySnaL2SYntIwxriTr4HmeowtJwH_s2YX-HBxDhxPRCEZ0ea6_-FuAqu7BdA_RQqwdubg0G5yYiEsuKueysUZF28_RE2P18wjpLhv55Hu2j1Iut1noltjVWofh_KWnmyf5pfVlnXmIvw.webp"},
+            {"name": "Cappuccino Assassino", "img": "https://i.namu.wiki/i/rggVL2LkfRxNMc0PQODWdH4x-I_KEIaJTznCs5egmZe96KjJlABkq3pQWaMr9p_zrfUw3-bEqvisfw71YPLMSEbU1RcFGgnRBTzh4UXGN8cjKXcRHLfLC-ViPDxUWltYCUxrRr-fvU8ygSoUxrQvMg.webp"},
+            {"name": "Frigo Camelo", "img": "https://i.namu.wiki/i/391NIeZunfajIGAPH1xfALBtP65uh8sqIu2UjQFC70OYt1oYrkntplWaJDkn7D58KmuFTVmdp4DGnWAMMCoEsGDJzCVHiFnCi6dKjm4D0OeHZsMXm7cEVVWPaCXfoMJW0kl_USiEox27CTQ6_-Pe8A.webp"},
+            {"name": "La Vaca Saturno Saturnita", "img": "https://i.namu.wiki/i/W4lHNC4WJ9dBjbVFcTFpsR4A2Pg_LIvr09xCf4vCYQMbiWRIsg023TWI_svmjL3DHtIRh8U1T-RVwvSjMlZt6GhzVjVSSGFhPIeMkwo86rSSMk4bNemEqmoy9upGT9mtG9gSygm0o0fk_EGnSkFbJA.webp"},
+            {"name": "Ballerina Cappuccina", "img": "https://i.namu.wiki/i/yzm1X6PvZRc36cNhgT1xxD4QwniE7UUZHIwbVesAI7rYy5VreFFB0IxUngc76qHZ1qQo63Bh6OmUeXmc_vOSAX51VFrj0qeHHogTw5SD2teN8N0LTtwNnEpfRby8gU-hoFQpdGl95T3l6awIIDHt_A.webp"},
+            {"name": "U Din Din Din Din Dun Ma Din Din Din Dun", "img": "https://i.namu.wiki/i/cq6ASoJxVvPvV0IRNyfRGOkcYAQRIkPWil69Zyjgg267HFSMRIKt25C4XBZVEkeSA8HgFSf9okD28LuQ7_AOwA-MshZfSKIlhX_CtAQ6OzNvECyRWNAAkM5eVfScK7Cu7zGKSGphit3Ko8vzQP9naw.webp"},
+            {"name": "Trulimero Trulicina", "img": "https://i.namu.wiki/i/q05gfcRKrv24JlKynBNbsSBuxz7WxMlXROoK1HoSpndeUzJrKv5Yz4JATcjKmuAWD2hHl0s46t43Sd0xlGHoUiV7aT5k3ZRVWSrTpLvo7XiZZUjDif4HWvm5ZLWxIkwnvW4h-A-7Rh_m55YIexoMlg.webp"},
+            {"name": "Girafa Celestre", "img": "https://i.namu.wiki/i/JOhT5BefVgf5DG7Hs8c8kZqv9c5GHC8rOtdHnQMFBiouWJ_lk7Jfc5xd2AEq4_9jkmTU3EuPH39utI3KBcLYzIWr09X94clgClO-lscS_q6Hur-EtJDpHn3y2SykserZhZg_36X7M8x6WAFCoVlbBg.webp"},
+            {"name": "Bobrito Bandito", "img": "https://i.namu.wiki/i/xUB-o7rksj-QM-sG1G5z0MxUN-doo4YGbZFqdX4yxcsC0gt1ucq7tgmHM_VYfD2T8o30nQHAkVHc4_EqVWFxOvlsxyY1nOm64gnpslCEmItn8ooIMIIBGcWy-sLuy0UaVWBT_XP7LeYTIhhJ_cSWvA.webp"},
+            {"name": "Frulli Frulla", "img": "https://i.namu.wiki/i/EvPlhewaa6TNqZ1szVppY4S-9qA4P_1vxbr54tCZonP-Wuedom_4GqpH4N18yd526KuQbTxo0BR8kdVOB1rEg4isItDXwGeAqjvhRdw9gl7b80W3xZYobUqZco71x3Uyn5vnsd6FFFuLqbCYOQXo5A.webp"},
+            {"name": "Ta Ta Ta Ta Ta Ta Ta Ta Ta Ta Ta Sahur", "img": "https://i.namu.wiki/i/m-9jVfTspmRX4zNNfh5jYaRL8fgYI0bXhkXuEMlN_k0lVngy4JVTdeqUoRe_6AcWBsF38zOFeJiYrYlC71YG6uzQBi97qmt07vb5ZDo0GYb22IMmWjHExc1Ed6QpHqe-dYbOenk5_PJvwe1hjE0fAA.webp"},
+            {"name": "Brri Brri Bicus Dicus Bombicus", "img": "https://i.namu.wiki/i/xwdTlKJqM_fgN0YysgB6YXWowr9NdVTXX2S0CQRsOuia9fULQCT61B3PSxpYplG8_amw5tnP9OHW9uDaLS1A9M0wsj0LWOIMkf9i6ZcNz4mDBGNY9-VJjQUNKFdGpD9BxyQ65cn5wRO2r7cg7UfGyg.webp"},
+            {"name": "Tric Trac baraboom", "img": "https://i.namu.wiki/i/-UX1lW3G9HQl5nLGBbcFaKULQbO-ry5iSQORQApRoBjJ9y7FSydIIy1YJwEU-vNPnGihbNq8MqIMVqT826n-QXoU-fnhej9E2OxpGEH5emjZSpxMOQMJ6u5UJFzEUTUouCWtBtvmJsHUei6bEABQJA.webp"},
+            {"name": "Cocofanto Elefanto", "img": "https://i.namu.wiki/i/pyia2JHQAqDT3BYFUs9yM1FrpR7sH0vE_thixD0kEMFPqIHnEH22B3elVxOidI4tn00uYSCJVvbiOmfy3343YC5gYu7MtIWC-SJBrrsuFfpKJrmSez1S5IX6mV0nThvJM5En4AVD5xQAAo2Ordniyw.webp"},
+            {"name": "Burbaloni Lulilolli", "img": "https://i.namu.wiki/i/UYcxP-mxt7BqXDJJRCLUnVtbVj69-96MkhYuLC_kP_QTxvWqkCzuKfn_TnFpG_3bjzQEfBuagjsz6ImmWxAqFhRh7K7OKhxpj6XcVhYO0UFSDce9FatCaioVDeLmx4Q5aWYpmLTeq_WSgyHXQfe4jg.webp"},
+            {"name": "Orangutini Ananasini", "img": "https://i.namu.wiki/i/DXM5l6EtDzjJtUzCRK_ALP5jZvEc3h_xQBM4ALGRyhHwICpfa8KIH-7Cp_k89_BWvZikce_-4E6ZN119kM3B83-zBUcyOduQ-EDdUGLsOyoJ8kfxSYq5d3hjCcgFsV7KBXV3mQZZ0sIDwRd3bpSlpg.webp"},
+            {"name": "Il Cacto Hipopotamo", "img": "https://i.namu.wiki/i/RQ9OdtOU87LLkw3vtzlV-vMPgol71hLzlopOQu9fCGqbi34fMPRkH1zmohkwzeB4ul38O7fM17Yhrr7Ld_k4Lla6lQct7infhd4RX7lwocc89EjF4XdWNlZWckr3swedq75Pd6-tPc4TxFsbjGOYKw.webp"},
+            {"name": "Blueberrinni Octopussini", "img": "https://i.namu.wiki/i/qyB8WrUykCqdofXbBRrU3YUqG-54YivrSpVkI8HfkkGE0f77QvFynFjkDZZevsaCndymh0EJq_qJ7YEgD9w2vmmuzxV78GtSWfhev_K5t-wzBkMmWyFe_ZBWMNdau3_HwHPxPME1HhC5vJ69TT0taA.webp"},
+            {"name": "Glorbo Fruttodrillo", "img": "https://i.namu.wiki/i/QPGeJpiRG4RVUnNxBM0k01wQHSVVDWihyuUF876jftkt512vetssWGg0G1ziCSKe1zTXKJEnCCjpzSFj0Zz5KMzoKPFQJhheqMMM7AwCEkO4OrADnMA84e_ZeAViuQUjZRgtXrLjdjbd21w6awLoLg.webp"},
+            {"name": "Rhino Toasterino", "img": "https://i.namu.wiki/i/BgSNGA9KzuCYiDxaspVbG4-cGuRFvG_rZbXmONKjRPje08JDRipjnW2_wwglzBkCLYzSgCa7c8D0A4ojuxvkR3c514GFKAHazzlbUu1FHhTE9J7q3IDRhytCG4wl-RJ5it627zzYVW4rb4yC_BBVHQ.webp"},
+            {"name": "Zibra Zubra Zibralini", "img": "https://i.namu.wiki/i/Nr-f89621tXOSrFqcOpfqpSS3wRuxrNjqC8uRylUoFmDHX0BfUq7Skv0VG3IjT5P-0Dbnls6J_bj0AKaS65YuMLgCUozTGqaZXiW74bmILqJjONohzTTGrMV8pDnWW3WN_uxvPcuOFo1WkkLrolBKw.webp"},
+            {"name": "Graipussi Medussi", "img": "https://i.namu.wiki/i/3BtP9lthfQy_ogTnzikskfnTlQshcNGJFiTOvlmtAwegxxGWP8sj9YsAe5bObvH3sXw0pV9tMTjG8NfGHqQmuwG1lPa70oi43eMUdidnVehwu6iHk1DzRLnRRQczX2VX2A1v91gkPxpu5bR8BqwQ-g.webp"},
+            {"name": "Tigrrullini Watermellini", "img": "https://i.namu.wiki/i/ZC7-STZmiF5-vZ54MueDIcixWk55ljrvGFY67ETw9kK5MN3TdJRwfRfYL1BreWHZ9FTg44r52v3DYtPnvNCZFMJBwEeU-J5vZUbNfhvHRSa-iCWQFhgw8xuKCcyDjxBOmQEyAE5mZwQ17GKRRz_MPA.webp"},
+            {"name": "Tracotucotulu Delapeladustuz", "img": "https://i.namu.wiki/i/TBSB0PIlWOrt-6iJuVAlaEYV0zm1MBlgz-VdP8Q9iepDX7OLDvQ6U9xvPLQCQtrVQ8qGcyJ46KXDfr1IljlzT-f7XbCTpeE1wi7Mi6pe4bPeLVDGAM_9_YFY7MTEli-6VyCAtvuuuEwAznkHgqFb4Q.webp"},
+            {"name": "Gorillo Watermellondrillo", "img": "https://i.namu.wiki/i/qPtR_6vBLXJqBzeENJpFJU7sPFi1z6ij_E57c3NiaDu3yL8Dg5ZL6PF6K2ygAa0KBmggawSAglQiXldStCIx0TQTwaIXNzW9_bVD5NrGOL-cibNeM_1dnd438-NVieKAD4wRywRU41TDdNNyCPbUlA.webp"},
+            {"name": "Bananita Dolfinita", "img": "https://i.namu.wiki/i/DOt7KayBkCvrstXxe7poCe5oBKAo_5sitp9po9YkMXmWsuPyallRQTLaJxUvkvEItdL21kd2pq2UFzNRm0D96nkUJ2VfvMMKIK465WIA1qaOls9y3Y0rJ5gA07Yehtg-P4a8TH4QMmquXgxCz4qZeA.webp"},
+            {"name": "Tigroligre Frutonni", "img": "https://i.namu.wiki/i/j4b_PPAS8H5IWSWaymOfCBFy_1V7N5GA75Uz731KTMwOmlcV0pjQYbt8e7QTHf3hzKrhMMW38wqInz6DrW-ASse9dC3MFrJJboWdUVtKbtB6rL8zsvNVWLIHp5ForaPFl3oK5BF0h_r1wcdUTjL-nA.webp"},
+            {"name": "Ballerino Lololo", "img": "https://i.namu.wiki/i/EEplz4eBQ87WL3zfjKXlCc2sh-PWc7DN5DGCAdoaeSy0XFV2OpbwOjGIil1KwlMOLccbHmiRMbX7iFZ226Q-Aj7UejvoQy71j71ZIBHoUX1R7kdkbpwebbfrUYN_6ttLWoz1L3Kj_SpRMXBu6Dx-oQ.webp"},
+            {"name": "Crocodildo Penisini", "img": "https://i.namu.wiki/i/sv5wFVzFpFgkWj5b86p0-TEIW2K1XaGcBNCCNBIT0jNsn--i0NdvrrI9D5bcdjgKRIKkfqbg3EYMt8QfzsjStalHaRBbfJ0ZqGyB3l9de1XJNhEKJ5r3SCs1yqOSEGSUSXgAzR1QTKlwfulIUCv8kw.webp"},
+            {"name": "Matteooooooooooooo", "img": "https://i.namu.wiki/i/x_KXXRuSH8SUSLPiDBnKKoKEA4wlVusBOYk_PoKn2WOAP56spIJ3HjQ8CnX3IYmd2-3nuZvKi5O9rLNWMepRL67QBF7szQOuSEYfkGFv1Jnp5P7ZUcWGhPB8gPRWQ4MVTwL8NbdStlHzeeWhUcGAfg.webp"},
+            {"name": "Špijuniro Golubiro", "img": "https://i.namu.wiki/i/KamQxFAa5Hh6LkFe6lF71drZpDAohwfj7Wn_3Hf9laO36a-cyZ4XVpOC70S4CRkqSJcd32M-uvxWHqZ1dXRx7S_dw6gegmd7Ha9RbLAb3N5_zgUc1VjZFCpFMPIMuRe2KTmQ9HRgqguWmPBywtdK7w.webp"},
+            {"name": "Elephantuchi Bananuchi", "img": "https://i.namu.wiki/i/1WWoRpgJfsx3P5lt68LqCAVtMU_Lf5gaofQOWDG9Cgpbvot-lSc4WIz4yuTrc7nJ1I1ikUj25gzXSkCd9AecBhjk34MtisY6Dzr6hd4boGszy1kL1sRAsUh5jszKwzZuY6bU35W_aE8aYuXYXo27Cw.webp"},
+            {"name": "Crocodillo Ananasinno", "img": "https://i.namu.wiki/i/81ldCM0MA_gmrUdwXBaPYydnqBmzy1xcX6-JIeuYe15j3rIB3396oE8w3jHy6q2yLVQAS0ebAIu9BI5axElbcGkc2HCr0fQBV7W7lHav141sh8W6br79iayBvvdbbJUvgYBnyExxIo0eVXCoKbJpGA.webp"},
+            {"name": "Trippa Troppa Tralala Lirilì Rilà Tung Tung Sahur Boneca Tung Tung Tralalelo Trippi Troppa Crocodina", "img": "https://i.namu.wiki/i/nf0_1SDca-a7iyp3LSmGmMqIYNXZ8_t40FJ9gHx2ysherKU6hNwbIcYzBSrPJwAW6RrdEAZOS-pQgaygHAKK5QCjtFvRFkVLFz2AidVzPamj7frU6ePQhTA_wu8HdX05_EvwHrIdLfebT7ILWyc6Vg.webp"},
+            {"name": "Tung Tung Tung Tung Tung Tung Tung Tung Tung Assassino Boneca", "img": "https://i.namu.wiki/i/bF_-kxC1C61PasDRoM1xIsHSOBTXlH6Nf9XTm9Texiz7JeSA0BQWfBEII3o5UlGpDU-kGUPjBPvmjjayxNpZ4xfpULHt31bUjHxO_7eIlGxZsj41VwW7-j3vd8M85CCOuS-9bKd4oLDDOXKA3u3xZw.webp"},
+            {"name": "Giraffa Meloniera", "img": "https://i.namu.wiki/i/VYtcpg-dA4eNYeuLYwdZAPAZxTM9yNHw_GzYYRSrqKo6eS64rGuwMVwEOY_h8odpDWCbRizLkSMLFrQLATJbA-_1kvGBa6e6I10rWwhtlcAyN9LUvRST4yRkBv38PD3wGswLmnfw9HMG1DRg_nS6LA.webp"},
+            {"name": "Pot hotspot", "img": "https://i.namu.wiki/i/vuMpWE6SCxUyOhUqfD2-Hf3Ap4lYOoZIdEQSHnO2QNCIQYnNcaqtwQOTtKIYB6gMYRNryb0U1C7qh7viMV0JSbUud6dCPxRc5bPaMGEa6TpcZOCJjcqOrmS-gl-TrVZ-8WMb6POGGoeaii3xM3Hz_A.webp"},
+            {"name": "Svinino Bombondino", "img": "https://i.namu.wiki/i/1IBc1IovYoE2DfRgIYqOD0186N9WNzmMgQuvBC7O3IH7hjEbLoPFPWxGFA4A34K572fq_LbevAU5Cuq41Y406fbVd0IwfB7dlxLXn3efd72y7RS64ytwr9hF_6-VjH9KOs6sIvhxprYZyhgyfbUpxQ.webp"},
+            {"name": "Bulbito Bandito Traktorito", "img": "https://i.namu.wiki/i/0zx7IvSdH8ui3rr3W6qz7aOgrVBhO2ES2khhoB0s0j6SDb7NEn0LEkgFo-YGN8u1fEyKiahkFbVUd_YoqflNBEcm5hGQI9cunMO9bmWc1KTE-V_QhiKX9bQUDKYkaiPDhY6j9js3NBQE7f6O60QLIQ.webp"},
+            {"name": "Raccooni Watermelunni", "img": "https://i.namu.wiki/i/2_KDt7j19uMSdv7Az7SMcbmsEO1gk0M7UfMfq9N4hwbd8hGnkWm2k9zUy47jbWUihmllQUp1-NJc_N7_9ZBiboPu08TvLuYDbsVFUm9P2leFAN3nnEfHMSAYyAkd578amkQD1nMGOWLiVU4Mudhlnw.webp"},
+            {"name": "Ganganzelli Trulala", "img": "https://i.namu.wiki/i/fUhdYeFmITD5YAxMQglbv477M7KSva3zvJW8PJtoIFWwtJpDBleOg4lAHJiZJUEC1QBys-7iXikTr7bm0PWEhfLwx4418OEhk03-K0OaxbKSQVUPAraqYS1frseI1F1qPI9Ir0HqoI8doStDcVN-2g.webp"},
+            {"name": "Espressona Signora", "img": "https://i.namu.wiki/i/OZWngxEd8oTM-GYyE-jELeYKhrCoJ3qVkEoYWq1SAYVT6WV1F9W_s6oBfEBP-z8eP4MtSVMwBa2pJlVhS2s_WAgMwv2pj989pIEWv1jl-Qqpm0Y9V_MjcRfquIYyvzD8GJJpErb-yi0Xc8302HZHoQ.webp"},
+            {"name": "Spaghetti Tualetti", "img": "https://i.namu.wiki/i/I8XcOJMHMTfryDMaiXk9sY3UMOl2iA8bZEHf2CZibjf2O4I8stuNSvgOI64u02aZq_qDhjMdSGuvei0ySjQPSwIZti75H46t2FiX6ZjpsknRERg3RYFLtZBXI-VIOUP_sxtfCqr9Yumj8GCZfHwCeg.webp"},
+            {"name": "Cappuccino Babooino", "img": "https://i.namu.wiki/i/IPeEEv2ZI9h1-TKi3h7XgrKQximjHXRyaiChNfLNb1dIrEgbRcKqtuXpZ4I1ZAPm2gNge3SERZEUMJTHAl7pfmY0SxUikJYtv9HF9hmXG5ll0olqEJ0_JWlMPZSB9RoRhugd2rdEbPzMHN3X9UUpWA.webp"},
+            {"name": "Cocossini Mama", "img": "https://i.namu.wiki/i/3x1CKPlD2uJ-4B354G8COfFjP1aET1--pbFSNjuN2r1A-zm_AQBGTPxbauPyxcRE4SYlnQ1yRGceeQxzcIXAfz99BmeMp62N7z4qqtOPIGLCl9BeEpI9cuNhOs9L0IJlJwyBzka29_oDqMfR8f7ZAg.webp"},
+            {"name": "Snooffi Zeffirulli", "img": "https://i.namu.wiki/i/4YOLDJK4gyRrtNhJOX__8FCaIwqntbZh4Si_3oEd-r48jjHTquF2PTfnKMB94qInJAPr7fbtzcPUEDtc6dpUDVK77EG4Nomjs7SUKrlHQnkWyhmYLmqazQqKI-i8banj3Owq8WwsQGZjqZl4FT-8iA.webp"},
+            {"name": "Perochello Lemonchello", "img": "https://i.namu.wiki/i/hlNzysS0-iUuIP4CKO_OdeX_NjpvfmTgbB6RWhFkZmVFiW_kr1C_wx3F22XVDZB7nCkAs8u1ze2hz0mNlYRIZs56FYRrFKHQLPu2WOqO-1lChc6xkFg6flA5QOKOjL-9yf60AvKG7vZZqFKbMwpYUw.webp"},
+            {"name": "Tukanno Bananno", "img": "https://i.namu.wiki/i/V3KEDQO28fCtnhKBgaAIu_eWJ2vc9aeDIhXP8YVgkXKishr6RJw0tCsbGSUzb44LYTN-zewzbtnvFQeXgLiEtfh8Ehx0pNzMo41vNa7xdLidbGXK1KvpwfJKHgCBUbEtQD3XWNkLZnVX5QcLawyEsA.webp"},
+            {"name": "Tob Tobi Tob Tob Tobi Tob", "img": "https://i.namu.wiki/i/n_7KPLk50pWKIQzibou-ppp9NUTBJC3LOzEolJv0TnQVOS_WaAvuKhQf-aDkawjfgyaErnsGCwLZxRt-fw8SheA4rYmV8ZnVG8mwn5nnkR25AwEvF0UBhqPVJ_WqqwtLYOOJTEV7iYWM5pz5Lw_78w.webp"},
+            {"name": "Ananitto Giraffini", "img": "https://i.namu.wiki/i/9x2V0J7PezBhh6jAjZdRtv39K_Xdx4GQE8m_8MOnjtIgEIW1vTuSYC0om3KCOjaU2aQBUD4o7w9yjcLphBIL6lA0HXNlM60vIjHkv6vanmT6ASKrbrx78wAhUuA8gxGDTwqi-X9HhlasZvYSZB6TKQ.webp"},
+        ]
+
+        choice = random.choice(brainrots)
+
+        embed = discord.Embed(title=choice.get("name"),
+                              color=0xF4D03F)
+        embed.set_image(
+            url=choice.get("img")
+        )
+
+        await channel.send(embed=embed)
+
     # teh help command, add commands call, but not reactions
     if MESSAGE == "--help":
         print(f">>({user.name} {time.asctime()}) - A demandé de l'aide")
@@ -1007,6 +1260,8 @@ async def on_message(message):
             " **--isPrime** *nb* pour tester si *nb* est premier\n"
             " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
             " **--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
+            " **--rename** *nouveau_nom* pour changer mon nom sur ce serveur (admin only)\n"
+            " **--resetname** pour remettre mon nom par défaut (admin only)\n"
             " **--invite** pour savoir comment m'inviter\n"
             "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈"
         )
@@ -1023,7 +1278,7 @@ async def clear(ctx, nombre: int):
     print(
         f">>({ctx.author.name} {time.asctime()}) - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}"
     )
-    messages = await ctx.channel.history(limit=nombre + 1).flatten()
+    messages = [message async for message in ctx.channel.history(limit=nombre + 1, oldest_first=False)]
     for message in messages:
         await message.delete()
 
@@ -1033,7 +1288,7 @@ async def repeat(ctx, *text):
     print(
         f">>({ctx.author.name} {time.asctime()}) - A demandé de répéter {' '.join(text)} messages"
     )
-    messages = await ctx.channel.history(limit=1).flatten()
+    messages = ctx.channel.history(limit=1)
     for message in messages:
         await message.delete()
     await ctx.send(" ".join(text))
@@ -1336,6 +1591,19 @@ async def prime(ctx, nb: int):
     nbprime -= 1
     print(f"A demandé de claculer tous les nombres premiers juqu'à {nb}")
 
+@bot.tree.command(name="isprime", description="Es-tu prime ?")
+async def isPrime(interaction: discord.Interaction, nb: int):
+    if nb > 99999997979797979797979777797:
+        await interaction.send(
+            "C'est trop gros, ca va tout casser, demande à papa Google :D", ephemeral=True)
+        print("too big")
+    elif await is_prime(nb):
+        await interaction.add_reaction("👍")
+        print("oui")
+    else:
+        await interaction.add_reaction("👎")
+        print("non")
+
 
 @bot.command()  # find if 'nb' is a prime number, reacts to the message
 async def isPrime(ctx, nb: int):
@@ -1392,20 +1660,6 @@ async def leave(ctx):
         f">>({ctx.author.name} {time.asctime()}) - A demandé que je quitte le vocal {ctx.author.voice.channel} du serveur {ctx.guild.name}"
     )
     await ctx.voice_client.disconnect()
-
-
-musics = {}
-ytdl = youtube_dl.YoutubeDL()
-
-
-# class of youtube videos (from youtube_dl)
-class Video:
-
-    def __init__(self, link):
-        video = ytdl.extract_info(link, download=False)
-        video_format = video["formats"][0]
-        self.url = video["webpage_url"]
-        self.stream_url = video_format["url"]
 
 
 # plays a song in the vocal channel [TO FIX]
@@ -1799,13 +2053,215 @@ async def amongus(ctx):
         f">>({ctx.author.name} {time.asctime()}) - La game Among Us a prit fin {ctx.guild.name}"
     )
 
+FLAG = "`CYBN{Y0u_Kn0w_hOW_7o_Pl4Y_P0w3R_4}`"
+FLAG2 = "`CYBN{DR4wiNG_w1Th0Ut_P4p3r_c4N_H4pP3n}`"
 
+@bot.tree.command(name="flag", description="Envoie un message éphémère")
+async def flag(interaction: discord.Interaction):
+    win, draw = [int(s) for s in (await getScoreLeaderBoard(interaction.user.id, filename="pve.txt"))]
+    if win >= 3:
+        await interaction.response.send_message("Allez tiens ton flag : " + FLAG, ephemeral=True)
+    if draw > 0:
+        await interaction.response.send_message("Ca c'est le bonus pour l'égalité : " + FLAG2, ephemeral=True)
+    if not(draw > 0) and not(win >= 3):
+        await interaction.response.send_message("Va falloir gagner au Puissance 4 si tu veux un flag : `--p4`", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"Wtf, envoi un MP aux admins en montrant ce message stp : {draw}, {win}, {interaction.user.id}", ephemeral=True)
+
+
+#@bot.tree.command(name="puissance4", description="Joue au puissance 4 !")
 @bot.command()
-async def puissance4(ctx):
+async def puissance4(interaction):
     print(
-        f">>({ctx.author.name} {time.asctime()}) - A lancé une partie de puissance 4 {ctx.guild.name}"
+        f">>({interaction.author.name} {time.asctime()}) - A lancé une partie de puissance 4 {interaction.guild.name}"
     )
-    grid = [[0 for _ in range(7)] for _ in range(6)]
+
+    import copy
+
+    ROWS = 6
+    COLS = 7
+
+    def valid_moves(grid):
+        return [c for c in range(COLS) if grid[0][c] == 0]
+
+    def simulate_move(grid, col, player):
+        new_grid = copy.deepcopy(grid)
+        for r in reversed(range(ROWS)):
+            if new_grid[r][col] == 0:
+                new_grid[r][col] = player
+                break
+        return new_grid
+
+    def is_winning_move(grid, player):
+        for r in range(ROWS):
+            for c in range(COLS - 3):
+                if all(grid[r][c+i] == player for i in range(4)):
+                    return True
+        for r in range(ROWS - 3):
+            for c in range(COLS):
+                if all(grid[r+i][c] == player for i in range(4)):
+                    return True
+        for r in range(ROWS - 3):
+            for c in range(COLS - 3):
+                if all(grid[r+i][c+i] == player for i in range(4)):
+                    return True
+        for r in range(3, ROWS):
+            for c in range(COLS - 3):
+                if all(grid[r-i][c+i] == player for i in range(4)):
+                    return True
+        return False
+
+    def evaluate_window(window, player):
+        opponent = 2 if player == 1 else 1
+        score = 0
+        # Offensive
+        if window.count(player) == 4:
+            score += 200
+        elif window.count(player) == 3 and window.count(0) == 1:
+            score += 25
+        elif window.count(player) == 2 and window.count(0) == 2:
+            score += 6
+        # Défensive — mais moins pénalisante qu’avant
+        if window.count(opponent) == 3 and window.count(0) == 1:
+            score -= 40
+        elif window.count(opponent) == 2 and window.count(0) == 2:
+            score -= 2
+        return score
+
+    def score_position(grid, player):
+        score = 0
+        # Bonus central plus marqué
+        center_col = [grid[r][COLS // 2] for r in range(ROWS)]
+        score += center_col.count(player) * 6
+        # Lignes horizontales
+        for r in range(ROWS):
+            for c in range(COLS - 3):
+                score += evaluate_window([grid[r][c+i] for i in range(4)], player)
+        # Colonnes verticales
+        for r in range(ROWS - 3):
+            for c in range(COLS):
+                score += evaluate_window([grid[r+i][c] for i in range(4)], player)
+        # Diagonales
+        for r in range(ROWS - 3):
+            for c in range(COLS - 3):
+                score += evaluate_window([grid[r+i][c+i] for i in range(4)], player)
+        for r in range(3, ROWS):
+            for c in range(COLS - 3):
+                score += evaluate_window([grid[r-i][c+i] for i in range(4)], player)
+        return score
+
+    def future_win_potential(grid, player):
+        """Nombre de coups qui mèneraient à une victoire au prochain tour."""
+        count = 0
+        for col in valid_moves(grid):
+            if is_winning_move(simulate_move(grid, col, player), player):
+                count += 1
+        return count
+
+    def minimax(grid, depth, maximizing, alpha, beta, offensive_factor):
+        bot = 1
+        human = 2
+        valid_cols = valid_moves(grid)
+        if depth == 0 or not valid_cols:
+            return (None, score_position(grid, bot))
+
+        if maximizing:
+            value = -float("inf")
+            best_col = random.choice(valid_cols)
+            for col in valid_cols:
+                new_grid = simulate_move(grid, col, bot)
+                if is_winning_move(new_grid, bot):
+                    return (col, 1_000_000)
+                _, new_score = minimax(new_grid, depth - 1, False, alpha, beta, offensive_factor)
+                # 🔥 Bonus offensif : créer des menaces doubles
+                new_score += future_win_potential(new_grid, bot) * 20 * offensive_factor
+                if new_score > value:
+                    value = new_score
+                    best_col = col
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break
+            return best_col, value
+        else:
+            value = float("inf")
+            best_col = random.choice(valid_cols)
+            for col in valid_cols:
+                new_grid = simulate_move(grid, col, human)
+                if is_winning_move(new_grid, human):
+                    return (col, -1_000_000)
+                _, new_score = minimax(new_grid, depth - 1, True, alpha, beta, offensive_factor)
+                new_score -= future_win_potential(new_grid, human) * 15
+                if new_score < value:
+                    value = new_score
+                    best_col = col
+                beta = min(beta, value)
+                if alpha >= beta:
+                    break
+            return best_col, value
+
+    def choose_ai_move(grid, difficulty="moyen", playstyle="offensif"):
+        """
+        difficulty: "facile", "moyen", "difficile"
+        playstyle: "equilibre", "offensif", "defensif"
+        """
+        bot = 1
+        human = 2
+        valid_cols = valid_moves(grid)
+
+        # Config selon niveau
+        if difficulty == "facile":
+            depth = 1
+            randomness = 0.3
+        elif difficulty == "moyen":
+            depth = 2
+            randomness = 0.1
+        else:
+            depth = 3
+            randomness = 0.07
+
+        # Ajuste le style de jeu
+        offensive_factor = 1.0
+        if playstyle == "offensif":
+            offensive_factor = 1.5
+        elif playstyle == "defensif":
+            offensive_factor = 0.7
+
+        # 1️⃣ Gagner immédiatement
+        for col in valid_cols:
+            if is_winning_move(simulate_move(grid, col, bot), bot):
+                return col
+
+        # 2️⃣ Bloquer une victoire immédiate
+        for col in valid_cols:
+            if is_winning_move(simulate_move(grid, col, human), human):
+                return col
+
+        # 3️⃣ Choisir via minimax
+        col, _ = minimax(grid, depth, True, -float("inf"), float("inf"), offensive_factor)
+
+        # 4️⃣ 10 % de hasard
+        if random.random() < randomness:
+            col = random.choice(valid_cols)
+        return col
+
+    async def send_mp(user, type="win"):
+        time.sleep(4)
+        if type == "win":
+            await user.send("Coucou")
+            time.sleep(4)
+            await user.send("Ok bien joué")
+            time.sleep(7)
+            await user.send("T'es sûr de mériter le flag ?")
+            time.sleep(9)
+            await user.send("Bon vasy le flag tu me fais pitié : `CYBN{Y0u_Kn0w_hOW_7o_Pl4Y_P0w3R_4}`")
+        elif type == "draw":
+            await user.send("Stylé l'égalité, je pensais pas que ca arriverait :clap:")
+            time.sleep(4)
+            await user.send("Tu es de ma trempe pour réussir ça, j'aime bien, bel adversaire")
+            time.sleep(3)
+            await user.send("Allez tiens un petit cadeau, il rapporte pas beaucoup de points mais c'est toujours sympa : `CYBN{DR4wiNG_w1Th0Ut_P4p3r_c4N_H4pP3n}`")
+
+    grid = [[0 for _ in range(COLS)] for _ in range(ROWS)]
     """grid = [[0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0],
@@ -1908,7 +2364,7 @@ async def puissance4(ctx):
     end = False
     numbers = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣"]
 
-    yellowMessage = await ctx.send("**⬇ Joueur jaune ⬇**")
+    yellowMessage = await interaction.send("**⬇ Joueur jaune ⬇**")
     await yellowMessage.add_reaction("🟡")
 
     def check(reaction, user):
@@ -1924,32 +2380,38 @@ async def puissance4(ctx):
         await yellowMessage.edit(content="Pas de joueur jaune ❌")
         return
     print(
-        f">>({yellow} {time.asctime()}) - Est le joueur jaune {ctx.guild.name}"
+        f">>({yellow} {time.asctime()}) - Est le joueur jaune {interaction.guild.name}"
     )
 
-    redMessage = await ctx.send("**⬇ Joueur rouge ⬇**")
-    await redMessage.add_reaction("🔴")
+    mode = "pvp"
 
-    def check(reaction, user):
-        return (user != bot.user and user != yellow
-                and str(reaction.emoji) == "🔴"
-                and reaction.message.id == redMessage.id)
+    if mode == "pvp":
+        redMessage = await interaction.send("**⬇ Joueur rouge ⬇**")
+        await redMessage.add_reaction("🔴")
 
-    try:
-        reaction, user = await bot.wait_for("reaction_add",
-                                            timeout=60.0,
-                                            check=check)
-        red = user
-    except asyncio.TimeoutError:
-        await redMessage.edit(content="Pas de joueur rouge ❌")
-        return
-    print(f">>({red} {time.asctime()}) - Est le joueur red {ctx.guild.name}")
+        def check(reaction, user):
+            return (user != bot.user and user != yellow
+                    and str(reaction.emoji) == "🔴"
+                    and reaction.message.id == redMessage.id)
+
+        try:
+            reaction, user = await bot.wait_for("reaction_add",
+                                                timeout=60.0,
+                                                check=check)
+            red = user
+        except asyncio.TimeoutError:
+            await redMessage.edit(content="Pas de joueur rouge ❌")
+            return
+        print(f">>({red} {time.asctime()}) - Est le joueur red {interaction.guild.name}")
+    elif mode == "pve":
+        red = bot.user
+        redMessage = await interaction.send("Je serai l'adversaire rouge, tiens-toi prêt 😈")
 
     yellowPing = "<@!" + str(yellow.id) + "> 🟡"
     redPing = "<@!" + str(red.id) + "> 🔴"
 
     text = yellowPing + " et " + redPing + " tenez vous prêts !"
-    gridMessage = await ctx.send(text)
+    gridMessage = await interaction.send(text)
 
     time.sleep(5)
 
@@ -1986,10 +2448,14 @@ async def puissance4(ctx):
                              gridMessage)
 
         if tour % 2 == 0:
-
-            def check(reaction, user):
-                return (user == red and str(reaction.emoji) in numbers
-                        and reaction.message.id == gridMessage.id)
+            if mode == "pvp":
+                def check(reaction, user):
+                    return (user == red and str(reaction.emoji) in numbers
+                            and reaction.message.id == gridMessage.id)
+            elif mode == "pve":
+                col = choose_ai_move(grid, difficulty="difficile", playstyle="offensif")
+                await addChip(grid, col, tour)
+                # Do some auto play
 
         else:
 
@@ -1998,66 +2464,106 @@ async def puissance4(ctx):
                         and reaction.message.id == gridMessage.id)
 
         try:
-            reaction, user = await bot.wait_for("reaction_add",
-                                                timeout=120.0,
-                                                check=check)
+            if not(tour % 2 == 0 and mode == "pve"):
+                reaction, user = await bot.wait_for("reaction_add",
+                                                    timeout=120.0,
+                                                    check=check)
 
-            await gridMessage.remove_reaction(reaction, user)
+                await gridMessage.remove_reaction(reaction, user)
 
-            for i in range(len(numbers)):
-                if str(reaction.emoji) == numbers[i]:
-                    await addChip(grid, i, tour)
+                for i in range(len(numbers)):
+                    if str(reaction.emoji) == numbers[i]:
+                        await addChip(grid, i, tour)
 
             if tour > 6 and await checkWin(grid, tour):
+                sent = False
                 if tour % 2 == 0:
-                    print(
-                        f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
-                    )
-                    await addScoreLeaderboard(red.id, red)
-                    await addLoseLeaderboard(yellow.id, yellow)
-                    await gridMessage.add_reaction("✅")
-                    await updateGrid(
-                        grid,
-                        "Tour n°" + str(tour) + " - " + redPing + "\n",
-                        gridMessage,
-                    )
-                    text = (redPing + " gagne ! **Score actuel : " +
-                            await getScoreLeaderBoard(red.id) +
-                            " victoires** - " +
-                            await getPlaceLeaderbord(red.id))
+                    loser   = yellow
+                    winner  = red
+                    ping    = redPing
+                    if mode == "pve":
+                        messages = [
+                            "Hop-là, ca dégage la racaille", 
+                            "Robots 1 - 0 Humain", 
+                            "Pas de flag pour toi ce soir 🤠", 
+                            "Tu pensais vraiment pouvoir me battre ?",
+                            "Trop facile",
+                            "Ptdr tu l'avais pas vu genre ?",
+                            "C'est pas avec ce niveau que tu arriveras à flagguer...",
+                            "Try again. Noob.",
+                            "Je me suis presque ennuyé tiens",
+                            "Retourne aux challs Intro, ils sont plus de ton niveau"
+                        ]
+                        print(
+                            f">>({loser} {time.asctime()}) - A perdu contre le bot au P4 (noob)"
+                        )
+                        await changeScoreLeaderboard(loser.id, loser, win=False, filename="pve.txt")
+                        text = f"{ping} gagne ! (c'est moi)\n{random.choice(messages)}"
                 else:
-                    print(
-                        f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
-                    )
-                    await addScoreLeaderboard(yellow.id, yellow)
-                    await addLoseLeaderboard(red.id, red)
-                    await gridMessage.add_reaction("✅")
-                    await updateGrid(
-                        grid,
-                        "Tour n°" + str(tour) + " - " + yellowPing + "\n",
-                        gridMessage,
-                    )
-                    text = (yellowPing + " gagne ! **Score actuel : " +
-                            await getScoreLeaderBoard(yellow.id) +
+                    loser   = red
+                    winner  = yellow
+                    ping    = yellowPing
+                    if mode == "pve":
+                        print(
+                            f">>({winner} {time.asctime()}) - A gagné contre le bot au P4 (gg)"
+                        )
+                        await changeScoreLeaderboard(winner.id, winner, win=True, filename="pve.txt")
+                        score = int((await getScoreLeaderBoard(winner.id, filename="pve.txt"))[0])
+                        if score == 3:
+                            text = ping + " remporte ses 3 victoires d'affilé ! Voilà le flag : ||t'as vraiment cru que j'allais donner le flag en public ? Regarde tes DM petit filou, ou fais `/flag`||"
+                            await interaction.send(text)
+                            await send_mp(winner)
+                            sent = True
+                            # send MP
+                            # flag, gg
+                        elif score > 3:
+                            text = f"Allez t'as gagné {ping}, t'es content avec tes {score} victoires d'affilé ? T'as déjà eu ton flag, va jouer ailleurs..."
+                            # ouais bon on a compris
+                        else:
+                            text = f"{ping} remporte la victoire ! **Score actuel : {score} / 3** - Plus que {3-score} avant le flag"
+                            # play again
+                print(
+                    f">>({winner} {time.asctime()}) - Est le gagnant vs {loser} ! {interaction.guild.name}"
+                )
+                if mode == "pvp":
+                    await addScoreLeaderboard(winner.id, winner)
+                    await addLoseLeaderboard(loser.id, loser)
+                await gridMessage.add_reaction("✅")
+                await updateGrid(
+                    grid,
+                    "Tour n°" + str(tour) + " - " + ping + "\n",
+                    gridMessage,
+                )
+                if mode == "pvp":
+                    text = (ping + " gagne ! **Score actuel : " +
+                            (await getScoreLeaderBoard(winner.id))[0] +
                             " victoires** - " +
-                            await getPlaceLeaderbord(yellow.id))
-                await ctx.send(text)
+                            await getPlaceLeaderbord(winner.id))
+                if not sent:
+                    await interaction.send(text)
                 end = True
 
             elif tour >= 42:
-                await addScoreLeaderboard(yellow.id, yellow)
-                await addScoreLeaderboard(red.id, red)
                 await gridMessage.add_reaction("✅")
                 print(
-                    f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {ctx.guild.name}"
+                    f">>({red} et {yellow} {time.asctime()}) - Sont à égalité ! {interaction.guild.name}"
                 )
-                text = (
-                    "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
-                    "**Score de " + yellowPing + " : " +
-                    await getScoreLeaderBoard(yellow.id) +
-                    " victoires !**\n **Score de " + redPing + " : " +
-                    await getScoreLeaderBoard(red.id) + " victoires !**")
-                await ctx.send(text)
+                if mode == "pvp":
+                    await addScoreLeaderboard(yellow.id, yellow)
+                    await addScoreLeaderboard(red.id, red)
+                    text = (
+                        "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
+                        "**Score de " + yellowPing + " : " +
+                        (await getScoreLeaderBoard(yellow.id))[0] +
+                        " victoires !**\n **Score de " + redPing + " : " +
+                        (await getScoreLeaderBoard(red.id))[0] + " victoires !**")
+                    await interaction.send(text)
+                elif mode == "pve":
+                    text = "Ah bah une égalité tiens, c'est rare... Viens on en discute en MP? Sinon fais `/flag`"
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt", draw=True)
+                    await interaction.send(text)
+                    await send_mp(yellow, type="draw")
+
                 end = True
 
         except asyncio.TimeoutError:
@@ -2065,7 +2571,7 @@ async def puissance4(ctx):
             await gridMessage.add_reaction("⌛")
             if tour % 2 == 0:
                 print(
-                    f">>({yellow} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
+                    f">>({yellow} {time.asctime()}) - Est le gagnant ! {interaction.guild.name}"
                 )
                 await updateGrid(
                     grid, "Tour n°" + str(tour) + " - " + redPing + "\n",
@@ -2075,23 +2581,29 @@ async def puissance4(ctx):
                 text = (
                     redPing + " n'a pas joué ! Alors **" + yellowPing +
                     " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "
-                    + await getScoreLeaderBoard(yellow.id) + " victoires - " +
+                    + (await getScoreLeaderBoard(yellow.id))[0] + " victoires - " +
                     await getPlaceLeaderbord(yellow.id))
+
             else:
                 print(
-                    f">>({red} {time.asctime()}) - Est le gagnant ! {ctx.guild.name}"
+                    f">>({red} {time.asctime()}) - Est le gagnant ! {interaction.guild.name}"
                 )
                 await updateGrid(
                     grid, "Tour n°" + str(tour) + " - " + redPing + "\n",
                     gridMessage)
-                await addScoreLeaderboard(red.id, red)
-                await addLoseLeaderboard(yellow.id, yellow)
-                text = (
-                    yellowPing + " n'a pas joué ! Alors **" + redPing +
-                    " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
-                    + await getScoreLeaderBoard(red.id) + " victoires - " +
-                    await getPlaceLeaderbord(red.id))
-            await ctx.send(text)
+
+                if mode == "pvp":
+                    await addScoreLeaderboard(red.id, red)
+                    await addLoseLeaderboard(yellow.id, yellow)
+                    text = (
+                        yellowPing + " n'a pas joué ! Alors **" + redPing +
+                        " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
+                        + (await getScoreLeaderBoard(red.id))[0] + " victoires - " +
+                        await getPlaceLeaderbord(red.id))
+                elif mode == "pve":
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt")
+                    text = f"J'en connais un qui est parti flag d'autres challs, et a abandonné le miens... Bah t'as perdu {yellowPing}, cheh"
+            await interaction.send(text)
             end = True
 
         tour += 1
@@ -2102,8 +2614,8 @@ async def p4(ctx):
     await puissance4(ctx)
 
 
-async def updateLeaderboard(liste):
-    file = open("txt/leaderboard.txt", "w+")
+async def updateLeaderboard(liste, filename="leaderboard.txt"):
+    file = open("txt/" + filename, "w+")
     for line in liste:
         line = "-".join(line)
         if line[len(line) - 1] != "\n":
@@ -2112,15 +2624,15 @@ async def updateLeaderboard(liste):
     file.close()
 
 
-async def getScoreLeaderBoard(id):
-    file = open("txt/leaderboard.txt", "r+")
+async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
+    file = open("txt/" + filename, "r+")
     leaderboard = file.readlines()
     file.close()
     for i in range(len(leaderboard)):
         if str(id) in leaderboard[i]:
             leaderboard[i] = leaderboard[i].split("-")
-            return leaderboard[i][1].replace("\n", "")
-
+            return leaderboard[i][1].replace("\n", ""), leaderboard[i][2].replace("\n", "")
+    return "0", "0"
 
 async def getPlaceLeaderbord(id):
     file = open("txt/leaderboard.txt", "r+")
@@ -2133,6 +2645,33 @@ async def getPlaceLeaderbord(id):
                 return "1er/" + str(len(leaderboard))
             else:
                 return str(i) + "e/" + str(len(leaderboard))
+
+
+async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt", draw=False):
+    file = open("txt/" + filename, "r+")
+    leaderboard = file.readlines()
+    file.close()
+    isIn = False
+    for i in range(len(leaderboard)):
+        leaderboard[i] = leaderboard[i].split("-")
+        if str(id) in leaderboard[i]:
+            isIn = True
+            leaderboard[i][1] = "0" if not win else str(int(leaderboard[i][1]) + 1)
+            leaderboard[i][2] = leaderboard[i][2] if not draw else "1"
+            if int(leaderboard[i][2]) == 0:
+                leaderboard[i][3] = leaderboard[i][1]
+            else:
+                leaderboard[i][3] = str(
+                    round(
+                        float(leaderboard[i][1]) / float(leaderboard[i][2]),
+                        2))
+    if not isIn:
+        line = (str(id) + "-1-0-1-" + str(name) + "\n").split("-")
+        leaderboard.append(line)
+
+    print(leaderboard)
+    leaderboard.sort(reverse=True, key=lambda score: int(score[1]))
+    await updateLeaderboard(leaderboard, filename=filename)
 
 
 async def addScoreLeaderboard(id, name):
@@ -2459,5 +2998,14 @@ async def activity(ctx):
     )
     embed.set_footer(text="provided by boredapi.com")
     await ctx.send("Use `--activity <nb>` to chose participants", embed=embed)
+
+@bot.command()
+async def sync(ctx):
+    print("sync command")
+    if ctx.author.id == 359743894042443776:
+        await bot.tree.sync()
+        await ctx.send('Command tree synced.')
+    else:
+        await ctx.send('You must be the owner to use this command!')
 
 bot.run(secret.TOKEN)
