@@ -79,16 +79,23 @@ async def on_ready():
     print("Logged in as")
     print(bot.user.name)
     print(bot.user.id)
-    print("Synchronizing slash commands for guilds :")
-    for guild_id in GUILD_IDS:
-        guild = discord.Object(id=guild_id)
+
+    if args.dev:
+        print("Synchronizing slash commands for guilds :")
+        for guild_id in GUILD_IDS:
+            guild = discord.Object(id=guild_id)
+            try:
+                await bot.tree.sync(guild=guild)
+                print(f"\t- {guild_id}")
+            except Exception as e:
+                print(f"\t- Failed for {guild_id}, reason : {e}")
+    else:
         try:
-            await bot.tree.sync(guild=guild)
-            print(f"\t- {guild_id}")
+            await bot.tree.sync()
         except Exception as e:
-            print(f"\t- Failed for {guild_id}, reason : {e}")
+            print(f"Failed syncing, reason : {e}")
     print("------")
-    
+
     # Apply saved names to servers
     for guild in bot.guilds:
         if str(guild.id) in server_names:
