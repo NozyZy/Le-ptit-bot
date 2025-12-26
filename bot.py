@@ -2865,7 +2865,11 @@ async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
     for letter in text:
         counter += ord(letter)
 
-    counter += ctx.user.id
+    today = date.today()
+    day = today.strftime("%d")
+    month = today.strftime("%m")
+
+    counter += ctx.user.id + int(day) + int(month)
 
     responses = [
         "Bah oui",
