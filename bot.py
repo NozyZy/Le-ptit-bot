@@ -9,6 +9,7 @@ import requests
 import json
 import argparse
 import logging
+import re
 
 from bs4 import BeautifulSoup
 from discord.ext import commands
@@ -261,7 +262,7 @@ async def on_message(message):
             return
 
     # if you tag this bot in any message
-    if "<@!653563141002756106>" in MESSAGE:
+    if f"<@{bot.user.id}>" in MESSAGE:
         logger.info(f"{user.name} - {message.guild.name} - A ping le bot")
         user = str(message.author.nick)
         if user == "None":
@@ -279,7 +280,7 @@ async def on_message(message):
         ]
         if user == "Le Grand bot":
             rep.append("Oui bb ?")
-            rep.append("Yo <@!747066145550368789>")
+            rep.append("Yo <@747066145550368789>")
         elif message.author.id == 359743894042443776:
             rep.append("Patron !")
             rep.append("Eh mattez, ce mec est mon dev 👆")
@@ -442,6 +443,9 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
+        if re.search(r'\bfeur\b', MESSAGE) and user.id == 302102401324679168:
+            await channel.send("@everyone ARRETEZ-TOUT, IL A DIT ***FEUR*** !!!")
+
         if MESSAGE == "<3":
             logger.info(f"{user.name} - {message.guild.name} - A envoyé de l'amour")
             reponses = [
@@ -461,7 +465,7 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if "<@!747066145550368789>" in message.content:
+        if "<@747066145550368789>" in message.content:
             logger.info(f"{user.name} - {message.guild.name} - A parlé du grand bot")
             reponses = [
                 "bae",
@@ -663,7 +667,7 @@ async def on_message(message):
                 ]
             await channel.send(random.choice(reponses))
 
-        if "<@!761898936364695573>" in MESSAGE:
+        if "<@761898936364695573>" in MESSAGE:
             logger.info(f"{user.name} - {message.guild.name} - A parlé de mon pote")
             await channel.send("Tu parles comment de mon pote là ?")
 
@@ -722,7 +726,7 @@ async def on_message(message):
             reponses = ["La deuxième", "La prochaine", "Aucune"]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE.startswith("miroir magique"):
+        if MESSAGE.startswith("miroir magique") and not user.bot:
             logger.info(f"{user.name} - {message.guild.name} - A sorti une répartie de maternelle")
             await channel.send(MESSAGE)
 
@@ -953,11 +957,11 @@ async def on_message(message):
             )
 
         if "pd" in MESSAGE:
-            logger.info(f"{user.name} - {message.guild.name} - A parlé de pd")
             MESSAGE = " " + MESSAGE + " "
             for i in range(len(MESSAGE) - 3):
                 if (MESSAGE[i] == " " and MESSAGE[i + 1] == "p"
                         and MESSAGE[i + 2] == "d" and MESSAGE[i + 3] == " "):
+                    logger.info(f"{user.name} - {message.guild.name} - A parlé de pd")
                     await channel.send(file=discord.File("images/pd.jpg"))
 
         if "oof" in MESSAGE and rdnb >= 5:
