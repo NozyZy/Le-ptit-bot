@@ -77,7 +77,8 @@ server_names = load_server_names()
 GUILD_IDS = [
     410766134569074691,
     1193546302970146846,
-    1420660433722802188
+    1420660433722802188,
+    826575187721322546
 ]
 
 
@@ -2750,7 +2751,7 @@ async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
     ]
 
     await ctx.response.send_message(f"> {text}\n" + responses[counter % len(responses)])
-    logger.info(f"{ctx.user.name} - A demandé '{text}' - {ctx.guild.name} : " + responses[counter % len(responses)])
+    logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé '{text}' : " + responses[counter % len(responses)])
 
 
 @bot.tree.command(name="skin", description="Minecraft ?")
@@ -2920,6 +2921,17 @@ async def activity(ctx: discord.Interaction, participants: int):
         await ctx.response.send_message(embed=embed)
     except json.decoder.JSONDecodeError:
         await ctx.response.send_message("Nan ca fonctionne, pas avec ces arguments à prior, c'est balo", ephemeral=True)
+
+@bot.tree.command(name="search", description="Cherche un mot dans mon dictionnaire")
+async def search(ctx: discord.Interaction, mot: str):
+    with open("txt/dico.txt", "r+") as dico:
+        lines = dico.read().split('\n')
+        if mot.lower() in lines:
+            await ctx.response.send_message(f"Yup, j'ai la connaissance du terme \"{mot}\"")
+            logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé si '{mot}' existe, eh bien oui")
+        else:
+            await ctx.response.send_message(f"De quoi tu me parles ? C'est quoi \"{mot}\" ?")
+            logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé si '{mot}' existe, bah non")
 
 
 @bot.command()
