@@ -107,5 +107,6 @@ j'me compile le kernel
 j'me bypass le waf
 j'me nano le tty
 j'me paf la puff
-je me bonta le brakmar
 j'me goku le vegeta
+je me kubectl le pod
+j'me addbranlette le p'tit bot
