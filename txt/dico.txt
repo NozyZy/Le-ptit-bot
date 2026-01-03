@@ -7889,6 +7889,7 @@ directory
 directs
 directum
 dired
+direfeur
 dires
 direz
 dirft
