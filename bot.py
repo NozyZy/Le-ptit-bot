@@ -44,10 +44,13 @@ bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
                    case_insensitive=True,
                    intents=intents)
-tgFile = open("txt/tg.txt", "r+")
-nbtg: int = int(tgFile.readlines()[0])
+with open("txt/tg.txt", "r+") as tgFile:
+    nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
-tgFile.close()
+
+# Locks to protect global variables from race conditions
+nbtg_lock = asyncio.Lock()
+nbprime_lock = asyncio.Lock()
 
 
 # Load server names from file
@@ -130,14 +133,12 @@ async def on_message(message):
     user = message.author
 
     # open and stock the dico, with a lot of words
-    dicoFile = open("txt/dico.txt", "r+")
-    dicoLines = dicoFile.readlines()
+    with open("txt/dico.txt", "r+") as dicoFile:
+        dicoLines = dicoFile.readlines()
     dicoSize = len(dicoLines)
-    dicoFile.close()
 
-    bansFile = open("txt/bans.txt", "r+")
-    bansLines = bansFile.readlines()
-    bansFile.close()
+    with open("txt/bans.txt", "r+") as bansFile:
+        bansLines = bansFile.readlines()
 
     if message.author == bot.user:  # we don't want the bot to repeat itself
         return
@@ -181,24 +182,21 @@ async def on_message(message):
 
     dicoLines.sort()
     if len(dicoLines) > 0 and len(dicoLines) > dicoSize:
-        dicoFile = open("txt/dico.txt", "w+")
-        for i in dicoLines:
-            dicoFile.write(i)
-        dicoFile.close()
+        with open("txt/dico.txt", "w+") as dicoFile:
+            for i in dicoLines:
+                dicoFile.write(i)
 
     # stock file full of insults (yes I know...)
-    fichierInsulte = open("txt/insultes.txt", "r+", encoding="utf-8")
-    insultes = fichierInsulte.read().split("\n")
-    fichierInsulte.close()
+    with open("txt/insultes.txt", "r+", encoding="utf-8") as fichierInsulte:
+        insultes = fichierInsulte.read().split("\n")
 
     # stock file full of branlettes (yes I know...)
-    fichierBranlette = open("txt/branlette.txt", "r")
-    linesBranlette = fichierBranlette.readlines()
+    with open("txt/branlette.txt", "r") as fichierBranlette:
+        linesBranlette = fichierBranlette.readlines()
     branlette = []
     for line in linesBranlette:
         line = line.replace("\n", "")
         branlette.append(line)
-    fichierBranlette.close()
 
     if message.content.startswith("--addInsult"):
         mot = ' '.join(MESSAGE.split()[1:])
@@ -206,9 +204,8 @@ async def on_message(message):
             await channel.send("Sympa l'insulte...")
             return
         mot = mot + '\n'
-        fichierInsulte = open("txt/insultes.txt", "a")
-        fichierInsulte.write(mot)
-        fichierInsulte.close()
+        with open("txt/insultes.txt", "a") as fichierInsulte:
+            fichierInsulte.write(mot)
         logger.info(f"{user.name} - {message.guild.name} - Nouvelle insulte :", mot)
         await channel.send("Je retiens...")
 
@@ -221,9 +218,8 @@ async def on_message(message):
             await channel.send("C'est moi qui ME, alors JME... stp 🍆")
             return
         mot = mot + '\n'
-        fichierBranlette = open("txt/branlette.txt", "a")
-        fichierBranlette.write(mot)
-        fichierBranlette.close()
+        with open("txt/branlette.txt", "a") as fichierBranlette:
+            fichierBranlette.write(mot)
         logger.info(f"{user.name} - {message.guild.name} - Nouvelle branlette :", mot)
         await channel.send("Je retiens...")
 
@@ -258,7 +254,7 @@ async def on_message(message):
             for mot in liste:
                 text = mot + nom
                 await channel.send(text)
-                time.sleep(3)
+                await asyncio.sleep(3)
             logger.info(f"{user.name} - {message.guild.name} - A appelé", nom)
             return
 
@@ -302,7 +298,8 @@ async def on_message(message):
                 text += " "
         text += "."
         text = text.replace("\n", "")
-        text = text.replace(text[0], text[0].upper(), 1)
+        if text:
+            text = text[0].upper() + text[1:]
         await channel.send(text)
 
     # send the number of words stocked in the dico
@@ -324,6 +321,17 @@ async def on_message(message):
 
         if len(new_name) == 0:
             await channel.send("❌ Veuillez spécifier un nom. Usage: `--rename NouveauNom`")
+            return
+
+        # block control characters and certain problematic characters ^^
+        if any(ord(c) < 32 for c in new_name):
+            await channel.send("❌ Le nom contient des caractères invalides.")
+            return
+
+        # Strip whitespace
+        new_name = new_name.strip()
+        if len(new_name) == 0:
+            await channel.send("❌ Le nom ne peut pas être vide ou composé uniquement d'espaces.")
             return
 
         try:
@@ -358,7 +366,7 @@ async def on_message(message):
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
-        if "enerv" in MESSAGE or "énerv" in MESSAGE and rdnb >= 2:
+        if ("enerv" in MESSAGE or "énerv" in MESSAGE) and rdnb >= 2:
             logger.info(f"{user.name} - {message.guild.name} - S'est enervé")
             await channel.send("(╯°□°）╯︵ ┻━┻")
 
@@ -423,7 +431,7 @@ async def on_message(message):
             await channel.send("Poueth poueth !! 🐤")
 
         if (MESSAGE.startswith("stop") or MESSAGE.startswith("arrête")
-                or MESSAGE.startswith("arrete") and rdnb > 3):
+                or MESSAGE.startswith("arrete")) and rdnb > 3:
             logger.info(f"{user.name} - {message.guild.name} - A demandé d'arrêter")
             reponses = [
                 "https://tenor.com/view/daddys-home2-daddys-home2gifs-stop-it-stop-that-i-mean-it-gif-9694318",
@@ -678,13 +686,13 @@ async def on_message(message):
             for i in range(len(MESSAGE) - 3):
                 if (MESSAGE[i] == " " and MESSAGE[i + 1] == "t"
                         and MESSAGE[i + 2] == "g" and MESSAGE[i + 3] == " "):
-                    nbtg += 1
-                    tgFile = open("txt/tg.txt", "w+")
-                    tgFile.write(str(nbtg))
-                    tgFile.close()
-                    activity = f"insulter {nbtg} personnes"
-                    await bot.change_presence(activity=discord.Game(
-                        name=activity))
+                    async with nbtg_lock:
+                        nbtg += 1
+                        with open("txt/tg.txt", "w+") as tgFile:
+                            tgFile.write(str(nbtg))
+                        activity = f"insulter {nbtg} personnes"
+                        await bot.change_presence(activity=discord.Game(
+                            name=activity))
                     await channel.send(random.choice(insultes))
                     if rdnb >= 4:
                         await message.add_reaction("🇹")
@@ -1224,6 +1232,12 @@ async def on_message(message):
 
 @bot.command()  # delete 'nombre' messages
 async def clear(ctx, nombre: int):
+    if nombre <= 0:
+        await ctx.send("❌ Le nombre de messages doit être positif.")
+        return
+    if nombre > 1000:
+        await ctx.send("❌ Je ne peux pas supprimer plus de 1000 messages à la fois.")
+        return
     logger.info(
         f"{ctx.author.name} - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}")
     messages = [message async for message in ctx.channel.history(limit=nombre + 1, oldest_first=False)]
@@ -1252,7 +1266,7 @@ async def serverinfo(ctx):
 @bot.command()  # send the 26 possibilites of a ceasar un/decryption
 async def crypt(ctx, *text):
     mot = " ".join(text)
-    messages = await ctx.channel.history(limit=1).flatten()
+    messages = [message async for message in ctx.channel.history(limit=1)]
     for message in messages:
         await message.delete()
     logger.info(f"{ctx.author.name} - A demandé de crypter {mot} en {crypting(mot)}")
@@ -1299,9 +1313,8 @@ async def randint(ctx, *text):
 @bot.command()  # send a random word from the dico, the first to write it wins
 async def game(ctx):
     logger.info(f"{ctx.author.name} - ")
-    dicoFile = open("txt/dico.txt", "r+")
-    dicoLines = dicoFile.readlines()
-    dicoFile.close()
+    with open("txt/dico.txt", "r+") as dicoFile:
+        dicoLines = dicoFile.readlines()
 
     mot = random.choice(dicoLines)
     mot = mot.replace("\n", "")
@@ -1494,14 +1507,14 @@ async def prime(ctx, nb: int):
         await ctx.send("Tu sais ce que ca veut dire 'prime number' ?")
         logger.info("A demandé de calculer un nombre premier sen dessous de 2")
         return
-    if nbprime > 2:
-        await ctx.send("Attends quelques instants stp, je suis occupé...")
-        logger.info("A demandé trop de prime ->", nbprime)
-        return
-    nbprime += 1
-    Fprime = open("txt/primes.txt", "r+")
-    primes = Fprime.readlines()
-    Fprime.close()
+    async with nbprime_lock:
+        if nbprime > 2:
+            await ctx.send("Attends quelques instants stp, je suis occupé...")
+            logger.info("A demandé trop de prime ->", nbprime)
+            return
+        nbprime += 1
+    with open("txt/primes.txt", "r+") as Fprime:
+        primes = Fprime.readlines()
     biggest = int(primes[len(primes) - 1].replace("\n", ""))
     text = ""
     ratio_max = 1.02
@@ -1530,21 +1543,22 @@ async def prime(ctx, nb: int):
     else:
         text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
         await ctx.send(text, file=discord.File("txt/prime.txt"))
-    nbprime -= 1
+    async with nbprime_lock:
+        nbprime -= 1
     logger.info(f"A demandé de claculer tous les nombres premiers juqu'à {nb}")
 
 
 @bot.tree.command(name="isprime", description="Es-tu prime ?")
 async def isPrime(interaction: discord.Interaction, nb: int):
     if nb > 99999997979797979797979777797:
-        await interaction.send(
+        await interaction.response.send_message(
             "C'est trop gros, ca va tout casser, demande à papa Google :D", ephemeral=True)
         logger.info("too big")
     elif await is_prime(nb):
-        await interaction.add_reaction("👍")
+        await interaction.response.send_message(f"👍 Oui, {nb} est premier !")
         logger.info("oui")
     else:
-        await interaction.add_reaction("👎")
+        await interaction.response.send_message(f"👎 Non, {nb} n'est pas premier.")
         logger.info("non")
 
 
@@ -1570,9 +1584,8 @@ async def randomWord(ctx, nb: int):
     logger.info(
         f"{ctx.author.name} - A demandé {nb} mots aléatoires dans le dico : ",
     )
-    dicoFile = open("txt/dico.txt", "r+")
-    dicoLines = dicoFile.readlines()
-    dicoFile.close()
+    with open("txt/dico.txt", "r+") as dicoFile:
+        dicoLines = dicoFile.readlines()
 
     text = ""
     for i in range(nb):
@@ -1581,7 +1594,8 @@ async def randomWord(ctx, nb: int):
             text += " "
     text += "."
     text = text.replace("\n", "")
-    text = text.replace(text[0], text[0].upper(), 1)
+    if text:
+        text = text[0].upper() + text[1:]
     logger.info(text)
     await ctx.send(text)
 
@@ -1724,17 +1738,15 @@ async def ban(ctx: discord.Interaction):
         await ctx.response.send_message("T'es pas admin, nananananère 😜")
         logger.info("mais n'a pas les droits")
         return
-    bansFile = open("txt/bans.txt", "r+")
-    bansLines = bansFile.readlines()
-    bansFile.close()
+    with open("txt/bans.txt", "r+") as bansFile:
+        bansLines = bansFile.readlines()
     chanID = str(ctx.channel.id) + "\n"
     if chanID in bansLines:
         await ctx.response.send_message("Jsuis déjà ban, du calme...")
         logger.info("mais j'étais déjà ban (sad)")
     else:
-        bansFile = open("txt/bans.txt", "a+")
-        bansFile.write(chanID)
-        bansFile.close()
+        with open("txt/bans.txt", "a+") as bansFile:
+            bansFile.write(chanID)
         await ctx.response.send_message(
             "D'accord, j'arrete de vous embêter ici... mais les commandes sont toujours dispos"
         )
@@ -1750,26 +1762,23 @@ async def unban(ctx: discord.Interaction):
         await ctx.response.send_message("T'es pas admin, nananananère 😜")
         logger.info("mais n'a pas les droits")
         return
-    bansFile = open("txt/bans.txt", "r+")
-    bansLines = bansFile.readlines()
-    bansFile.close()
+    with open("txt/bans.txt", "r+") as bansFile:
+        bansLines = bansFile.readlines()
     chanID = str(ctx.channel.id) + "\n"
     if chanID not in bansLines:
         await ctx.send("D'accord, mais j'suis pas ban, hehe.")
         logger.info("mais j'étais pas ban")
     else:
-        bansFile = open("txt/bans.txt", "w+")
-        bansFile.write("")
-        bansFile.close()
-        bansFile = open("txt/bans.txt", "a+")
-        for id in bansLines:
-            if id == chanID:
-                bansLines.remove(id)
-                await ctx.response.send_message("JE SUIS LIIIIIIBRE")
-                logger.info("et je suis libre (oui!)")
-            else:
-                bansFile.write(id)
-        bansFile.close()
+        with open("txt/bans.txt", "w+") as bansFile:
+            bansFile.write("")
+        with open("txt/bans.txt", "a+") as bansFile:
+            for id in bansLines:
+                if id == chanID:
+                    bansLines.remove(id)
+                    await ctx.response.send_message("JE SUIS LIIIIIIBRE")
+                    logger.info("et je suis libre (oui!)")
+                else:
+                    bansFile.write(id)
 
 
 @bot.tree.command(name="invite", description="Vasy invite moi sur un autre serveur, on s'emmerde ici")
@@ -1789,56 +1798,6 @@ async def amongus(ctx):
         f"{ctx.author.name} - A demandé une game Among Us {ctx.guild.name}"
     )
 
-    def equal_games(liste):
-        # Il vaut mieux que la liste soit déjà mélangée, mais on peut le faire ici aussi.
-        # Le programme renvoie une liste 2D composant les équipes
-
-        tailleListe = len(liste)
-        tailleMin, tailleMax = 5, 10
-        tailleEquip = []
-        nbEquip = 0
-        equip = []
-
-        for i in range(tailleMax, tailleMin, -1):
-            if tailleListe % i == 0:
-                nbEquip = tailleListe // i
-                for _ in range(nbEquip):
-                    tailleEquip.append(i)
-                break
-            elif tailleListe % i == 1 and i < tailleMax:
-                nbEquip = tailleListe // i
-                for j in range(nbEquip):
-                    if j == 0:
-                        tailleEquip.append(i + 1)
-                    else:
-                        tailleEquip.append(i)
-                break
-
-        if nbEquip == 0:
-            tailleEquip.append(tailleMax)
-            while tailleListe > 0 and tailleMin < tailleEquip[
-                0] and nbEquip < 8:
-                tailleListe -= tailleEquip[0]
-                nbEquip += 1
-
-                if 0 < tailleListe < tailleMin and nbEquip < 8:
-                    tailleEquip[0] -= 1
-                    tailleListe = len(liste)
-                    nbEquip = 0
-
-            for i in range(1, nbEquip):
-                tailleEquip.append(tailleEquip[0])
-
-        j = 0
-        for i in range(nbEquip):
-            list1 = []
-            for _ in range(tailleEquip[i]):
-                if j < len(liste):
-                    list1.append(liste[j])
-                    j += 1
-            equip.append(list1)
-        return equip
-
     tour = 0
     while 1:
         tour += 1
@@ -1853,7 +1812,7 @@ async def amongus(ctx):
         await firstMessage.add_reaction(yes)
 
         for _ in range(totalTime):
-            time.sleep(1)
+            await asyncio.sleep(1)
             timeLeft -= 1
             await firstMessage.edit(content=message +
                                             f" Il reste {str(timeLeft)} sec")
@@ -1951,6 +1910,8 @@ FLAG2 = "`CYBN{DR4wiNG_w1Th0Ut_P4p3r_c4N_H4pP3n}`"
 @bot.tree.command(name="flag", description="Envoie un message éphémère")
 async def flag(interaction: discord.Interaction):
     win, draw = [int(s) for s in (await getScoreLeaderBoard(interaction.user.id, filename="pve.txt"))]
+
+    messages = []
     if win >= 3:
         await interaction.response.send_message("Allez tiens ton flag : " + FLAG, ephemeral=True)
     if draw > 0:
@@ -2139,20 +2100,20 @@ async def puissance4(interaction):
         return col
 
     async def send_mp(user, type="win"):
-        time.sleep(4)
+        await asyncio.sleep(4)
         if type == "win":
             await user.send("Coucou")
-            time.sleep(4)
+            await asyncio.sleep(4)
             await user.send("Ok bien joué")
-            time.sleep(7)
+            await asyncio.sleep(7)
             await user.send("T'es sûr de mériter le flag ?")
-            time.sleep(9)
+            await asyncio.sleep(9)
             await user.send("Bon vasy le flag tu me fais pitié : `CYBN{Y0u_Kn0w_hOW_7o_Pl4Y_P0w3R_4}`")
         elif type == "draw":
             await user.send("Stylé l'égalité, je pensais pas que ca arriverait :clap:")
-            time.sleep(4)
+            await asyncio.sleep(4)
             await user.send("Tu es de ma trempe pour réussir ça, j'aime bien, bel adversaire")
-            time.sleep(3)
+            await asyncio.sleep(3)
             await user.send(
                 "Allez tiens un petit cadeau, il rapporte pas beaucoup de points mais c'est toujours sympa : `CYBN{DR4wiNG_w1Th0Ut_P4p3r_c4N_H4pP3n}`")
 
@@ -2308,7 +2269,7 @@ async def puissance4(interaction):
     text = yellowPing + " et " + redPing + " tenez vous prêts !"
     gridMessage = await interaction.send(text)
 
-    time.sleep(5)
+    await asyncio.sleep(5)
 
     while not end:
         if tour == 1:
@@ -2508,19 +2469,17 @@ async def p4(ctx):
 
 
 async def updateLeaderboard(liste, filename="leaderboard.txt"):
-    file = open("txt/" + filename, "w+")
-    for line in liste:
-        line = "-".join(line)
-        if line[len(line) - 1] != "\n":
-            line += "\n"
-        file.write(line)
-    file.close()
+    with open("txt/" + filename, "w+") as file:
+        for line in liste:
+            line = "-".join(line)
+            if line[len(line) - 1] != "\n":
+                line += "\n"
+            file.write(line)
 
 
 async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
-    file = open("txt/" + filename, "r+")
-    leaderboard_users = file.readlines()
-    file.close()
+    with open("txt/" + filename, "r+") as file:
+        leaderboard_users = file.readlines()
     for i in range(len(leaderboard_users)):
         if str(id) in leaderboard_users[i]:
             leaderboard_users[i] = leaderboard_users[i].split("-")
@@ -2529,9 +2488,8 @@ async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
 
 
 async def getPlaceLeaderbord(id):
-    file = open("txt/leaderboard.txt", "r+")
-    leaderboard_users = file.readlines()
-    file.close()
+    with open("txt/leaderboard.txt", "r+") as file:
+        leaderboard_users = file.readlines()
 
     for i in range(len(leaderboard_users)):
         if str(id) in leaderboard_users[i]:
@@ -2544,9 +2502,8 @@ async def getPlaceLeaderbord(id):
 
 
 async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt", draw=False):
-    file = open("txt/" + filename, "r+")
-    leaderboard_users = file.readlines()
-    file.close()
+    with open("txt/" + filename, "r+") as file:
+        leaderboard_users = file.readlines()
     isIn = False
     for i in range(len(leaderboard_users)):
         leaderboard_users[i] = leaderboard_users[i].split("-")
@@ -2570,9 +2527,8 @@ async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt"
 
 
 async def addScoreLeaderboard(id, name):
-    file = open("txt/leaderboard.txt", "r+")
-    leaderboard_users = file.readlines()
-    file.close()
+    with open("txt/leaderboard.txt", "r+") as file:
+        leaderboard_users = file.readlines()
     isIn = False
     for i in range(len(leaderboard_users)):
         leaderboard_users[i] = leaderboard_users[i].split("-")
@@ -2595,9 +2551,8 @@ async def addScoreLeaderboard(id, name):
 
 
 async def addLoseLeaderboard(id, name):
-    file = open("txt/leaderboard.txt", "r+")
-    leaderboard_users = file.readlines()
-    file.close()
+    with open("txt/leaderboard.txt", "r+") as file:
+        leaderboard_users = file.readlines()
     isIn = False
     for i in range(len(leaderboard_users)):
         leaderboard_users[i] = leaderboard_users[i].split("-")
@@ -2621,9 +2576,8 @@ async def addLoseLeaderboard(id, name):
 
 @bot.tree.command(name="leaderboard", description="Affiche le classement au Puissance 4")
 async def leaderboard(ctx: discord.Interaction):
-    file = open("txt/leaderboard.txt", "r+")
-    leaderboard_users = file.readlines()
-    file.close()
+    with open("txt/leaderboard.txt", "r+") as file:
+        leaderboard_users = file.readlines()
     for i in range(len(leaderboard_users)):
         leaderboard_users[i] = leaderboard_users[i].split("-")
 
@@ -2677,9 +2631,8 @@ async def leaderboard(ctx: discord.Interaction):
 
 @bot.tree.command(name="rank", description="Affiche le rang d'une personne au Puissance 4")
 async def rank(ctx: discord.Interaction, user: typing.Optional[discord.Member]):
-    file = open("txt/leaderboard.txt", "r+")
-    leaderboard_users = file.readlines()
-    file.close()
+    with open("txt/leaderboard.txt", "r+") as file:
+        leaderboard_users = file.readlines()
     for i in range(len(leaderboard_users)):
         leaderboard_users[i] = leaderboard_users[i].split("-")
 
@@ -2795,7 +2748,7 @@ async def panda(ctx: discord.Interaction):
         url=url + "/random-panda-image",
     )
     embed.set_author(
-        name=ctx.message.author.display_name,
+        name=ctx.user.display_name,
         icon_url=
         "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
     )
@@ -2805,7 +2758,7 @@ async def panda(ctx: discord.Interaction):
 
 
 @bot.tree.command(name="chat", description="😺")
-async def panda(ctx: discord.Interaction):
+async def chat(ctx: discord.Interaction):
     url = "https://api.thecatapi.com/v1/images/search?limit=1"
 
     try:
@@ -2859,7 +2812,7 @@ async def dhcp(ctx, ip_range: str):
         await firstMessage.add_reaction(yes)
 
         for _ in range(totalTime):
-            time.sleep(1)
+            await asyncio.sleep(1)
             timeLeft -= 1
             await firstMessage.edit(content=message +
                                             f" Il reste {str(timeLeft)} sec")
