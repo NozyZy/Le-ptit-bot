@@ -173,9 +173,7 @@ async def on_message(message):
                 if verifAlphabet(mot) and 0 < len(mot) < 27:
                     mot += "\n"
                     if mot not in dicoLines:
-                        logger.info(
-                            f"{user.name} - {message.guild.name} - nouveau mot : {mot}"
-                        )
+                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {mot}")
                         dicoLines.append(mot)
                 mot = ""
 
@@ -259,7 +257,7 @@ async def on_message(message):
                 text = mot + nom
                 await channel.send(text)
                 time.sleep(3)
-            logger.info("A appelé", nom)
+            logger.info(f"{user.name} - {message.guild.name} - A appelé", nom)
             return
 
     # if you tag this bot in any message
@@ -292,9 +290,7 @@ async def on_message(message):
 
     # send 5 randoms words from the dico
     if MESSAGE == "--random":
-        logger.info(
-            f"{user.name} - {message.guild.name} - A généré une phrase aléatoire"
-        )
+        logger.info(f"{user.name} - {message.guild.name} - A généré une phrase aléatoire")
         text = ""
         rd_dico = dicoLines
         random.shuffle(rd_dico)
@@ -309,9 +305,7 @@ async def on_message(message):
 
     # send the number of words stocked in the dico
     if MESSAGE == "--dico":
-        logger.info(
-            f"{user.name} - {message.guild.name} - A compter le nombe de mots du dico"
-        )
+        logger.info(f"{user.name} - {message.guild.name} - A compter le nombe de mots du dico")
         text = f"J'ai actuellement {str(len(dicoLines))} mots enregistrés, nickel"
         await channel.send(text)
 
@@ -437,7 +431,7 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("exact") and rdnb > 2:
-            logger.info(f"{user.name} - {message.guild.name} - A trouvé ça exacte")
+            logger.info(f"{user.name} - {message.guild.name} - A trouvé ça exact")
             reponses = [
                 "Je dirais même plus, exact.",
                 "Il est vrai",
@@ -458,10 +452,8 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE in ["toi-même", "toi-meme", "toi même", "toi meme"]:
-            logger.info(
-                f"{user.name} - {message.guild.name} - A sorti sa meilleure répartie"
-            )
+        if MESSAGE.strip(".;,?! \"')") in ["toi-même", "toi-meme", "toi même", "toi meme"]:
+            logger.info(f"{user.name} - {message.guild.name} - A sorti sa meilleure répartie")
             reponses = [
                 "Je ne vous permet pas",
                 "Miroir magique",
@@ -484,8 +476,7 @@ async def on_message(message):
             logger.info(f"{user.name} - {message.guild.name} - A envoyé du love")
             await message.add_reaction("❤")
 
-        if (MESSAGE.startswith("hein")
-            or MESSAGE.startswith("1")) and rdnb > 3:
+        if (MESSAGE.strip(".;,?! \"')") in ["hein", "1"]) and rdnb > 3:
             logger.info(f"{user.name} - {message.guild.name} - A commencé par 1")
             reponses = ["deux", "2", "deux ?", "2 😏"]
             await channel.send(random.choice(reponses))
@@ -508,7 +499,7 @@ async def on_message(message):
                     "BRAVO TU SAIS COMPTER !",
                     "SOLEIL !",
                     "4, 5, 6, 7.... oh et puis merde",
-                    "HAHAHAHAH non.",
+                    "allez ta gueule.",
                     "stop.",
                 ]
                 await channel.send(random.choice(reponses))
@@ -530,19 +521,18 @@ async def on_message(message):
                 await channel.send("A B C GNEU GNEU MARRANT TROU DU CUL !!!")
 
         if MESSAGE == "ah" and rdnb > 3:
-            logger.info(f"{user.name} - {message.guild.name} - ")
             if rdnb >= 4:
-                logger.info("S'est fait Oh/Bh")
+                logger.info(f"{user.name} - {message.guild.name} - S'est fait Oh/Bh")
                 reponses = ["Oh", "Bh"]
                 await channel.send(random.choice(reponses))
             else:
-                logger.info("S'est fait répondre avec le dico (ah)")
+                logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre avec le dico (ah)")
                 await channel.send(finndAndReplace("a", dicoLines))
 
         if MESSAGE == "oh" and rdnb >= 2:
             logger.info(f"{user.name} - {message.guild.name} - ")
             if rdnb >= 4:
-                logger.info("S'est fait répondre (oh)")
+                logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre (oh)")
                 reponses = [
                     "Quoi ?",
                     "p",
@@ -552,17 +542,16 @@ async def on_message(message):
                 ]
                 await channel.send(random.choice(reponses))
             else:
-                logger.info("S'est fait répondre par le dico (oh)")
+                logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre par le dico (oh)")
                 await channel.send(finndAndReplace("o", dicoLines))
 
         if MESSAGE == "eh" and rdnb >= 2:
-            logger.info(f"{user.name} - {message.guild.name} - ")
             if rdnb >= 4:
-                logger.info("S'est fait répondre (eh)")
+                logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre (eh)")
                 reponses = ["hehehehehe", "oh", "Du calme."]
                 await channel.send(random.choice(reponses))
             else:
-                logger.info("S'est fait répondre par le dico (eh)")
+                logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre par le dico (eh)")
                 await channel.send(finndAndReplace("é", dicoLines))
 
         if MESSAGE.startswith("merci"):
@@ -596,8 +585,7 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("tu veux") and rdnb > 3:
-            logger.info(
-                f"{user.name} - {message.guild.name} - A demandé si on voulait")
+            logger.info(f"{user.name} - {message.guild.name} - A demandé si on voulait")
             reponses = [
                 "Ouais gros",
                 "Carrément ma poule",
@@ -634,9 +622,7 @@ async def on_message(message):
 
         if (MESSAGE.startswith("t'es sur")
             or MESSAGE.startswith("t sur")) and rdnb > 3:
-            logger.info(
-                f"{user.name} - {message.guild.name} - A demandé si on était sur"
-            )
+            logger.info(f"{user.name} - {message.guild.name} - A demandé si on était sur")
             reponses = [
                 "Ouais gros",
                 "Nan pas du tout",
@@ -647,9 +633,7 @@ async def on_message(message):
 
         if (MESSAGE.startswith("ah ouais")
             or MESSAGE.startswith("ah bon")) and rdnb > 3:
-            logger.info(
-                f"{user.name} - {message.guild.name} - S'est intérrogé de la véracité du dernier propos"
-            )
+            logger.info(f"{user.name} - {message.guild.name} - S'est intérrogé de la véracité du dernier propos")
             reponses = [
                 "Ouais gros", "Nan ptdr", "Je sais pas écoute...", "tg"
             ]
@@ -667,9 +651,7 @@ async def on_message(message):
                     "*Nous vous devons une reconnaissance éternelllllllle*",
                 ]
             else:
-                logger.info(
-                    f"{user.name} - {message.guild.name} - Un faux maître m'a appelé"
-                )
+                logger.info(f"{user.name} - {message.guild.name} - Un faux maître m'a appelé")
                 reponses = [
                     "ratio",
                     "ptdr t ki ?",
@@ -741,9 +723,7 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE.startswith("miroir magique"):
-            logger.info(
-                f"{user.name} - {message.guild.name} - A sorti une répartie de maternelle"
-            )
+            logger.info(f"{user.name} - {message.guild.name} - A sorti une répartie de maternelle")
             await channel.send(MESSAGE)
 
         if MESSAGE.startswith("jure") and rdnb > 4:
@@ -819,7 +799,7 @@ async def on_message(message):
             )
             embed.set_image(url=go)
             embed.set_footer(text="SOinc")
-            logger.info("GOes fast today")
+            logger.info(f"{user.name} - {message.guild.name} - GOes fast today")
             await channel.send("GOtta GO fast !", embed=embed)
 
         if MESSAGE == "kanye":
@@ -844,168 +824,67 @@ async def on_message(message):
             await channel.send("Kanyeah", embed=embed)
 
         if MESSAGE.startswith("god"):
-            logger.info(f"{user.name} - {message.guild.name} - ")
             day = today.strftime("%d")
             month = today.strftime("%m")
+            year = today.strftime("%y")
             MESSAGE = MESSAGE.replace("god", "")
             userID = ""
-            if "<@!" not in MESSAGE:
+
+            if "<@" not in MESSAGE:
                 userID = int(user.id)
             else:
                 i = 0
                 for i in range(len(MESSAGE)):
-                    if (MESSAGE[i] == "<" and MESSAGE[i + 1] == "@"
-                            and MESSAGE[i + 2] == "!"):
-                        i += 3
-                        userID = ""
+                    if MESSAGE[i] == "<" and MESSAGE[i + 1] == "@":
+                        i += 2
                         break
                 while MESSAGE[i] != ">" and i < len(MESSAGE):
                     userID += MESSAGE[i]
                     i += 1
                 userID = int(userID)
+
             if userID == 890084641317478400 and rdnb >= 3:
                 await channel.send("Lâche l'affaire David")
-                logger.info("C'était David")
+                logger.info(f"{user.name} - {message.guild.name} - C'était David")
                 return
             if userID % 5 != (int(day) + int(month)) % 5:
                 await channel.send("Not today (☞ﾟヮﾟ)☞")
-                logger.info("N'est pas dieu aujourd'hui")
+                logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
                 return
             user = await message.guild.fetch_member(userID)
             pfp = user.avatar.url
             gods = [
-                [
-                    "https://tse4.mm.bing.net/th?id=OIP.IXAIL06o83HxXHGjKHqZMAHaKe&pid=Api",
-                    "Loki",
-                ],
-                [
-                    "https://www.wallpaperflare.com/static/810/148/1018/painting-vikings-odin-gungnir-wallpaper.jpg",
-                    "Odin",
-                ],
-                [
-                    "https://tse3.mm.bing.net/th?id=OIP.3NR2eZEBm46mrcFM_p14RgHaJ3&pid=Api",
-                    "Osiris",
-                ],
-                [
-                    "https://tse1.explicit.bing.net/th?id=OIP.KXfuA_jDa_cfDkrMInOMfQHaJq&pid=Api",
-                    "Shiva",
-                ],
-                [
-                    "https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api",
-                    "Poseidon",
-                ],
-                [
-                    "https://tse1.mm.bing.net/th?id=OIP.M6A5OIYcaUO5UUrUjVRn5wHaNK&pid=Api",
-                    "Arceus",
-                ],
-                [
-                    "https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api",
-                    "Anubis",
-                ],
-                [
-                    "https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api",
-                    "Tezcatlipoca",
-                ],
-                [
-                    "https://www.spiritmiracle.com/wp-content/uploads/2023/04/goddess-venus-cupid.jpg",
-                    "Venus",
-                ],
-                [
-                    "https://image.tensorartassets.com/cdn-cgi/image//posts/images/613335434814121629/5f9b14dc-12f8-45f4-8cfd-8fb38dc3cb02.jpg",
-                    "God zilla",
-                ],
-                [
-                    "https://www.writersandy.com/uploads/1/2/5/4/12545559/published/goddess-inanna2.jpg?1524448024",
-                    "Ishtar",
-                ],
-                [
-                    "https://1.bp.blogspot.com/-J6h4vRgHTEg/WDkQztXD12I/AAAAAAAANRY/TeAWIz6L3_kBZr86cTWS4YVHYoCXCmx3gCLcB/s1600/Karna-Vimanika-Comics.jpg",
-                    "Karna",
-                ],
-                [
-                    "https://i.pinimg.com/originals/32/d6/55/32d6553b6a36d8872734998af9312c71.jpg",
-                    "Brynhild",
-                ],
-                [
-                    "https://static.wikia.nocookie.net/omniversal-battlefield/images/7/73/Sun_Wukong_%28Art%29.jpg/revision/latest?cb=20210823031548",
-                    "Sun Wukong",
-                ],
-                [
-                    "https://i.redd.it/7q9as4hojtd61.jpg",
-                    "Apollo",
-                ],
-                [
-                    "https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg",
-                    "Quetzacoalt",
-                ],
-                [
-                    "https://static.wikia.nocookie.net/gods_and_demons/images/d/d6/D317f73591e2565cc5617fc7d8f2c630.jpg",
-                    "Hades",
-                ],
-                [
-                    "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/6ec0d49d-038d-4900-b498-c8cc3863c8e8/dd2bzrv-c474cf5f-386e-44b4-89f8-e0e69827e1a1.jpg/v1/fill/w_800,h_1000,q_75,strp/ereshkigal_by_irenhorrors_dd2bzrv-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTAwMCIsInBhdGgiOiJcL2ZcLzZlYzBkNDlkLTAzOGQtNDkwMC1iNDk4LWM4Y2MzODYzYzhlOFwvZGQyYnpydi1jNDc0Y2Y1Zi0zODZlLTQ0YjQtODlmOC1lMGU2OTgyN2UxYTEuanBnIiwid2lkdGgiOiI8PTgwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.Svr-kqOYRHqmLSi0VW3YORKkt-q8WdvC8FaKvlWxbz0",
-                    "Ereshkigal",
-                ],
-                [
-                    "https://www.nautiljon.com/images/description/00/37/1635269992331_image.jpg",
-                    "Asclepius",
-                ],
-                [
-                    "https://cdnb.artstation.com/p/assets/images/images/056/675/953/large/gabriel-flauzino-thorcolour.jpg",
-                    "Thor",
-                ],
-                [
-                    "https://i.pinimg.com/originals/ae/68/50/ae68509b78c017ecba1f08d64c59c7f8.jpg",
-                    "Amon",
-                ],
-                [
-                    "https://cdna.artstation.com/p/assets/images/images/006/489/730/large/boyan-petrov-thoth12.jpg",
-                    "Thoth",
-                ],
-                [
-                    "https://cdnb.artstation.com/p/assets/images/images/011/390/921/large/mohamed-sax-sobek.jpg",
-                    "Sobek",
-                ],
-                [
-                    "https://cdnb.artstation.com/p/assets/images/images/012/343/689/large/yiye-gong-img-20180806-173554.jpg",
-                    "Dio",
-                ],
-                [
-                    "https://upload.wikimedia.org/wikipedia/commons/6/69/Sucellus_MAN_St_Germain.jpg",
-                    "Sucellos",
-                ],
-                [
-                    "https://i.pinimg.com/originals/fa/8f/b2/fa8fb2e1f6ec3e529c119b05c2c5c649.png",
-                    "Gaïa",
-                ],
-                [
-                    "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8809c8cd-04d2-4fc2-bc24-f9e2460d0f36/d8vo0pe-00f82d4e-4560-462d-9d19-594b1455f009.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzg4MDljOGNkLTA0ZDItNGZjMi1iYzI0LWY5ZTI0NjBkMGYzNlwvZDh2bzBwZS0wMGY4MmQ0ZS00NTYwLTQ2MmQtOWQxOS01OTRiMTQ1NWYwMDkuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.w8B7yWVQ2_wrZKZvJ_p9JzrXymLB3XWWmEdOx-JXmP4",
-                    "Anu",
-                ],
-                [
-                    "https://cdna.artstation.com/p/assets/images/images/019/778/880/large/ekaterina-chesalova-enki.jpg",
-                    "Enki",
-                ],
-                [
-                    "https://cdna.artstation.com/p/assets/images/images/030/081/254/large/victoria-ponomarenko-2-zin-enlil-a5.jpg",
-                    "Enlil",
-                ],
-                [
-                    "https://i.pinimg.com/originals/01/61/ec/0161ecc12f56d0310f332d6e2714bd6c.png",
-                    "Marduk",
-                ],
-                [
-                    "https://static.wikia.nocookie.net/villains/images/7/72/Lovecraft-cthulhu.jpg/revision/latest?cb=20151128095138",
-                    "Cthulhu",
-                ],
-                [
-                    "https://tolkiengateway.net/w/images/4/48/Elena_Kukanova_-_Vana_the_Ever-Young.jpg",
-                    "Vána",
-                ],
-                [
-                    "https://static.wikia.nocookie.net/dragonball/images/7/7d/BeerusWikia_%283%29.jpg/revision/latest?cb=20240224003806",
-                    "Beerus",
-                ]
+                ['https://i.pinimg.com/originals/ae/68/50/ae68509b78c017ecba1f08d64c59c7f8.jpg', 'Amon'],
+                ['https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg', 'Quetzacoalt'],
+                ['https://i.pinimg.com/originals/fa/8f/b2/fa8fb2e1f6ec3e529c119b05c2c5c649.png', 'Gaïa'],
+                ['https://cdna.artstation.com/p/assets/images/images/030/081/254/large/victoria-ponomarenko-2-zin-enlil-a5.jpg', 'Enlil'],
+                ['https://static.wikia.nocookie.net/dragonball/images/7/7d/BeerusWikia_%283%29.jpg/revision/latest?cb=20240224003806', 'Beerus'],
+                ['https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api', 'Tezcatlipoca'],
+                ['https://static.wikia.nocookie.net/the-demonic-paradise/images/2/2b/62000d56c16c35ada35f1da338de087e309313e9r1-736-735v2_uhq.jpg/revision/latest?cb=20200531061757', 'Arawn'],
+                ['https://cdnb.artstation.com/p/assets/images/images/011/390/921/large/mohamed-sax-sobek.jpg', 'Sobek'],
+                ['https://www.deviantart.com/purplerhino/art/Ishtar-Babylonian-goddess-of-love-and-war-939024002', 'Ishtar'],
+                ['https://tolkiengateway.net/w/images/4/48/Elena_Kukanova_-_Vana_the_Ever-Young.jpg', 'Vána'],
+                ['https://i.pinimg.com/originals/22/a3/01/22a3013477b4edde4da351b4f2c800d9.jpg', 'Hades'],
+                ['https://i.pinimg.com/736x/dc/b2/b2/dcb2b25f78cce0ef7fd19b5694875327.jpg', 'Thor'],
+                ['https://tse1.explicit.bing.net/th?id=OIP.KXfuA_jDa_cfDkrMInOMfQHaJq&pid=Api', 'Shiva'],
+                ['https://tse3.mm.bing.net/th?id=OIP.3NR2eZEBm46mrcFM_p14RgHaJ3&pid=Api', 'Osiris'],
+                ['https://i.redd.it/7q9as4hojtd61.jpg', 'Apollo'],
+                ['https://cdna.artstation.com/p/assets/images/images/019/778/880/large/ekaterina-chesalova-enki.jpg', 'Enki'],
+                ['https://static.wikia.nocookie.net/villains/images/7/72/Lovecraft-cthulhu.jpg/revision/latest?cb=20151128095138', 'Cthulhu'],
+                ['https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api', 'Anubis'],
+                ['https://i.pinimg.com/originals/7c/71/f7/7c71f791c9e6450c00f66543c0569a8f.jpg', 'Odin'],
+                ['https://www.bergaminart.com/cdn/shop/products/Old_One_1200x1200.jpg?v=1533874426', 'Azathoth'],
+                ['https://tse1.mm.bing.net/th?id=OIP.M6A5OIYcaUO5UUrUjVRn5wHaNK&pid=Api', 'Arceus'],
+                ['https://www.mifologia.com/wp-content/uploads/2024/10/041a1.png', 'Ninkasi'],
+                ['https://cdna.artstation.com/p/assets/images/images/006/489/730/large/boyan-petrov-thoth12.jpg','Thoth'],
+                ['https://upload.wikimedia.org/wikipedia/commons/d/d1/Amaterasu_cave_crop.jpg', 'Amaterasu'],
+                ['https://cdnb.artstation.com/p/assets/images/images/012/343/689/large/yiye-gong-img-20180806-173554.jpg', 'Dio'],
+                ['https://i.pinimg.com/originals/e1/4a/2b/e14a2b86ccd88ba31ad3ac3945737d26.jpg', 'God zilla'],
+                ['https://cdn3.f-cdn.com//files/download/124058119/erlikk2.jpg?width=780&height=1011&fit=crop', 'Erlik Khan'],
+                ['https://legendaryladieshub.com/wp-content/uploads/2023/10/Venus_LLH.jpeg', 'Venus'],
+                ['https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api', 'Poseidon'],
+                ['https://i.pinimg.com/736x/cd/79/9d/cd799dc51f48b1a88dddf5a8017d288f.jpg', 'Mara'],
+                ['https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8809c8cd-04d2-4fc2-bc24-f9e2460d0f36/d8vo0pe-00f82d4e-4560-462d-9d19-594b1455f009.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzg4MDljOGNkLTA0ZDItNGZjMi1iYzI0LWY5ZTI0NjBkMGYzNlwvZDh2bzBwZS0wMGY4MmQ0ZS00NTYwLTQ2MmQtOWQxOS01OTRiMTQ1NWYwMDkuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.w8B7yWVQ2_wrZKZvJ_p9JzrXymLB3XWWmEdOx-JXmP4','Anu']
             ]
             embed = discord.Embed(
                 title="This is God",
@@ -1017,8 +896,7 @@ async def on_message(message):
                     "https://tenor.com/view/bruce-almighty-morgan-freeman-i-am-god-hello-hey-gif-4743445",
                 ]),
             )
-            god = gods[((userID // 365 + int(day) * 5) // int(month)) %
-                       len(gods)]
+            god = gods[((userID // 365 + int(day) ** 3 * int(year)) // int(month)) % len(gods)]
             embed.set_thumbnail(url=pfp)
             embed.set_author(
                 name="Le p'tit god",
@@ -1028,7 +906,7 @@ async def on_message(message):
             )
             embed.set_image(url=god[0])
             embed.set_footer(text=god[1])
-            logger.info("Est un dieu aujourd'hui : ", god[1])
+            logger.info(f"{user.name} - {message.guild.name} - Est un dieu aujourd'hui : {god[1]}")
             await channel.send("God looks like him.", embed=embed)
 
         if MESSAGE.startswith("hello") and rdnb >= 3:
@@ -1036,9 +914,7 @@ async def on_message(message):
             await channel.send(file=discord.File("images/helo.jpg"))
 
         if (MESSAGE == "enculé" or MESSAGE == "enculer") and rdnb > 3:
-            logger.info(
-                f"{user.name} - {message.guild.name} - A demander d'aller se faire enculer"
-            )
+            logger.info(f"{user.name} - {message.guild.name} - A demander d'aller se faire enculer")
             image = ["images/tellermeme.png", "images/bigard.jpeg"]
             await channel.send(file=discord.File(random.choice(image)))
 
@@ -1060,15 +936,6 @@ async def on_message(message):
         if MESSAGE.startswith("leeroy"):
             logger.info(f"{user.name} - {message.guild.name} - LEEROOOOOOOOOOYY")
             await channel.send(file=discord.File("sounds/Leeroy Jenkins.mp3"))
-
-        # if "pute" in MESSAGE and rdnb > 4:
-        #     logger.info(f"{user.name} - {message.guild.name} - Le pute")
-        #     reponses = [
-        #         "https://tenor.com/view/mom-gif-10756105",
-        #         "https://tenor.com/view/wiener-sausages-hotdogs-gif-5295979",
-        #         "https://i.ytimg.com/vi/3HZ0lvpdw6A/maxresdefault.jpg",
-        #     ]
-        #    await channel.send(random.choice(reponses))
 
         if "guillotine" in MESSAGE:
             logger.info(f"{user.name} - {message.guild.name} - Le guillotine")
@@ -1353,8 +1220,7 @@ async def on_message(message):
 @bot.command()  # delete 'nombre' messages
 async def clear(ctx, nombre: int):
     logger.info(
-        f"{ctx.author.name} - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}"
-    )
+        f"{ctx.author.name} - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}")
     messages = [message async for message in ctx.channel.history(limit=nombre + 1, oldest_first=False)]
     for message in messages:
         await message.delete()
@@ -1362,9 +1228,7 @@ async def clear(ctx, nombre: int):
 
 @bot.command()  # repeat the 'text', and delete the original message
 async def repeat(ctx, *text):
-    logger.info(
-        f"{ctx.author.name} - A demandé de répéter {' '.join(text)} messages"
-    )
+    logger.info(f"{ctx.author.name} - A demandé de répéter {' '.join(text)} messages")
     messages = ctx.channel.history(limit=1)
     for message in messages:
         await message.delete()
@@ -1376,9 +1240,7 @@ async def serverinfo(ctx):
     server = ctx.guild
     nbUsers = server.member_count
     text = f"Le serveur **{server.name}** contient **{nbUsers}** personnes !"
-    logger.info(
-        f"{ctx.author.name} - A demandé les infos du serveur {server.name}"
-    )
+    logger.info(f"{ctx.author.name} - A demandé les infos du serveur {server.name}")
     await ctx.send(text)
 
 
@@ -1388,9 +1250,7 @@ async def crypt(ctx, *text):
     messages = await ctx.channel.history(limit=1).flatten()
     for message in messages:
         await message.delete()
-    logger.info(
-        f"{ctx.author.name} - A demandé de crypter {mot} en {crypting(mot)}"
-    )
+    logger.info(f"{ctx.author.name} - A demandé de crypter {mot} en {crypting(mot)}")
     await ctx.send(f"||{mot}|| :\n" + crypting(mot))
 
 

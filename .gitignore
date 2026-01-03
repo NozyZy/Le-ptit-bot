@@ -6,6 +6,7 @@ txt/admin.txt
 txt/names.txt
 txt/ShPeu.txt
 .env
+stats.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
