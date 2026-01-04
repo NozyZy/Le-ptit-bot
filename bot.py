@@ -1,24 +1,32 @@
+# Standard library imports
+import argparse
 import asyncio
+import json
+import logging
 import os
-import time
-import typing
+import re
 from datetime import date
+import random
 
+# Third-party imports
 import discord
 import requests
-import json
-import argparse
-import logging
-import re
-
 from bs4 import BeautifulSoup
 from discord.ext import commands
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
 from dotenv import load_dotenv
+from PIL import Image, ImageDraw, ImageFont
 
-from fonctions import *
+# Local application imports
+from fonctions import (
+    crypting,
+    equal_games,
+    facto,
+    finndAndReplace,
+    is_prime,
+    nbInStr,
+    strToInt,
+    verifAlphabet,
+)
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -2389,10 +2397,9 @@ async def puissance4(interaction):
                     gridMessage,
                 )
                 if mode == "pvp":
-                    text = (ping + " gagne ! **Score actuel : " +
-                            (await getScoreLeaderBoard(winner.id))[0] +
-                            " victoires** - " +
-                            await getPlaceLeaderbord(winner.id))
+                    score = (await getScoreLeaderBoard(winner.id))[0]
+                    place = await getPlaceLeaderbord(winner.id)
+                    text = f"{ping} gagne ! **Score actuel : {score} victoires** - {place}"
                 if not sent:
                     await interaction.send(text)
                 end = True
@@ -2432,12 +2439,16 @@ async def puissance4(interaction):
                     gridMessage)
                 await addScoreLeaderboard(yellow.id, yellow)
                 await addLoseLeaderboard(red.id, red)
+                # await score/place into variables and ensure place is a string fallback
+                score = (await getScoreLeaderBoard(yellow.id))[0]
+                place = await getPlaceLeaderbord(yellow.id)
+                if place is None:
+                    place = "Non classé"
                 text = (
-                        redPing + " n'a pas joué ! Alors **" + yellowPing +
-                        " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "
-                        + (await getScoreLeaderBoard(yellow.id))[0] + " victoires - " +
-                        await getPlaceLeaderbord(yellow.id))
-
+                    redPing + " n'a pas joué ! Alors **" + yellowPing +
+                    " gagne !** (c'est le jeu ma pov lucette)\n Score actuel : "
+                    + score + " victoires - " + place
+                )
             else:
                 logger.info(
                     f"{red} - Est le gagnant ! {interaction.guild.name}"
@@ -2449,11 +2460,15 @@ async def puissance4(interaction):
                 if mode == "pvp":
                     await addScoreLeaderboard(red.id, red)
                     await addLoseLeaderboard(yellow.id, yellow)
+                    score = (await getScoreLeaderBoard(red.id))[0]
+                    place = await getPlaceLeaderbord(red.id)
+                    if place is None:
+                        place = "Non classé"
                     text = (
-                            yellowPing + " n'a pas joué ! Alors **" + redPing +
-                            " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
-                            + (await getScoreLeaderBoard(red.id))[0] + " victoires - " +
-                            await getPlaceLeaderbord(red.id))
+                        yellowPing + " n'a pas joué ! Alors **" + redPing +
+                        " gagne !** (fallait jouer, 2 min t'es large !)\n Score actuel : "
+                        + score + " victoires - " + place
+                    )
                 elif mode == "pve":
                     await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt")
                     text = f"J'en connais un qui est parti flag d'autres challs, et a abandonné le miens... Bah t'as perdu {yellowPing}, cheh"
