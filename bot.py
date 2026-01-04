@@ -1557,7 +1557,7 @@ async def prime(ctx, nb: int):
 
 
 @bot.tree.command(name="isprime", description="Es-tu prime ?")
-async def isPrime(interaction: discord.Interaction, nb: int):
+async def isPrime_slash(interaction: discord.Interaction, nb: int):
     if nb > 99999997979797979797979777797:
         await interaction.response.send_message(
             "C'est trop gros, ca va tout casser, demande à papa Google :D", ephemeral=True)
