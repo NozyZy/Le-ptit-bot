@@ -5,6 +5,8 @@ import json
 import logging
 import os
 import re
+import time as time_module
+from collections import defaultdict
 from datetime import date
 import random
 
@@ -59,6 +61,23 @@ nbprime: int = 0
 # Locks to protect global variables from race conditions
 nbtg_lock = asyncio.Lock()
 nbprime_lock = asyncio.Lock()
+
+# Rate limiting system
+# Track last usage time for each user (user_id -> last_use_timestamp)
+user_cooldowns = defaultdict(float)
+
+def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
+    """
+    Checks whether a user can perform an action.
+    Returns True if the action is allowed, False if it is on cooldown.
+    """
+    current_time = time_module.time()
+    last_use = user_cooldowns[user_id]
+
+    if current_time - last_use >= cooldown_seconds:
+        user_cooldowns[user_id] = current_time
+        return True
+    return False
 
 
 # Load server names from file
@@ -127,6 +146,21 @@ async def on_ready():
                 logger.debug(f"Applied saved name '{server_names[str(guild.id)]}' to server {guild.name}")
             except discord.Forbidden:
                 logger.warning(f"No permission to change nickname in server {guild.name}")
+
+
+# Error handler for command cooldowns
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        remaining = int(error.retry_after)
+        await ctx.send(f"⏳ Cette commande est en cooldown. Réessaie dans {remaining} seconde{'s' if remaining > 1 else ''}.")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f"❌ Argument manquant : `{error.param.name}`")
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send(f"❌ Argument invalide. Vérifie la syntaxe de la commande.")
+    else:
+        # Log other errors without sending to user
+        logger.error(f"Command error: {error}")
 
 
 # Get every message sent, stocked in 'message'
@@ -1239,6 +1273,7 @@ async def on_message(message):
 
 
 @bot.command()  # delete 'nombre' messages
+@commands.cooldown(1, 10, commands.BucketType.user)  # 1 use per 10 seconds per user
 async def clear(ctx, nombre: int):
     if nombre <= 0:
         await ctx.send("❌ Le nombre de messages doit être positif.")
@@ -1349,8 +1384,8 @@ async def game(ctx):
         await ctx.send(text)
 
 
-@bot.command(
-)  # do a simple calcul of 2 numbers and 1 operator (or a fractionnal)
+@bot.command()  # do a simple calcul of 2 numbers and 1 operator (or a fractionnal)
+@commands.cooldown(3, 5, commands.BucketType.user)  # 3 uses per 5 seconds
 async def calcul(ctx, *text):
     logger.info(f"{ctx.author.name} - ")
     tab = []
@@ -1506,14 +1541,14 @@ async def poll(ctx, *text):
             await reponse.add_reaction("🔟")
 
 
-@bot.command(
-)  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
+@bot.command()  # find and send all the prime numbers until 14064991, can calcul above but can't send it (8Mb limit)
+@commands.cooldown(1, 30, commands.BucketType.user)  # 1 use per 30 seconds (intensive calculation)
 async def prime(ctx, nb: int):
     global nbprime
     logger.info(f"{ctx.author.name} - ")
     if nb < 2:
         await ctx.send("Tu sais ce que ca veut dire 'prime number' ?")
-        logger.info("A demandé de calculer un nombre premier sen dessous de 2")
+        logger.info("A demandé de calculer un nombre premier en dessous de 2")
         return
     async with nbprime_lock:
         if nbprime > 2:
@@ -1571,6 +1606,7 @@ async def isPrime_slash(interaction: discord.Interaction, nb: int):
 
 
 @bot.command()  # find if 'nb' is a prime number, reacts to the message
+@commands.cooldown(2, 5, commands.BucketType.user)  # 2 uses per 5 seconds
 async def isPrime(ctx, nb: int):
     logger.info(
         f"{ctx.author.name} - A demandé si {nb} est premier : ",
@@ -1646,6 +1682,7 @@ def playSong(clt, queue, song):
 
 
 @bot.command()
+@commands.cooldown(1, 10, commands.BucketType.user)  # 1 use per 10 seconds (image generation)
 async def master(ctx, *text):
     logger.info(
         f"{ctx.author.name} - A demandé un meme master ")
@@ -1669,7 +1706,8 @@ async def master(ctx, *text):
     sizes = []
 
     for i in range(len(fonts)):
-        sizes.append(fonts[i].getsize(text[i])[0])
+        bbox = fonts[i].getbbox(text[i])
+        sizes.append(bbox[2] - bbox[0])  # width = right - left
 
     draw = ImageDraw.Draw(img)
 
@@ -1697,6 +1735,7 @@ async def master(ctx, *text):
 
 
 @bot.command()
+@commands.cooldown(1, 10, commands.BucketType.user)  # 1 use per 10 seconds (image generation)
 async def presentation(ctx, *base):
     logger.info(
         f"{ctx.author.name} - A demandé un meme presentation ",
@@ -1724,9 +1763,11 @@ async def presentation(ctx, *base):
     count += 1
     draw = ImageDraw.Draw(img)
     for i in range(len(text)):
-        size = font.getsize(text[i])
+        bbox = font.getbbox(text[i])
+        width = bbox[2] - bbox[0]  # right - left
+        height = bbox[3] - bbox[1]  # bottom - top
         draw.text(
-            xy=(335 - size[0] / 2, 170 + i * size[1] - 10 * count),
+            xy=(335 - width / 2, 170 + i * height - 10 * count),
             text=text[i],
             fill=(0, 0, 0),
             font=font,
@@ -1801,6 +1842,7 @@ async def invite(ctx: discord.Interaction):
 
 
 @bot.command()
+@commands.cooldown(1, 60, commands.BucketType.channel)  # 1 use per 60 seconds per channel (to avoid spam)
 async def amongus(ctx):
     logger.info(
         f"{ctx.author.name} - A demandé une game Among Us {ctx.guild.name}"
@@ -1934,6 +1976,7 @@ async def flag(interaction: discord.Interaction):
 
 
 @bot.command()
+@commands.cooldown(1, 30, commands.BucketType.channel)  # 1 game per 30 seconds per channel
 async def puissance4(interaction):
     logger.info(
         f"{interaction.author.name} - A lancé une partie de puissance 4 {interaction.guild.name}"
