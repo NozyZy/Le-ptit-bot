@@ -1554,7 +1554,7 @@ async def prime(ctx, nb: int):
     async with nbprime_lock:
         if nbprime > 2:
             await ctx.send("Attends quelques instants stp, je suis occupé...")
-            logger.info(f"A demandé trop de prime -> {nbprime})
+            logger.info(f"A demandé trop de prime -> {nbprime}")
             return
         nbprime += 1
     with open("txt/primes.txt", "r+") as Fprime:
