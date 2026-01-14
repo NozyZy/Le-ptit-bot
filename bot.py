@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import time as time_module
+import typing
 from collections import defaultdict
 from datetime import date
 import random
@@ -248,7 +249,7 @@ async def on_message(message):
         mot = mot + '\n'
         with open("txt/insultes.txt", "a") as fichierInsulte:
             fichierInsulte.write(mot)
-        logger.info(f"{user.name} - {message.guild.name} - Nouvelle insulte :", mot)
+        logger.info(f"{user.name} - {message.guild.name} - Nouvelle insulte : {mot}")
         await channel.send("Je retiens...")
 
     if message.content.startswith("--addBranlette"):
@@ -297,7 +298,7 @@ async def on_message(message):
                 text = mot + nom
                 await channel.send(text)
                 await asyncio.sleep(3)
-            logger.info(f"{user.name} - {message.guild.name} - A appelé", nom)
+            logger.info(f"{user.name} - {message.guild.name} - A appelé {nom}")
             return
 
     # if you tag this bot in any message
@@ -1553,7 +1554,7 @@ async def prime(ctx, nb: int):
     async with nbprime_lock:
         if nbprime > 2:
             await ctx.send("Attends quelques instants stp, je suis occupé...")
-            logger.info("A demandé trop de prime ->", nbprime)
+            logger.info(f"A demandé trop de prime -> {nbprime})
             return
         nbprime += 1
     with open("txt/primes.txt", "r+") as Fprime:
@@ -1588,7 +1589,7 @@ async def prime(ctx, nb: int):
         await ctx.send(text, file=discord.File("txt/prime.txt"))
     async with nbprime_lock:
         nbprime -= 1
-    logger.info(f"A demandé de claculer tous les nombres premiers juqu'à {nb}")
+    logger.info(f"A demandé de calculer tous les nombres premiers juqu'à {nb}")
 
 
 @bot.tree.command(name="isprime", description="Es-tu prime ?")
@@ -1598,10 +1599,10 @@ async def isPrime_slash(interaction: discord.Interaction, nb: int):
             "C'est trop gros, ca va tout casser, demande à papa Google :D", ephemeral=True)
         logger.info("too big")
     elif await is_prime(nb):
-        await interaction.response.send_message(f"👍 Oui, {nb} est premier !")
+        await interaction.response.send_message(f"👍")
         logger.info("oui")
     else:
-        await interaction.response.send_message(f"👎 Non, {nb} n'est pas premier.")
+        await interaction.response.send_message(f"👎")
         logger.info("non")
 
 
@@ -1815,7 +1816,7 @@ async def unban(ctx: discord.Interaction):
         bansLines = bansFile.readlines()
     chanID = str(ctx.channel.id) + "\n"
     if chanID not in bansLines:
-        await ctx.send("D'accord, mais j'suis pas ban, hehe.")
+        await ctx.response.send_message("D'accord, mais j'suis pas ban, hehe.")
         logger.info("mais j'étais pas ban")
     else:
         with open("txt/bans.txt", "w+") as bansFile:
@@ -1961,7 +1962,6 @@ FLAG2 = "`CYBN{DR4wiNG_w1Th0Ut_P4p3r_c4N_H4pP3n}`"
 async def flag(interaction: discord.Interaction):
     win, draw = [int(s) for s in (await getScoreLeaderBoard(interaction.user.id, filename="pve.txt"))]
 
-    messages = []
     if win >= 3:
         await interaction.response.send_message("Allez tiens ton flag : " + FLAG, ephemeral=True)
     if draw > 0:
@@ -2189,7 +2189,7 @@ async def puissance4(interaction):
                 elif case == 2:
                     text += "🟡"
                 else:
-                    logger.info("ERROR - ", case, row)
+                    logger.info(f"ERROR - {case} - {row}")
             text += "\n"
         await message.edit(content=text)
 
@@ -2335,7 +2335,7 @@ async def puissance4(interaction):
                     elif case == 2:
                         text += "🟡"
                     else:
-                        logger.info("ERROR - ", case, row)
+                        logger.info(f"ERROR - {case} - {row}")
                 text += "\n"
             await gridMessage.edit(content=text)
             await gridMessage.add_reaction("1️⃣")
