@@ -1111,133 +1111,20 @@ async def on_message(message):
         await channel.send("Ananasinno")
 
     if "brainrot" in MESSAGE or "italian" in MESSAGE:
-        brainrots = [
-            {"name": "Tralalero Tralala",
-             "img": "https://i.namu.wiki/i/Xx4c8zAsZSl_4MPCne2ehJGXkxHfLVevSusjY3nVYTGo6qWtCVlia9OCGo9H6dpl22yROFQY2kjq7SkgMyiSUFZdw1uN-itHSOzFo21_xG8Yn08BchnoUkd1I2Lhx81jIwkYzYpKo6WgqYcrTeaUMQ.webp"},
-            {"name": "Bombardiro Crocodilo",
-             "img": "https://i.namu.wiki/i/tDuYiBQRDatd0hIa65v0Q-qWASSh7UI1A9SYkvtF1UybnJvqFU_IGpmkAB_8rlhEZcJVK-inmcK9h4oPEREEJn5-5Ku0LUDlarjM_hsWxoJWYvDsvMxN_hV80nHOOm4lVs-8Sk6SoEoDxn5ih-ShGg.webp"},
-            {"name": "Tung Tung Tung Tung Tung Tung Tung Tung Tung Sahur",
-             "img": "https://i.namu.wiki/i/-YZ0x_wWyQ2z92YKH1hTYwuJQCPJw1TE6zt5q7evVOyAW-k1pXxNWp6VXpNMI_RSfpbPcKsaKEbLGXVADX5zaebZmasNey0DOH9yhopRXX5wPT3KocHxhRLSQ-AYPL_rCeyZamTxN0WN3LzaVMxahA.webp"},
-            {"name": "Lirilì Larilà",
-             "img": "https://i.namu.wiki/i/dbL-iw2P5t7mGWYIAHKWAn5EIYhcAKwYyeCjoWQWqCIcPr0T4a0svt21GzQVAzUWISnr2U_2U90S_i--14dLyF0zx1wXrMCw3IL6CI1tPGa_3pXV82OWUXVoYcJnz8QNyGCVZ27X1psrSdaanFdebQ.webp"},
-            {"name": "Boneca Ambalabu",
-             "img": "https://i.namu.wiki/i/5W9RGh81s6LNY4lZhT65tnbT_9oRiZaHy0kvsajWBZBk9CNQCobnNB9Q_K2TCsP4VrTufhr6LuP0Emj0g8RohJz10W-WjHzPAJcb0ACpiGPGc7kWsrjWx5nmapJcc2M7gTacge6ZwAn8I1lmy_7JlQ.webp"},
-            {"name": "Brr Brr Patapim",
-             "img": "https://i.namu.wiki/i/PccZl7Dts7ykLg5Gl2HGZWAP5vuU74lQHzJ6QBHHBlGmnS5WU7nq-f7muafQtm8lmAu9weOI8fP_FkJ_2WBo2Or9asEWpKqZ0Wh8h8ZxRLy836g997Ew7WQ3l2PW5xqHmNv4vwzfpzqs3Rz41sANyA.webp"},
-            {"name": "Chimpanzini Bananini",
-             "img": "https://i.namu.wiki/i/49pkt4yi1RO-lKVdrxBNSbMMnbPd38Vo4IV-dSdPnt0gHlydhIkrQHqaEtRSM4c_nyGXyYL5woaEqvQZL2A3TYnizNXvO8MTYbh4PEB9xOC3UPudV5lqlX6xNQ_bFOPyPftbvZ0c7YI9ALsGTvfSFQ.webp"},
-            {"name": "Bombombini Gusini",
-             "img": "https://i.namu.wiki/i/NSbDg0Cb8yiySnaL2SYntIwxriTr4HmeowtJwH_s2YX-HBxDhxPRCEZ0ea6_-FuAqu7BdA_RQqwdubg0G5yYiEsuKueysUZF28_RE2P18wjpLhv55Hu2j1Iut1noltjVWofh_KWnmyf5pfVlnXmIvw.webp"},
-            {"name": "Cappuccino Assassino",
-             "img": "https://i.namu.wiki/i/rggVL2LkfRxNMc0PQODWdH4x-I_KEIaJTznCs5egmZe96KjJlABkq3pQWaMr9p_zrfUw3-bEqvisfw71YPLMSEbU1RcFGgnRBTzh4UXGN8cjKXcRHLfLC-ViPDxUWltYCUxrRr-fvU8ygSoUxrQvMg.webp"},
-            {"name": "Frigo Camelo",
-             "img": "https://i.namu.wiki/i/391NIeZunfajIGAPH1xfALBtP65uh8sqIu2UjQFC70OYt1oYrkntplWaJDkn7D58KmuFTVmdp4DGnWAMMCoEsGDJzCVHiFnCi6dKjm4D0OeHZsMXm7cEVVWPaCXfoMJW0kl_USiEox27CTQ6_-Pe8A.webp"},
-            {"name": "La Vaca Saturno Saturnita",
-             "img": "https://i.namu.wiki/i/W4lHNC4WJ9dBjbVFcTFpsR4A2Pg_LIvr09xCf4vCYQMbiWRIsg023TWI_svmjL3DHtIRh8U1T-RVwvSjMlZt6GhzVjVSSGFhPIeMkwo86rSSMk4bNemEqmoy9upGT9mtG9gSygm0o0fk_EGnSkFbJA.webp"},
-            {"name": "Ballerina Cappuccina",
-             "img": "https://i.namu.wiki/i/yzm1X6PvZRc36cNhgT1xxD4QwniE7UUZHIwbVesAI7rYy5VreFFB0IxUngc76qHZ1qQo63Bh6OmUeXmc_vOSAX51VFrj0qeHHogTw5SD2teN8N0LTtwNnEpfRby8gU-hoFQpdGl95T3l6awIIDHt_A.webp"},
-            {"name": "U Din Din Din Din Dun Ma Din Din Din Dun",
-             "img": "https://i.namu.wiki/i/cq6ASoJxVvPvV0IRNyfRGOkcYAQRIkPWil69Zyjgg267HFSMRIKt25C4XBZVEkeSA8HgFSf9okD28LuQ7_AOwA-MshZfSKIlhX_CtAQ6OzNvECyRWNAAkM5eVfScK7Cu7zGKSGphit3Ko8vzQP9naw.webp"},
-            {"name": "Trulimero Trulicina",
-             "img": "https://i.namu.wiki/i/q05gfcRKrv24JlKynBNbsSBuxz7WxMlXROoK1HoSpndeUzJrKv5Yz4JATcjKmuAWD2hHl0s46t43Sd0xlGHoUiV7aT5k3ZRVWSrTpLvo7XiZZUjDif4HWvm5ZLWxIkwnvW4h-A-7Rh_m55YIexoMlg.webp"},
-            {"name": "Girafa Celestre",
-             "img": "https://i.namu.wiki/i/JOhT5BefVgf5DG7Hs8c8kZqv9c5GHC8rOtdHnQMFBiouWJ_lk7Jfc5xd2AEq4_9jkmTU3EuPH39utI3KBcLYzIWr09X94clgClO-lscS_q6Hur-EtJDpHn3y2SykserZhZg_36X7M8x6WAFCoVlbBg.webp"},
-            {"name": "Bobrito Bandito",
-             "img": "https://i.namu.wiki/i/xUB-o7rksj-QM-sG1G5z0MxUN-doo4YGbZFqdX4yxcsC0gt1ucq7tgmHM_VYfD2T8o30nQHAkVHc4_EqVWFxOvlsxyY1nOm64gnpslCEmItn8ooIMIIBGcWy-sLuy0UaVWBT_XP7LeYTIhhJ_cSWvA.webp"},
-            {"name": "Frulli Frulla",
-             "img": "https://i.namu.wiki/i/EvPlhewaa6TNqZ1szVppY4S-9qA4P_1vxbr54tCZonP-Wuedom_4GqpH4N18yd526KuQbTxo0BR8kdVOB1rEg4isItDXwGeAqjvhRdw9gl7b80W3xZYobUqZco71x3Uyn5vnsd6FFFuLqbCYOQXo5A.webp"},
-            {"name": "Ta Ta Ta Ta Ta Ta Ta Ta Ta Ta Ta Sahur",
-             "img": "https://i.namu.wiki/i/m-9jVfTspmRX4zNNfh5jYaRL8fgYI0bXhkXuEMlN_k0lVngy4JVTdeqUoRe_6AcWBsF38zOFeJiYrYlC71YG6uzQBi97qmt07vb5ZDo0GYb22IMmWjHExc1Ed6QpHqe-dYbOenk5_PJvwe1hjE0fAA.webp"},
-            {"name": "Brri Brri Bicus Dicus Bombicus",
-             "img": "https://i.namu.wiki/i/xwdTlKJqM_fgN0YysgB6YXWowr9NdVTXX2S0CQRsOuia9fULQCT61B3PSxpYplG8_amw5tnP9OHW9uDaLS1A9M0wsj0LWOIMkf9i6ZcNz4mDBGNY9-VJjQUNKFdGpD9BxyQ65cn5wRO2r7cg7UfGyg.webp"},
-            {"name": "Tric Trac baraboom",
-             "img": "https://i.namu.wiki/i/-UX1lW3G9HQl5nLGBbcFaKULQbO-ry5iSQORQApRoBjJ9y7FSydIIy1YJwEU-vNPnGihbNq8MqIMVqT826n-QXoU-fnhej9E2OxpGEH5emjZSpxMOQMJ6u5UJFzEUTUouCWtBtvmJsHUei6bEABQJA.webp"},
-            {"name": "Cocofanto Elefanto",
-             "img": "https://i.namu.wiki/i/pyia2JHQAqDT3BYFUs9yM1FrpR7sH0vE_thixD0kEMFPqIHnEH22B3elVxOidI4tn00uYSCJVvbiOmfy3343YC5gYu7MtIWC-SJBrrsuFfpKJrmSez1S5IX6mV0nThvJM5En4AVD5xQAAo2Ordniyw.webp"},
-            {"name": "Burbaloni Lulilolli",
-             "img": "https://i.namu.wiki/i/UYcxP-mxt7BqXDJJRCLUnVtbVj69-96MkhYuLC_kP_QTxvWqkCzuKfn_TnFpG_3bjzQEfBuagjsz6ImmWxAqFhRh7K7OKhxpj6XcVhYO0UFSDce9FatCaioVDeLmx4Q5aWYpmLTeq_WSgyHXQfe4jg.webp"},
-            {"name": "Orangutini Ananasini",
-             "img": "https://i.namu.wiki/i/DXM5l6EtDzjJtUzCRK_ALP5jZvEc3h_xQBM4ALGRyhHwICpfa8KIH-7Cp_k89_BWvZikce_-4E6ZN119kM3B83-zBUcyOduQ-EDdUGLsOyoJ8kfxSYq5d3hjCcgFsV7KBXV3mQZZ0sIDwRd3bpSlpg.webp"},
-            {"name": "Il Cacto Hipopotamo",
-             "img": "https://i.namu.wiki/i/RQ9OdtOU87LLkw3vtzlV-vMPgol71hLzlopOQu9fCGqbi34fMPRkH1zmohkwzeB4ul38O7fM17Yhrr7Ld_k4Lla6lQct7infhd4RX7lwocc89EjF4XdWNlZWckr3swedq75Pd6-tPc4TxFsbjGOYKw.webp"},
-            {"name": "Blueberrinni Octopussini",
-             "img": "https://i.namu.wiki/i/qyB8WrUykCqdofXbBRrU3YUqG-54YivrSpVkI8HfkkGE0f77QvFynFjkDZZevsaCndymh0EJq_qJ7YEgD9w2vmmuzxV78GtSWfhev_K5t-wzBkMmWyFe_ZBWMNdau3_HwHPxPME1HhC5vJ69TT0taA.webp"},
-            {"name": "Glorbo Fruttodrillo",
-             "img": "https://i.namu.wiki/i/QPGeJpiRG4RVUnNxBM0k01wQHSVVDWihyuUF876jftkt512vetssWGg0G1ziCSKe1zTXKJEnCCjpzSFj0Zz5KMzoKPFQJhheqMMM7AwCEkO4OrADnMA84e_ZeAViuQUjZRgtXrLjdjbd21w6awLoLg.webp"},
-            {"name": "Rhino Toasterino",
-             "img": "https://i.namu.wiki/i/BgSNGA9KzuCYiDxaspVbG4-cGuRFvG_rZbXmONKjRPje08JDRipjnW2_wwglzBkCLYzSgCa7c8D0A4ojuxvkR3c514GFKAHazzlbUu1FHhTE9J7q3IDRhytCG4wl-RJ5it627zzYVW4rb4yC_BBVHQ.webp"},
-            {"name": "Zibra Zubra Zibralini",
-             "img": "https://i.namu.wiki/i/Nr-f89621tXOSrFqcOpfqpSS3wRuxrNjqC8uRylUoFmDHX0BfUq7Skv0VG3IjT5P-0Dbnls6J_bj0AKaS65YuMLgCUozTGqaZXiW74bmILqJjONohzTTGrMV8pDnWW3WN_uxvPcuOFo1WkkLrolBKw.webp"},
-            {"name": "Graipussi Medussi",
-             "img": "https://i.namu.wiki/i/3BtP9lthfQy_ogTnzikskfnTlQshcNGJFiTOvlmtAwegxxGWP8sj9YsAe5bObvH3sXw0pV9tMTjG8NfGHqQmuwG1lPa70oi43eMUdidnVehwu6iHk1DzRLnRRQczX2VX2A1v91gkPxpu5bR8BqwQ-g.webp"},
-            {"name": "Tigrrullini Watermellini",
-             "img": "https://i.namu.wiki/i/ZC7-STZmiF5-vZ54MueDIcixWk55ljrvGFY67ETw9kK5MN3TdJRwfRfYL1BreWHZ9FTg44r52v3DYtPnvNCZFMJBwEeU-J5vZUbNfhvHRSa-iCWQFhgw8xuKCcyDjxBOmQEyAE5mZwQ17GKRRz_MPA.webp"},
-            {"name": "Tracotucotulu Delapeladustuz",
-             "img": "https://i.namu.wiki/i/TBSB0PIlWOrt-6iJuVAlaEYV0zm1MBlgz-VdP8Q9iepDX7OLDvQ6U9xvPLQCQtrVQ8qGcyJ46KXDfr1IljlzT-f7XbCTpeE1wi7Mi6pe4bPeLVDGAM_9_YFY7MTEli-6VyCAtvuuuEwAznkHgqFb4Q.webp"},
-            {"name": "Gorillo Watermellondrillo",
-             "img": "https://i.namu.wiki/i/qPtR_6vBLXJqBzeENJpFJU7sPFi1z6ij_E57c3NiaDu3yL8Dg5ZL6PF6K2ygAa0KBmggawSAglQiXldStCIx0TQTwaIXNzW9_bVD5NrGOL-cibNeM_1dnd438-NVieKAD4wRywRU41TDdNNyCPbUlA.webp"},
-            {"name": "Bananita Dolfinita",
-             "img": "https://i.namu.wiki/i/DOt7KayBkCvrstXxe7poCe5oBKAo_5sitp9po9YkMXmWsuPyallRQTLaJxUvkvEItdL21kd2pq2UFzNRm0D96nkUJ2VfvMMKIK465WIA1qaOls9y3Y0rJ5gA07Yehtg-P4a8TH4QMmquXgxCz4qZeA.webp"},
-            {"name": "Tigroligre Frutonni",
-             "img": "https://i.namu.wiki/i/j4b_PPAS8H5IWSWaymOfCBFy_1V7N5GA75Uz731KTMwOmlcV0pjQYbt8e7QTHf3hzKrhMMW38wqInz6DrW-ASse9dC3MFrJJboWdUVtKbtB6rL8zsvNVWLIHp5ForaPFl3oK5BF0h_r1wcdUTjL-nA.webp"},
-            {"name": "Ballerino Lololo",
-             "img": "https://i.namu.wiki/i/EEplz4eBQ87WL3zfjKXlCc2sh-PWc7DN5DGCAdoaeSy0XFV2OpbwOjGIil1KwlMOLccbHmiRMbX7iFZ226Q-Aj7UejvoQy71j71ZIBHoUX1R7kdkbpwebbfrUYN_6ttLWoz1L3Kj_SpRMXBu6Dx-oQ.webp"},
-            {"name": "Crocodildo Penisini",
-             "img": "https://i.namu.wiki/i/sv5wFVzFpFgkWj5b86p0-TEIW2K1XaGcBNCCNBIT0jNsn--i0NdvrrI9D5bcdjgKRIKkfqbg3EYMt8QfzsjStalHaRBbfJ0ZqGyB3l9de1XJNhEKJ5r3SCs1yqOSEGSUSXgAzR1QTKlwfulIUCv8kw.webp"},
-            {"name": "Matteooooooooooooo",
-             "img": "https://i.namu.wiki/i/x_KXXRuSH8SUSLPiDBnKKoKEA4wlVusBOYk_PoKn2WOAP56spIJ3HjQ8CnX3IYmd2-3nuZvKi5O9rLNWMepRL67QBF7szQOuSEYfkGFv1Jnp5P7ZUcWGhPB8gPRWQ4MVTwL8NbdStlHzeeWhUcGAfg.webp"},
-            {"name": "Špijuniro Golubiro",
-             "img": "https://i.namu.wiki/i/KamQxFAa5Hh6LkFe6lF71drZpDAohwfj7Wn_3Hf9laO36a-cyZ4XVpOC70S4CRkqSJcd32M-uvxWHqZ1dXRx7S_dw6gegmd7Ha9RbLAb3N5_zgUc1VjZFCpFMPIMuRe2KTmQ9HRgqguWmPBywtdK7w.webp"},
-            {"name": "Elephantuchi Bananuchi",
-             "img": "https://i.namu.wiki/i/1WWoRpgJfsx3P5lt68LqCAVtMU_Lf5gaofQOWDG9Cgpbvot-lSc4WIz4yuTrc7nJ1I1ikUj25gzXSkCd9AecBhjk34MtisY6Dzr6hd4boGszy1kL1sRAsUh5jszKwzZuY6bU35W_aE8aYuXYXo27Cw.webp"},
-            {"name": "Crocodillo Ananasinno",
-             "img": "https://i.namu.wiki/i/81ldCM0MA_gmrUdwXBaPYydnqBmzy1xcX6-JIeuYe15j3rIB3396oE8w3jHy6q2yLVQAS0ebAIu9BI5axElbcGkc2HCr0fQBV7W7lHav141sh8W6br79iayBvvdbbJUvgYBnyExxIo0eVXCoKbJpGA.webp"},
-            {
-                "name": "Trippa Troppa Tralala Lirilì Rilà Tung Tung Sahur Boneca Tung Tung Tralalelo Trippi Troppa Crocodina",
-                "img": "https://i.namu.wiki/i/nf0_1SDca-a7iyp3LSmGmMqIYNXZ8_t40FJ9gHx2ysherKU6hNwbIcYzBSrPJwAW6RrdEAZOS-pQgaygHAKK5QCjtFvRFkVLFz2AidVzPamj7frU6ePQhTA_wu8HdX05_EvwHrIdLfebT7ILWyc6Vg.webp"},
-            {"name": "Tung Tung Tung Tung Tung Tung Tung Tung Tung Assassino Boneca",
-             "img": "https://i.namu.wiki/i/bF_-kxC1C61PasDRoM1xIsHSOBTXlH6Nf9XTm9Texiz7JeSA0BQWfBEII3o5UlGpDU-kGUPjBPvmjjayxNpZ4xfpULHt31bUjHxO_7eIlGxZsj41VwW7-j3vd8M85CCOuS-9bKd4oLDDOXKA3u3xZw.webp"},
-            {"name": "Giraffa Meloniera",
-             "img": "https://i.namu.wiki/i/VYtcpg-dA4eNYeuLYwdZAPAZxTM9yNHw_GzYYRSrqKo6eS64rGuwMVwEOY_h8odpDWCbRizLkSMLFrQLATJbA-_1kvGBa6e6I10rWwhtlcAyN9LUvRST4yRkBv38PD3wGswLmnfw9HMG1DRg_nS6LA.webp"},
-            {"name": "Pot hotspot",
-             "img": "https://i.namu.wiki/i/vuMpWE6SCxUyOhUqfD2-Hf3Ap4lYOoZIdEQSHnO2QNCIQYnNcaqtwQOTtKIYB6gMYRNryb0U1C7qh7viMV0JSbUud6dCPxRc5bPaMGEa6TpcZOCJjcqOrmS-gl-TrVZ-8WMb6POGGoeaii3xM3Hz_A.webp"},
-            {"name": "Svinino Bombondino",
-             "img": "https://i.namu.wiki/i/1IBc1IovYoE2DfRgIYqOD0186N9WNzmMgQuvBC7O3IH7hjEbLoPFPWxGFA4A34K572fq_LbevAU5Cuq41Y406fbVd0IwfB7dlxLXn3efd72y7RS64ytwr9hF_6-VjH9KOs6sIvhxprYZyhgyfbUpxQ.webp"},
-            {"name": "Bulbito Bandito Traktorito",
-             "img": "https://i.namu.wiki/i/0zx7IvSdH8ui3rr3W6qz7aOgrVBhO2ES2khhoB0s0j6SDb7NEn0LEkgFo-YGN8u1fEyKiahkFbVUd_YoqflNBEcm5hGQI9cunMO9bmWc1KTE-V_QhiKX9bQUDKYkaiPDhY6j9js3NBQE7f6O60QLIQ.webp"},
-            {"name": "Raccooni Watermelunni",
-             "img": "https://i.namu.wiki/i/2_KDt7j19uMSdv7Az7SMcbmsEO1gk0M7UfMfq9N4hwbd8hGnkWm2k9zUy47jbWUihmllQUp1-NJc_N7_9ZBiboPu08TvLuYDbsVFUm9P2leFAN3nnEfHMSAYyAkd578amkQD1nMGOWLiVU4Mudhlnw.webp"},
-            {"name": "Ganganzelli Trulala",
-             "img": "https://i.namu.wiki/i/fUhdYeFmITD5YAxMQglbv477M7KSva3zvJW8PJtoIFWwtJpDBleOg4lAHJiZJUEC1QBys-7iXikTr7bm0PWEhfLwx4418OEhk03-K0OaxbKSQVUPAraqYS1frseI1F1qPI9Ir0HqoI8doStDcVN-2g.webp"},
-            {"name": "Espressona Signora",
-             "img": "https://i.namu.wiki/i/OZWngxEd8oTM-GYyE-jELeYKhrCoJ3qVkEoYWq1SAYVT6WV1F9W_s6oBfEBP-z8eP4MtSVMwBa2pJlVhS2s_WAgMwv2pj989pIEWv1jl-Qqpm0Y9V_MjcRfquIYyvzD8GJJpErb-yi0Xc8302HZHoQ.webp"},
-            {"name": "Spaghetti Tualetti",
-             "img": "https://i.namu.wiki/i/I8XcOJMHMTfryDMaiXk9sY3UMOl2iA8bZEHf2CZibjf2O4I8stuNSvgOI64u02aZq_qDhjMdSGuvei0ySjQPSwIZti75H46t2FiX6ZjpsknRERg3RYFLtZBXI-VIOUP_sxtfCqr9Yumj8GCZfHwCeg.webp"},
-            {"name": "Cappuccino Babooino",
-             "img": "https://i.namu.wiki/i/IPeEEv2ZI9h1-TKi3h7XgrKQximjHXRyaiChNfLNb1dIrEgbRcKqtuXpZ4I1ZAPm2gNge3SERZEUMJTHAl7pfmY0SxUikJYtv9HF9hmXG5ll0olqEJ0_JWlMPZSB9RoRhugd2rdEbPzMHN3X9UUpWA.webp"},
-            {"name": "Cocossini Mama",
-             "img": "https://i.namu.wiki/i/3x1CKPlD2uJ-4B354G8COfFjP1aET1--pbFSNjuN2r1A-zm_AQBGTPxbauPyxcRE4SYlnQ1yRGceeQxzcIXAfz99BmeMp62N7z4qqtOPIGLCl9BeEpI9cuNhOs9L0IJlJwyBzka29_oDqMfR8f7ZAg.webp"},
-            {"name": "Snooffi Zeffirulli",
-             "img": "https://i.namu.wiki/i/4YOLDJK4gyRrtNhJOX__8FCaIwqntbZh4Si_3oEd-r48jjHTquF2PTfnKMB94qInJAPr7fbtzcPUEDtc6dpUDVK77EG4Nomjs7SUKrlHQnkWyhmYLmqazQqKI-i8banj3Owq8WwsQGZjqZl4FT-8iA.webp"},
-            {"name": "Perochello Lemonchello",
-             "img": "https://i.namu.wiki/i/hlNzysS0-iUuIP4CKO_OdeX_NjpvfmTgbB6RWhFkZmVFiW_kr1C_wx3F22XVDZB7nCkAs8u1ze2hz0mNlYRIZs56FYRrFKHQLPu2WOqO-1lChc6xkFg6flA5QOKOjL-9yf60AvKG7vZZqFKbMwpYUw.webp"},
-            {"name": "Tukanno Bananno",
-             "img": "https://i.namu.wiki/i/V3KEDQO28fCtnhKBgaAIu_eWJ2vc9aeDIhXP8YVgkXKishr6RJw0tCsbGSUzb44LYTN-zewzbtnvFQeXgLiEtfh8Ehx0pNzMo41vNa7xdLidbGXK1KvpwfJKHgCBUbEtQD3XWNkLZnVX5QcLawyEsA.webp"},
-            {"name": "Tob Tobi Tob Tob Tobi Tob",
-             "img": "https://i.namu.wiki/i/n_7KPLk50pWKIQzibou-ppp9NUTBJC3LOzEolJv0TnQVOS_WaAvuKhQf-aDkawjfgyaErnsGCwLZxRt-fw8SheA4rYmV8ZnVG8mwn5nnkR25AwEvF0UBhqPVJ_WqqwtLYOOJTEV7iYWM5pz5Lw_78w.webp"},
-            {"name": "Ananitto Giraffini",
-             "img": "https://i.namu.wiki/i/9x2V0J7PezBhh6jAjZdRtv39K_Xdx4GQE8m_8MOnjtIgEIW1vTuSYC0om3KCOjaU2aQBUD4o7w9yjcLphBIL6lA0HXNlM60vIjHkv6vanmT6ASKrbrx78wAhUuA8gxGDTwqi-X9HhlasZvYSZB6TKQ.webp"},
-        ]
+        # Charger les brainrots depuis le fichier JSON
+        logger.info(f"{user.name} - {message.guild.name} - A invoqué un brainrot italian")
+        brainrots_file = os.path.join(os.path.dirname(__file__), 'images', 'italian.json')
+        try:
+            with open(brainrots_file, 'r', encoding='utf-8') as f:
+                brainrots = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            brainrots = []
 
-        choice = random.choice(brainrots)
-
-        embed = discord.Embed(title=choice.get("name"),
-                              color=0xF4D03F)
-        embed.set_image(
-            url=choice.get("img")
-        )
-
-        await channel.send(embed=embed)
+        if brainrots:
+            choice = random.choice(brainrots)
+            embed = discord.Embed(title=choice.get("name"), color=0xF4D03F)
+            embed.set_image(url=choice.get("img"))
+            await channel.send(embed=embed)
 
     # teh help command, add commands call, but not reactions
     if MESSAGE == "--help":
