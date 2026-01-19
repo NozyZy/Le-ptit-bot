@@ -78,6 +78,7 @@ abruh
 abrupte
 abruti
 abrutis
+abruv
 abrège
 abrégé
 abréviations
@@ -503,6 +504,7 @@ ahahahahahahahhahhahahha
 ahahahahahahhahahahahhaha
 ahahahahha
 ahahahahhahahhaa
+ahahahaj
 ahahahha
 ahahahhahaa
 ahahahhahah
@@ -737,6 +739,8 @@ aliste
 alive
 alkapote
 alkez
+alko
+alkolique
 alkpote
 all
 allah
@@ -1161,6 +1165,7 @@ aoas
 aodera
 aoe
 aoi
+aok
 aoor
 aop
 aoprès
@@ -1197,6 +1202,7 @@ api
 apide
 apidnosandâokspoqkd
 apifhaieqbvgqelkzvs
+apireine
 apk
 apl
 apocalypse
@@ -2158,6 +2164,7 @@ bahahahahahahah
 bahahahahahahaha
 bahahahahahahahah
 bahahahahahahahahah
+bahahahahahahahahaha
 bahahahahahahahahahah
 bahahahahahahahahahahaah
 bahahahahahahahahahahah
@@ -2240,6 +2247,7 @@ bakudan
 bal
 balade
 balader
+balades
 baladeurs
 baladé
 balance
@@ -2466,6 +2474,7 @@ bayhahahahahaha
 bayonnes
 bayâtes
 bazar
+bazooka
 bazouzou
 baïtes
 bb
@@ -2516,6 +2525,7 @@ beay
 bebar
 bebe
 bebeb
+bebew
 beboo
 bebou
 bebous
@@ -2731,6 +2741,7 @@ biebn
 biehn
 bien
 bienb
+biencoubeh
 bieng
 bienlebonjour
 bienp
@@ -2830,6 +2841,7 @@ bistrot
 bit
 bitbot
 bitch
+bitcher
 bitches
 bitd
 bite
@@ -3407,6 +3419,7 @@ bowser
 bowsette
 box
 boxe
+boxer
 boxeur
 boy
 boya
@@ -4993,6 +5006,7 @@ chuteuh
 chutte
 chybrax
 chybre
+chzud
 châine
 châtain
 château
@@ -5017,6 +5031,7 @@ ciblés
 ciborg
 ciboulette
 cic
+cicd
 cidre
 cie
 ciel
@@ -5363,6 +5378,7 @@ coip
 cois
 coit
 coke
+cokin
 cola
 colacre
 colag
@@ -6810,6 +6826,7 @@ currency
 current
 curry
 cursed
+cursefoge
 curseforge
 curseur
 curtainsjs
@@ -6822,6 +6839,7 @@ customisation
 customs
 cut
 cute
+cuteness
 cuts
 cuttman
 cv
@@ -6959,6 +6977,7 @@ dame
 damen
 dames
 damien
+damine
 damm
 dammit
 dammn
@@ -7784,6 +7803,7 @@ dig
 digere
 digeste
 digestif
+digestion
 digestive
 diggo
 digimon
@@ -8616,6 +8636,7 @@ durée
 dut
 dutout
 dutronc
+dutt
 duty
 duur
 duygzauydazftuaz
@@ -10242,6 +10263,7 @@ excellebnt
 excellenr
 excellent
 excellente
+excellentes
 excellents
 excellet
 excels
@@ -10387,6 +10409,7 @@ expériences
 expérimenter
 expérimenté
 expérimentés
+exquis
 exquise
 exspres
 extended
@@ -10634,6 +10657,7 @@ fascinant
 fascinants
 fascinating
 fascine
+fascines
 fashioned
 fasse
 fassent
@@ -10714,6 +10738,7 @@ favorite
 favorites
 favoritisme
 favs
+favé
 fax
 faxer
 faze
@@ -10922,6 +10947,7 @@ fiers
 fiert
 fierte
 fierté
+fiertés
 fieré
 fiesta
 fieux
@@ -11022,6 +11048,7 @@ finit
 finite
 finition
 finito
+finlandais
 finlande
 finnois
 finrzid
@@ -11041,6 +11068,7 @@ firelox
 fireman
 firewall
 firewalls
+firey
 firmware
 first
 firstblood
@@ -11090,6 +11118,7 @@ fjoejf
 fjshgsugsughs
 fk
 fkldmzfkdzdolpf
+flabergasted
 flac
 flag
 flaged
@@ -12423,6 +12452,7 @@ goulcaves
 goume
 goumer
 goumés
+goupelin
 gourde
 gourdes
 gourer
@@ -13845,6 +13875,7 @@ imaginez
 imaginons
 iman
 imbatable
+imbatables
 imbattable
 imblocable
 imbécile
@@ -14185,6 +14216,7 @@ informés
 infos
 infostealers
 infra
+infrabasse
 infraction
 infras
 infrastructures
@@ -14616,6 +14648,7 @@ ir
 ira
 irais
 irait
+iraniens
 ireland
 irelia
 irido
@@ -14712,6 +14745,7 @@ iuazoildlaz
 iueorpazeuf
 iui
 iunutiles
+iuo
 iuzsehiuhliz
 iv
 ivan
@@ -14738,6 +14772,7 @@ içi
 j
 ja
 jabami
+jabori
 jabva
 jack
 jackal
@@ -15073,6 +15108,7 @@ jre
 jreconnais
 jrigole
 jrs
+jrue
 jrv
 js
 jsais
@@ -15387,6 +15423,7 @@ keskya
 kessisspass
 kesske
 kesstafé
+kesta
 kestadui
 kestafoutu
 kestafé
@@ -16670,6 +16707,7 @@ maade
 maalouf
 mabad
 maboul
+maboule
 mac
 macabre
 macam
@@ -16956,6 +16994,7 @@ mange
 mangeais
 mangeant
 mangee
+mangent
 mangeons
 manger
 manges
@@ -17224,6 +17263,7 @@ matrixé
 matrixée
 matsuri
 matt
+mattbo
 mattends
 matteo
 matter
@@ -17281,11 +17321,13 @@ mazette
 maétresse
 maître
 maîtres
+maîtriser
 mb
 mbmb
 mbon
 mbps
 mbs
+mbtteo
 mbz
 mc
 mcd
@@ -17673,6 +17715,7 @@ migi
 mignon
 mignonne
 mignonnes
+mignonnie
 mignons
 migraine
 migrate
@@ -18843,6 +18886,7 @@ niagara
 niaise
 niaiser
 nial
+nic
 nicaragua
 nicce
 nice
@@ -20207,6 +20251,7 @@ pamoi
 pamplemousse
 panache
 panard
+pancakes
 panda
 pandas
 pandora
@@ -20820,6 +20865,7 @@ perfs
 perhaps
 perico
 perif
+perimés
 periode
 perl
 perle
@@ -20986,6 +21032,7 @@ phillipe
 philo
 philosophe
 philosophie
+phione
 phisher
 phishing
 phising
@@ -21159,6 +21206,7 @@ piqye
 pir
 piramides
 pirate
+piraterie
 pirates
 piraté
 pire
@@ -21188,6 +21236,7 @@ pitch
 piti
 pitiax
 pitie
+pitiful
 pitié
 pitoyable
 pitste
@@ -22924,6 +22973,7 @@ quackr
 quadrouple
 quadruple
 quai
+quais
 qual
 quali
 qualidad
@@ -23565,6 +23615,7 @@ reconnaissance
 reconnaissant
 reconnait
 reconnaitre
+reconnaîtra
 reconnaître
 reconnu
 reconnue
@@ -24388,6 +24439,7 @@ retrouv
 retrouve
 retrouvent
 retrouver
+retrouvera
 retrouverai
 retrouveras
 retrouvons
@@ -24721,6 +24773,7 @@ rohh
 rohkilestcon
 rohlala
 roi
+roigada
 rois
 roj
 rokuko
@@ -26490,6 +26543,7 @@ smol
 smooth
 smoothie
 smouille
+smr
 sms
 smthg
 smurf
@@ -29919,6 +29973,7 @@ verts
 vertébrale
 vessalius
 vesseau
+vestaires
 veste
 vestiaire
 vestiaires
@@ -30020,6 +30075,7 @@ vieu
 vieuw
 vieux
 view
+viewer
 viewers
 views
 viewset
@@ -30983,6 +31039,7 @@ yavait
 yawlmof
 yay
 yaya
+yayq
 yayy
 ydgz
 ydk
@@ -31525,6 +31582,7 @@ zéro
 époques
 époustouflant
 épreuve
+épreuves
 éprouve
 épuisant
 épuisé
@@ -31562,6 +31620,7 @@ zéro
 étais
 était
 était
+étaler
 étape
 étapes
 état

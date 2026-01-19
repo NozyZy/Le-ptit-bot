@@ -117,3 +117,5 @@ je me pentest la preprod
 je me forge le smart-contract
 je me babyfoot la salle de pause
 je m’auto-resolve le spoony
+jme cci le mail
+je me --addbranlette le petit bot
