@@ -67,6 +67,10 @@ nbprime_lock = asyncio.Lock()
 # Track last usage time for each user (user_id -> last_use_timestamp)
 user_cooldowns = defaultdict(float)
 
+# Tracking of “god” requests per user per day
+# Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
+god_requests = {}
+
 def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
     """
     Checks whether a user can perform an action.
@@ -888,6 +892,11 @@ async def on_message(message):
 
             if "<@" not in MESSAGE:
                 userID = int(user.id)
+                # Track requests for yourself per day
+                today_str = today.strftime("%Y-%m-%d")
+                if userID not in god_requests or god_requests[userID]["date"] != today_str:
+                    god_requests[userID] = {"date": today_str, "count": 0}
+                god_requests[userID]["count"] += 1
             else:
                 i = 0
                 for i in range(len(MESSAGE)):
@@ -904,7 +913,7 @@ async def on_message(message):
                 logger.info(f"{user.name} - {message.guild.name} - C'était David")
                 return
             if userID % 5 != (int(day) + int(month)) % 5:
-                # 5% de chance d'être comparé à un dogo ^^
+                # 5% chance of being compared to a dogo ^^
                 if random.random() < 0.05:
                     dogs = [
                         'https://t3.ftcdn.net/jpg/10/70/64/34/360_F_1070643477_lKOYkVTzLjAJ9SHjHLTGJU1GUCoMiaML.jpg',
@@ -932,8 +941,26 @@ async def on_message(message):
                     logger.info(f"{user.name} - {message.guild.name} - Est un chien aujourd'hui")
                     await channel.send("Dog looks like him.", embed=embed)
                     return
-                await channel.send("Not today (☞ﾟヮﾟ)☞")
-                logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
+                # If the user asks for himself and insists (2nd time+) => he is stupid
+                # Phrases for those who insist ಥ_ಥ
+                stubborn_phrases = [
+                    "T'est un descendant des conifères ? Genre t'es con et tu peux rien y faire  ?",
+                    "T'es pas le couteau le plus aiguisé du tiroir.",
+                    "T'as pas inventé l'eau chaude ...",
+                    "T'as pas la lumière à tous les étages toi, hein ?",
+                    "Si la bêtise se mesurait, tu serais hors catégorie.",
+                    "T'es le genre à relire les instructions du shampoing plusieurs fois.",
+                    "Le QI d'une huître... et encore, je suis gentil avec l'huître.",
+                    "Tu sais que la définition de la folie c'est de répéter la même chose en espérant un résultat différent ?",
+                    "Quelqu'un lui a dit que l'espoir fait vivre ? Bah là ça marche pas.",
+                    "T'es têtu comme une mule, mais sans le charme.",
+                ]
+                if "<@" not in MESSAGE and god_requests.get(userID, {}).get("count", 0) >= 2:
+                    await channel.send(f"<@{userID}> {random.choice(stubborn_phrases)}")
+                    logger.info(f"{user.name} - {message.guild.name} - Insiste pour être dieu (x{god_requests[userID]['count']})")
+                else:
+                    await channel.send("Not today (☞ﾟヮﾟ)☞")
+                    logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
                 return
             user = await message.guild.fetch_member(userID)
             pfp = user.avatar.url
