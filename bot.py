@@ -904,6 +904,34 @@ async def on_message(message):
                 logger.info(f"{user.name} - {message.guild.name} - C'était David")
                 return
             if userID % 5 != (int(day) + int(month)) % 5:
+                # 5% de chance d'être comparé à un dogo ^^
+                if random.random() < 0.05:
+                    dogs = [
+                        'https://t3.ftcdn.net/jpg/10/70/64/34/360_F_1070643477_lKOYkVTzLjAJ9SHjHLTGJU1GUCoMiaML.jpg',
+                        'https://ichef.bbci.co.uk/ace/standard/624/cpsprodpb/E386/production/_88764285_tuna1.jpg',
+                        'https://www.famousbirthdays.com/headshots/tuna-1.jpg',
+                        'https://s.yimg.com/os/en/aol_bored_panda_979/850b1e4dd49231d8b39075feb0ce8e9f',
+                        'https://media.tenor.com/2mfG8pdR5UgAAAAM/dog-laughing-funny-dog.gif'
+                    ]
+                    target_user = await message.guild.fetch_member(userID)
+                    pfp = target_user.avatar.url if target_user.avatar else target_user.default_avatar.url
+                    embed = discord.Embed(
+                        title="It's just a dog.",
+                        description=f"<@{userID}> you're just a dog.",
+                        color=0x8B4513,
+                        url="https://www.youtube.com/watch?v=dCMcSQEXAY4",
+                    )
+                    embed.set_thumbnail(url=pfp)
+                    embed.set_author(
+                        name="Le p'tit dog",
+                        url="https://github.com/NozyZy/Le-ptit-bot",
+                        icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                    )
+                    embed.set_image(url=random.choice(dogs))
+                    embed.set_footer(text="Wouf wouf")
+                    logger.info(f"{user.name} - {message.guild.name} - Est un chien aujourd'hui")
+                    await channel.send("Dog looks like him.", embed=embed)
+                    return
                 await channel.send("Not today (☞ﾟヮﾟ)☞")
                 logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
                 return
