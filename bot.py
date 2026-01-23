@@ -921,15 +921,34 @@ async def on_message(message):
                         'https://ichef.bbci.co.uk/ace/standard/624/cpsprodpb/E386/production/_88764285_tuna1.jpg',
                         'https://www.famousbirthdays.com/headshots/tuna-1.jpg',
                         'https://s.yimg.com/os/en/aol_bored_panda_979/850b1e4dd49231d8b39075feb0ce8e9f',
-                        'https://media.tenor.com/2mfG8pdR5UgAAAAM/dog-laughing-funny-dog.gif'
+                        'https://media.tenor.com/2mfG8pdR5UgAAAAM/dog-laughing-funny-dog.gif',
+                        'https://i.pinimg.com/736x/27/21/55/2721550a69dc64a0b3b5bd2f792d87b2.jpg',
+                        'https://pethelpful.com/.image/NDowMDAwMDAwMDAwMDYyODg1/neapolitan-mastiff-closeup.jpg',
+                        'https://www.shutterstock.com/image-photo/fat-dog-sitting-panting-isolated-260nw-2588654581.jpg',
+                        'https://ih1.redbubble.net/image.2958379778.2368/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg'
                     ]
                     target_user = await message.guild.fetch_member(userID)
                     pfp = target_user.avatar.url if target_user.avatar else target_user.default_avatar.url
                     embed = discord.Embed(
-                        title="It's just a dog.",
-                        description=f"<@{userID}> you're just a dog.",
+                        title=random.choice([
+                            "It's just a dog.",
+                            "Naaaah, dog",
+                            "God? More like DOG",
+                            "Only dog"
+                        ]),
+                        description=random.choice([
+                            f"<@{userID}> you're just a dog.",
+                            f"<@{userID}> you're no dog, only DAWG.",
+                            f"<@{userID}> say \"wouf\"",
+                            f"<@{userID}> you're barking and yapping, stoopid dawg"
+                        ]),
                         color=0x8B4513,
-                        url="https://www.youtube.com/watch?v=dCMcSQEXAY4",
+                        url=random.choice([
+                            "https://www.youtube.com/watch?v=dCMcSQEXAY4",
+                            "https://www.youtube.com/watch?v=-AdteE-KuIg",
+                            "https://www.youtube.com/shorts/rBKqNGTPNTc",
+                            "https://www.youtube.com/shorts/x2BakEedBkI"
+                        ]),
                     )
                     embed.set_thumbnail(url=pfp)
                     embed.set_author(
@@ -939,22 +958,25 @@ async def on_message(message):
                     )
                     embed.set_image(url=random.choice(dogs))
                     embed.set_footer(text="Wouf wouf")
-                    logger.info(f"{user.name} - {message.guild.name} - Est un chien aujourd'hui")
+                    logger.info(f"{user.name} - {message.guild.name} - Est un dog aujourd'hui")
                     await channel.send("Dog looks like him.", embed=embed)
                     return
                 # If the user asks for himself and insists (2nd time+) => he is stupid
                 # Phrases for those who insist ಥ_ಥ
                 stubborn_phrases = [
-                    "T'est un descendant des conifères ? Genre t'es con et tu peux rien y faire  ?",
-                    "T'es pas le couteau le plus aiguisé du tiroir.",
+                    "T'est un descendant des conifères ? Genre t'es con et tu peux rien y faire ?",
+                    "Ouais bon j'ai dit \"Not today (☞ﾟヮﾟ)☞\", lâche l'affaire nan ?",
                     "T'as pas inventé l'eau chaude ...",
                     "T'as pas la lumière à tous les étages toi, hein ?",
-                    "Si la bêtise se mesurait, tu serais hors catégorie.",
+                    "Vasy tu peux encore essayer, mais la réponse sera encore la même :)",
                     "T'es le genre à relire les instructions du shampoing plusieurs fois.",
-                    "Le QI d'une huître... et encore, je suis gentil avec l'huître.",
+                    "Essaies encore une fois, juste pour voir ?",
                     "Tu sais que la définition de la folie c'est de répéter la même chose en espérant un résultat différent ?",
                     "Quelqu'un lui a dit que l'espoir fait vivre ? Bah là ça marche pas.",
                     "T'es têtu comme une mule, mais sans le charme.",
+                    "T'as les boules ?",
+                    "Tu vas chialer ?",
+                    "Encore une fois, juste pour me divertir stp"
                 ]
                 if "<@" not in MESSAGE and god_requests.get(userID, {}).get("count", 0) >= 2:
                     await channel.send(f"<@{userID}> {random.choice(stubborn_phrases)}")
