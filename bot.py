@@ -146,8 +146,9 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(
         name=f"insulter {nbtg} personnes"))
     logger.debug("Logged in as")
-    logger.debug(bot.user.name)
-    logger.debug(bot.user.id)
+    if bot.user:
+        logger.debug(bot.user.name)
+        logger.debug(bot.user.id)
 
     if args.dev:
         logger.debug("Synchronizing slash commands for guilds :")
@@ -332,7 +333,7 @@ async def on_message(message):
             return
 
     # if you tag this bot in any message
-    if f"<@{bot.user.id}>" in MESSAGE:
+    if bot.user and f"<@{bot.user.id}>" in MESSAGE:
         logger.info(f"{user.name} - {message.guild.name} - A ping le bot")
         user = str(message.author.nick)
         if user == "None":
@@ -568,15 +569,15 @@ async def on_message(message):
             reponses = ["deux", "2", "deux ?", "2 😏"]
             await channel.send(random.choice(reponses))
 
-            # waits for a message valiudating further instructions
-            def check(m):
+            # waits for a message validating further instructions
+            def check_count(m):
                 logger.info(m.content)
                 return (("3" in m.content or "trois" in m.content)
                         and m.channel == message.channel
                         and not m.content.startswith("http"))
 
             try:
-                await bot.wait_for("message", timeout=60.0, check=check)
+                await bot.wait_for("message", timeout=60.0, check=check_count)
             except asyncio.TimeoutError:
                 await message.add_reaction("☹")
                 logger.info(f"{user.name} - {message.guild.name} - A pas su compter")
@@ -594,12 +595,12 @@ async def on_message(message):
         if MESSAGE == "a" and rdnb > 2:
             logger.info(f"{user.name} - {message.guild.name} - A commencer par a")
 
-            def check(m):
+            def check_alphabet(m):
                 return m.content.lower(
                 ) == "b" and m.channel == message.channel
 
             try:
-                await bot.wait_for("message", timeout=60.0, check=check)
+                await bot.wait_for("message", timeout=60.0, check=check_alphabet)
             except asyncio.TimeoutError:
                 await message.add_reaction("☹")
                 logger.info(f"{user.name} - {message.guild.name} - A pas continué par b")
@@ -1407,9 +1408,7 @@ async def game(ctx):
     except asyncio.TimeoutError:
         await reponse.add_reaction("☹")
     else:
-        user = str(msg.author.nick)
-        if user == "None":
-            user = str(msg.author.name)
+        user = getattr(msg.author, 'nick', None) or msg.author.name
         text = f"**{user}** a gagné !"
         logger.info(f"{user} a gagné")
         await ctx.send(text)
@@ -1811,10 +1810,15 @@ async def presentation(ctx, *base):
 
 @bot.tree.command(name="ban", description="Tu veux vraiment bannir mes réactions ??? Enflure...")
 async def ban(ctx: discord.Interaction):
+    if not ctx.channel or not ctx.guild:
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur.")
+        return
+    channel_name = getattr(ctx.channel, 'name', 'DM')
     logger.info(
-        f"{ctx.user.name} - A demandé de me bannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        f"{ctx.user.name} - A demandé de me bannir du channel {channel_name} du serveur {ctx.guild.name} : ",
     )
-    if not ctx.user.guild_permissions.administrator:
+    member = ctx.guild.get_member(ctx.user.id)
+    if not member or not member.guild_permissions.administrator:
         await ctx.response.send_message("T'es pas admin, nananananère 😜")
         logger.info("mais n'a pas les droits")
         return
@@ -1835,10 +1839,15 @@ async def ban(ctx: discord.Interaction):
 
 @bot.tree.command(name="unban", description="OUI LIBERE-MOI")
 async def unban(ctx: discord.Interaction):
+    if not ctx.channel or not ctx.guild:
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur.")
+        return
+    channel_name = getattr(ctx.channel, 'name', 'DM')
     logger.info(
-        f"{ctx.user.name} - A demandé de me débannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        f"{ctx.user.name} - A demandé de me débannir du channel {channel_name} du serveur {ctx.guild.name} : ",
     )
-    if not ctx.user.guild_permissions.administrator:
+    member = ctx.guild.get_member(ctx.user.id)
+    if not member or not member.guild_permissions.administrator:
         await ctx.response.send_message("T'es pas admin, nananananère 😜")
         logger.info("mais n'a pas les droits")
         return
@@ -1863,8 +1872,9 @@ async def unban(ctx: discord.Interaction):
 
 @bot.tree.command(name="invite", description="Vasy invite moi sur un autre serveur, on s'emmerde ici")
 async def invite(ctx: discord.Interaction):
+    guild_name = ctx.guild.name if ctx.guild else "DM"
     logger.info(
-        f"{ctx.user.name} - A demandé une invitation dans le serveur {ctx.guild.name}"
+        f"{ctx.user.name} - A demandé une invitation dans le serveur {guild_name}"
     )
     await ctx.response.send_message(
         "Invitez-moi 🥵 !\n"
@@ -1909,8 +1919,9 @@ async def amongus(ctx):
                     users.add(user)
 
         ids = []
+        bot_id = bot.user.id if bot.user else None
         for user in users:
-            if user.id != bot.user.id:
+            if user.id != bot_id:
                 ids.append(user.id)
         random.shuffle(ids)
         if len(ids) < 5:
@@ -2341,11 +2352,14 @@ async def puissance4(interaction):
             return
         logger.info(f"{red} - Est le joueur red {interaction.guild.name}")
     elif mode == "pve":
+        if not bot.user:
+            await interaction.send("Erreur: le bot n'est pas prêt.")
+            return
         red = bot.user
         redMessage = await interaction.send("Je serai l'adversaire rouge, tiens-toi prêt 😈")
 
-    yellowPing = "<@!" + str(yellow.id) + "> 🟡"
-    redPing = "<@!" + str(red.id) + "> 🔴"
+    yellowPing = "<@!" + str(yellow.id) + "> 🟡"  # type: ignore[union-attr]
+    redPing = "<@!" + str(red.id) + "> 🔴"  # type: ignore[union-attr]
 
     text = yellowPing + " et " + redPing + " tenez vous prêts !"
     gridMessage = await interaction.send(text)
@@ -2432,7 +2446,7 @@ async def puissance4(interaction):
                         logger.info(
                             f"{loser} - A perdu contre le bot au P4 (noob)"
                         )
-                        await changeScoreLeaderboard(loser.id, loser, win=False, filename="pve.txt")
+                        await changeScoreLeaderboard(loser.id, loser, win=False, filename="pve.txt")  # type: ignore[union-attr]
                         text = f"{ping} gagne ! (c'est moi)\n{random.choice(messages)}"
                 else:
                     loser = red
@@ -2442,8 +2456,8 @@ async def puissance4(interaction):
                         logger.info(
                             f"{winner} - A gagné contre le bot au P4 (gg)"
                         )
-                        await changeScoreLeaderboard(winner.id, winner, win=True, filename="pve.txt")
-                        score = int((await getScoreLeaderBoard(winner.id, filename="pve.txt"))[0])
+                        await changeScoreLeaderboard(winner.id, winner, win=True, filename="pve.txt")  # type: ignore[union-attr]
+                        score = int((await getScoreLeaderBoard(winner.id, filename="pve.txt"))[0])  # type: ignore[union-attr]
                         if score == 3:
                             text = ping + " remporte ses 3 victoires d'affilé ! Voilà le flag : ||t'as vraiment cru que j'allais donner le flag en public ? Regarde tes DM petit filou, ou fais `/flag`||"
                             await interaction.send(text)
@@ -2461,8 +2475,8 @@ async def puissance4(interaction):
                     f"{winner} - Est le gagnant vs {loser} ! {interaction.guild.name}"
                 )
                 if mode == "pvp":
-                    await addScoreLeaderboard(winner.id, winner)
-                    await addLoseLeaderboard(loser.id, loser)
+                    await addScoreLeaderboard(winner.id, winner)  # type: ignore[union-attr]
+                    await addLoseLeaderboard(loser.id, loser)  # type: ignore[union-attr]
                 await gridMessage.add_reaction("✅")
                 await updateGrid(
                     grid,
@@ -2470,8 +2484,8 @@ async def puissance4(interaction):
                     gridMessage,
                 )
                 if mode == "pvp":
-                    score = (await getScoreLeaderBoard(winner.id))[0]
-                    place = await getPlaceLeaderbord(winner.id)
+                    score = (await getScoreLeaderBoard(winner.id))[0]  # type: ignore[union-attr]
+                    place = await getPlaceLeaderbord(winner.id)  # type: ignore[union-attr]
                     text = f"{ping} gagne ! **Score actuel : {score} victoires** - {place}"
                 if not sent:
                     await interaction.send(text)
@@ -2483,18 +2497,18 @@ async def puissance4(interaction):
                     f"{red} et {yellow} - Sont à égalité ! {interaction.guild.name}"
                 )
                 if mode == "pvp":
-                    await addScoreLeaderboard(yellow.id, yellow)
-                    await addScoreLeaderboard(red.id, red)
+                    await addScoreLeaderboard(yellow.id, yellow)  # type: ignore[union-attr]
+                    await addScoreLeaderboard(red.id, red)  # type: ignore[union-attr]
                     text = (
                             "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
                             "**Score de " + yellowPing + " : " +
-                            (await getScoreLeaderBoard(yellow.id))[0] +
+                            (await getScoreLeaderBoard(yellow.id))[0] +  # type: ignore[union-attr]
                             " victoires !**\n **Score de " + redPing + " : " +
-                            (await getScoreLeaderBoard(red.id))[0] + " victoires !**")
+                            (await getScoreLeaderBoard(red.id))[0] + " victoires !**")  # type: ignore[union-attr]
                     await interaction.send(text)
                 elif mode == "pve":
                     text = "Ah bah une égalité tiens, c'est rare... Viens on en discute en MP? Sinon fais `/flag`"
-                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt", draw=True)
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt", draw=True)  # type: ignore[union-attr]
                     await interaction.send(text)
                     await send_mp(yellow, type="draw")
 
@@ -2510,11 +2524,11 @@ async def puissance4(interaction):
                 await updateGrid(
                     grid, "Tour n°" + str(tour) + " - " + redPing + "\n",
                     gridMessage)
-                await addScoreLeaderboard(yellow.id, yellow)
-                await addLoseLeaderboard(red.id, red)
+                await addScoreLeaderboard(yellow.id, yellow)  # type: ignore[union-attr]
+                await addLoseLeaderboard(red.id, red)  # type: ignore[union-attr]
                 # await score/place into variables and ensure place is a string fallback
-                score = (await getScoreLeaderBoard(yellow.id))[0]
-                place = await getPlaceLeaderbord(yellow.id)
+                score = (await getScoreLeaderBoard(yellow.id))[0]  # type: ignore[union-attr]
+                place = await getPlaceLeaderbord(yellow.id)  # type: ignore[union-attr]
                 if place is None:
                     place = "Non classé"
                 text = (
@@ -2531,10 +2545,10 @@ async def puissance4(interaction):
                     gridMessage)
 
                 if mode == "pvp":
-                    await addScoreLeaderboard(red.id, red)
-                    await addLoseLeaderboard(yellow.id, yellow)
-                    score = (await getScoreLeaderBoard(red.id))[0]
-                    place = await getPlaceLeaderbord(red.id)
+                    await addScoreLeaderboard(red.id, red)  # type: ignore[union-attr]
+                    await addLoseLeaderboard(yellow.id, yellow)  # type: ignore[union-attr]
+                    score = (await getScoreLeaderBoard(red.id))[0]  # type: ignore[union-attr]
+                    place = await getPlaceLeaderbord(red.id)  # type: ignore[union-attr]
                     if place is None:
                         place = "Non classé"
                     text = (
@@ -2543,7 +2557,7 @@ async def puissance4(interaction):
                         + score + " victoires - " + place
                     )
                 elif mode == "pve":
-                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt")
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt")  # type: ignore[union-attr]
                     text = f"J'en connais un qui est parti flag d'autres challs, et a abandonné le miens... Bah t'as perdu {yellowPing}, cheh"
             await interaction.send(text)
             end = True
@@ -2570,8 +2584,8 @@ async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
         leaderboard_users = file.readlines()
     for i in range(len(leaderboard_users)):
         if str(id) in leaderboard_users[i]:
-            leaderboard_users[i] = leaderboard_users[i].split("-")
-            return leaderboard_users[i][1].replace("\n", ""), leaderboard_users[i][2].replace("\n", "")
+            parts = leaderboard_users[i].split("-")
+            return parts[1].replace("\n", ""), parts[2].replace("\n", "")
     return "0", "0"
 
 
@@ -2591,10 +2605,9 @@ async def getPlaceLeaderbord(id):
 
 async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt", draw=False):
     with open("txt/" + filename, "r+") as file:
-        leaderboard_users = file.readlines()
+        leaderboard_users = [line.split("-") for line in file.readlines()]
     isIn = False
     for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
         if str(id) in leaderboard_users[i]:
             isIn = True
             leaderboard_users[i][1] = "0" if not win else str(int(leaderboard_users[i][1]) + 1)
@@ -2616,10 +2629,9 @@ async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt"
 
 async def addScoreLeaderboard(id, name):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
+        leaderboard_users = [line.split("-") for line in file.readlines()]
     isIn = False
     for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
         if str(id) in leaderboard_users[i]:
             isIn = True
             leaderboard_users[i][1] = str(int(leaderboard_users[i][1]) + 1)
@@ -2640,10 +2652,9 @@ async def addScoreLeaderboard(id, name):
 
 async def addLoseLeaderboard(id, name):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
+        leaderboard_users = [line.split("-") for line in file.readlines()]
     isIn = False
     for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
         if str(id) in leaderboard_users[i]:
             isIn = True
             leaderboard_users[i][2] = str(int(leaderboard_users[i][2]) + 1)
@@ -2665,9 +2676,7 @@ async def addLoseLeaderboard(id, name):
 @bot.tree.command(name="leaderboard", description="Affiche le classement au Puissance 4")
 async def leaderboard(ctx: discord.Interaction):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
-    for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
+        leaderboard_users = [line.split("-") for line in file.readlines()]
 
     numbers = [
         "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"
@@ -2720,9 +2729,7 @@ async def leaderboard(ctx: discord.Interaction):
 @bot.tree.command(name="rank", description="Affiche le rang d'une personne au Puissance 4")
 async def rank(ctx: discord.Interaction, user: typing.Optional[discord.Member]):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
-    for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
+        leaderboard_users = [line.split("-") for line in file.readlines()]
 
     user_id = user.id if user is not None else ctx.user.id
 
@@ -2737,7 +2744,7 @@ async def rank(ctx: discord.Interaction, user: typing.Optional[discord.Member]):
     for i in range(len(leaderboard_users)):
         name = leaderboard_users[i]
         if str(user_id) in name:
-            await ctx.send(
+            await ctx.followup.send(
                 f"@{user_id} est **{str(i + 1)}e/{len(leaderboard_users)}** des ratios,"
                 f" avec **{name[3]} V/D**"
                 f" ({str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))}%) !"
@@ -2792,7 +2799,8 @@ async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
     ]
 
     await ctx.response.send_message(f"> {text}\n" + responses[counter % len(responses)])
-    logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé '{text}' : " + responses[counter % len(responses)])
+    guild_name = ctx.guild.name if ctx.guild else "DM"
+    logger.info(f"{ctx.user.name} - {guild_name} - A demandé '{text}' : " + responses[counter % len(responses)])
 
 
 @bot.tree.command(name="skin", description="Minecraft ?")
@@ -2801,8 +2809,9 @@ async def skin(ctx: discord.Interaction):
     response = requests.get(url + "/en/skins/random")
     soup = BeautifulSoup(response.text, "html.parser")
     tag = soup.find_all("a")[62]
-    img = tag.find("img")["src"]
-    author = img.split("/")[-1].split("-")[0]
+    img_tag = tag.find("img")
+    img = str(img_tag["src"]) if img_tag else ""
+    author = img.split("/")[-1].split("-")[0] if img else "Unknown"
     embed = discord.Embed(
         description="Skin of %s" % author,
         title="Random minecraft skin",
@@ -2829,7 +2838,7 @@ async def panda(ctx: discord.Interaction):
     url = "https://generatorfun.com"
     response = requests.get(url + "/random-panda-image")
     soup = BeautifulSoup(response.text, "html.parser")
-    img = soup.find_all("img")[0]["src"]
+    img = str(soup.find_all("img")[0]["src"])
     embed = discord.Embed(
         title="Take that Panda",
         color=0xffffff,
@@ -2863,7 +2872,7 @@ async def chat(ctx: discord.Interaction):
         )
         embed.set_author(
             name=ctx.user.display_name,
-            icon_url=ctx.user.avatar.url,
+            icon_url=ctx.user.avatar.url if ctx.user.avatar else None,
         )
         embed.set_image(url=cat_url)
         embed.set_footer(text="chat - by thecatapi.com")
@@ -2911,8 +2920,9 @@ async def dhcp(ctx, ip_range: str):
         for reaction in firstMessage.reactions:
 
             if str(reaction.emoji) == yes:
+                bot_id = bot.user.id if bot.user else None
                 async for user in reaction.users():
-                    if user.id != bot.user.id:
+                    if user.id != bot_id:
                         users.add(user)
         text = """
         Suis les étapes suivantes :
@@ -2967,12 +2977,13 @@ async def activity(ctx: discord.Interaction, participants: int):
 async def search(ctx: discord.Interaction, mot: str):
     with open("txt/dico.txt", "r+") as dico:
         lines = dico.read().split('\n')
-        if mot.lower() in lines:
-            await ctx.response.send_message(f"Yup, j'ai la connaissance du terme \"{mot}\"")
-            logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé si '{mot}' existe, eh bien oui")
-        else:
-            await ctx.response.send_message(f"De quoi tu me parles ? C'est quoi \"{mot}\" ?")
-            logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé si '{mot}' existe, bah non")
+    guild_name = ctx.guild.name if ctx.guild else "DM"
+    if mot.lower() in lines:
+        await ctx.response.send_message(f"Yup, j'ai la connaissance du terme \"{mot}\"")
+        logger.info(f"{ctx.user.name} - {guild_name} - A demandé si '{mot}' existe, eh bien oui")
+    else:
+        await ctx.response.send_message(f"De quoi tu me parles ? C'est quoi \"{mot}\" ?")
+        logger.info(f"{ctx.user.name} - {guild_name} - A demandé si '{mot}' existe, bah non")
 
 
 @bot.command()
@@ -2988,4 +2999,6 @@ async def sync(ctx):
 logger.debug(
     "\n############\nDEV MODE\n############\n" if args.dev else "\n############\n/!\\ PRODUCTION MODE /!\\\n############\n")
 TOKEN = os.getenv('DEVELOPMENT_TOKEN') if args.dev else os.getenv('PRODUCTION_TOKEN')
+if not TOKEN:
+    raise ValueError("TOKEN non défini dans les variables d'environnement")
 bot.run(TOKEN)
