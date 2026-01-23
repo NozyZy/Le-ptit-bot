@@ -905,7 +905,7 @@ async def on_message(message):
             userID = ""
 
             if "<@" not in MESSAGE:
-                userID = int(user.id) + 3
+                userID = int(user.id)
                 # Track requests for yourself per day
                 today_str = today.strftime("%Y-%m-%d")
                 if userID not in god_requests or god_requests[userID]["date"] != today_str:
