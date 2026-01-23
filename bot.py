@@ -465,6 +465,7 @@ async def on_message(message):
             "chybre",
             "chybrax",
             "chibre",
+            "kekette",
         ]:
             logger.info(f"{user.name} - {message.guild.name} - A parlé de bite")
             text = "8" + "=" * random.randint(0, int(
