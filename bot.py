@@ -109,6 +109,29 @@ def save_server_names(server_names):
 
 server_names = load_server_names()
 
+
+# Load OneCOPS counter from file
+def load_onecops_counter():
+    try:
+        with open("txt/onecops_counter.txt", "r") as f:
+            return int(f.read().strip())
+    except (FileNotFoundError, ValueError):
+        return 0
+
+
+# Save OneCOPS counter to file
+def save_onecops_counter(count):
+    with open("txt/onecops_counter.txt", "w") as f:
+        f.write(str(count))
+
+
+# French month names
+FRENCH_MONTHS = [
+    "janvier", "février", "mars", "avril", "mai", "juin",
+    "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+]
+
+
 GUILD_IDS = [
     410766134569074691,
     1193546302970146846,
@@ -1216,6 +1239,29 @@ async def on_message(message):
             embed = discord.Embed(title=choice.get("name"), color=0xF4D03F)
             embed.set_image(url=choice.get("img"))
             await channel.send(embed=embed)
+
+    # OneCOPS release date feature
+    if "onecops" in MESSAGE and MESSAGE.strip().endswith("?"):
+        logger.info(f"{user.name} - {message.guild.name} - A demandé quand sortira OneCOPS")
+
+        # Increment and save the counter
+        onecops_count = load_onecops_counter() + 1
+        save_onecops_counter(onecops_count)
+
+        # Calculate release date
+        today = date.today()
+        current_month = today.month
+        current_year = today.year
+
+        # Add counter months to current month
+        total_months = current_month + onecops_count
+        release_year = current_year + (total_months - 1) // 12
+        release_month = ((total_months - 1) % 12) + 1
+
+        # Format response
+        month_name = FRENCH_MONTHS[release_month - 1]
+        await channel.send(f"Oulà, OneCOPS sortira pas avant fin {month_name} {release_year}")
+        logger.info(f"OneCOPS counter: {onecops_count} -> fin {month_name} {release_year}")
 
     # teh help command, add commands call, but not reactions
     if MESSAGE == "--help":
