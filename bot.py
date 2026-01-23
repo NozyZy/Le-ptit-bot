@@ -67,6 +67,10 @@ nbprime_lock = asyncio.Lock()
 # Track last usage time for each user (user_id -> last_use_timestamp)
 user_cooldowns = defaultdict(float)
 
+# Tracking of “god” requests per user per day
+# Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
+god_requests = {}
+
 def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
     """
     Checks whether a user can perform an action.
@@ -173,6 +177,9 @@ async def on_message(message):
     MESSAGE = message.content.lower()
     rdnb = random.randint(1, 5)
     today = date.today()
+    day = today.strftime("%d")
+    month = today.strftime("%m")
+    year = today.strftime("%y")
     user = message.author
 
     # open and stock the dico, with a lot of words
@@ -461,6 +468,7 @@ async def on_message(message):
             "chybre",
             "chybrax",
             "chibre",
+            "kekette",
         ]:
             logger.info(f"{user.name} - {message.guild.name} - A parlé de bite")
             text = "8" + "=" * random.randint(0, int(
@@ -879,15 +887,30 @@ async def on_message(message):
             embed.set_footer(text="provided by kanye.rest")
             await channel.send("Kanyeah", embed=embed)
 
+        if MESSAGE == "dog":
+            if int(user.id) % 10 == (int(day)**3 + 33*int(month) + 12) % 10:
+                await channel.send("ça se trouve t'es peut-être god aujourd'hui ?")
+                return
+            await channel.send(random.choice([
+                "You spelled it wrong.",
+                "Dumbass",
+                "T'es sûr de toi ?",
+                "Wouf",
+                "Vasy toi aboies"
+            ]))
+            logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
+
         if MESSAGE.startswith("god"):
-            day = today.strftime("%d")
-            month = today.strftime("%m")
-            year = today.strftime("%y")
             MESSAGE = MESSAGE.replace("god", "")
             userID = ""
 
             if "<@" not in MESSAGE:
-                userID = int(user.id)
+                userID = int(user.id) + 3
+                # Track requests for yourself per day
+                today_str = today.strftime("%Y-%m-%d")
+                if userID not in god_requests or god_requests[userID]["date"] != today_str:
+                    god_requests[userID] = {"date": today_str, "count": 0}
+                god_requests[userID]["count"] += 1
             else:
                 i = 0
                 for i in range(len(MESSAGE)):
@@ -904,8 +927,76 @@ async def on_message(message):
                 logger.info(f"{user.name} - {message.guild.name} - C'était David")
                 return
             if userID % 5 != (int(day) + int(month)) % 5:
-                await channel.send("Not today (☞ﾟヮﾟ)☞")
-                logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
+                # not a god? maybe a dog
+                if userID % 10 == (int(day)**3 + 33*int(month) + 12) % 10:
+                    dogs = [
+                        'https://t3.ftcdn.net/jpg/10/70/64/34/360_F_1070643477_lKOYkVTzLjAJ9SHjHLTGJU1GUCoMiaML.jpg',
+                        'https://ichef.bbci.co.uk/ace/standard/624/cpsprodpb/E386/production/_88764285_tuna1.jpg',
+                        'https://www.famousbirthdays.com/headshots/tuna-1.jpg',
+                        'https://s.yimg.com/os/en/aol_bored_panda_979/850b1e4dd49231d8b39075feb0ce8e9f',
+                        'https://media.tenor.com/2mfG8pdR5UgAAAAM/dog-laughing-funny-dog.gif',
+                        'https://i.pinimg.com/736x/27/21/55/2721550a69dc64a0b3b5bd2f792d87b2.jpg',
+                        'https://pethelpful.com/.image/NDowMDAwMDAwMDAwMDYyODg1/neapolitan-mastiff-closeup.jpg',
+                        'https://www.shutterstock.com/image-photo/fat-dog-sitting-panting-isolated-260nw-2588654581.jpg',
+                        'https://ih1.redbubble.net/image.2958379778.2368/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg'
+                    ]
+                    target_user = await message.guild.fetch_member(userID)
+                    pfp = target_user.avatar.url if target_user.avatar else target_user.default_avatar.url
+                    embed = discord.Embed(
+                        title=random.choice([
+                            "It's just a dog.",
+                            "Naaaah, dog",
+                            "God? More like DOG",
+                            "Only dog"
+                        ]),
+                        description=random.choice([
+                            f"<@{userID}> you're just a dog.",
+                            f"<@{userID}> you're no dog, only DAWG.",
+                            f"<@{userID}> say \"wouf\"",
+                            f"<@{userID}> you're barking and yapping, stoopid dawg"
+                        ]),
+                        color=0x8B4513,
+                        url=random.choice([
+                            "https://www.youtube.com/watch?v=dCMcSQEXAY4",
+                            "https://www.youtube.com/watch?v=-AdteE-KuIg",
+                            "https://www.youtube.com/shorts/rBKqNGTPNTc",
+                            "https://www.youtube.com/shorts/x2BakEedBkI"
+                        ]),
+                    )
+                    embed.set_thumbnail(url=pfp)
+                    embed.set_author(
+                        name="Le p'tit dog",
+                        url="https://github.com/NozyZy/Le-ptit-bot",
+                        icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                    )
+                    embed.set_image(url=random.choice(dogs))
+                    embed.set_footer(text="Wouf wouf")
+                    logger.info(f"{user.name} - {message.guild.name} - Est un dog aujourd'hui")
+                    await channel.send("Dog looks like him.", embed=embed)
+                    return
+                # If the user asks for himself and insists (2nd time+) => he is stupid
+                # Phrases for those who insist ಥ_ಥ
+                stubborn_phrases = [
+                    f"<@{userID}> T'est un descendant des conifères ? Genre t'es con et tu peux rien y faire ?",
+                    "Ouais bon j'ai dit \"Not today (☞ﾟヮﾟ)☞\", lâche l'affaire nan ?",
+                    f"<@{userID}> T'as pas inventé l'eau chaude ...",
+                    f"<@{userID}> T'as pas la lumière à tous les étages toi, hein ?",
+                    f"<@{userID}> Vasy tu peux encore essayer, mais la réponse sera toujours la même :)",
+                    f"<@{userID}> T'es le genre à relire les instructions du shampoing plusieurs fois.",
+                    "Essaies encore une fois, juste pour voir ?",
+                    "Tu sais que la définition de la folie c'est de répéter la même chose en espérant un résultat différent ?",
+                    "Quelqu'un lui a dit que l'espoir fait vivre ? Bah là ça marche pas.",
+                    "T'es têtu comme une mule, mais sans le charme.",
+                    f"T'as les boules <@{userID}> ?",
+                    "Tu vas chialer ?",
+                    "Encore une fois, juste pour me divertir stp"
+                ]
+                if "<@" not in MESSAGE and god_requests.get(userID, {}).get("count", 0) >= (rdnb % 3) + 2:
+                    await channel.send(f"{random.choice(stubborn_phrases)}")
+                    logger.info(f"{user.name} - {message.guild.name} - Insiste pour être dieu (x{god_requests[userID]['count']})")
+                else:
+                    await channel.send("Not today (☞ﾟヮﾟ)☞")
+                    logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
                 return
             user = await message.guild.fetch_member(userID)
             pfp = user.avatar.url
