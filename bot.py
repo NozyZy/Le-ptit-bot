@@ -177,6 +177,9 @@ async def on_message(message):
     MESSAGE = message.content.lower()
     rdnb = random.randint(1, 5)
     today = date.today()
+    day = today.strftime("%d")
+    month = today.strftime("%m")
+    year = today.strftime("%y")
     user = message.author
 
     # open and stock the dico, with a lot of words
@@ -884,15 +887,25 @@ async def on_message(message):
             embed.set_footer(text="provided by kanye.rest")
             await channel.send("Kanyeah", embed=embed)
 
+        if MESSAGE == "dog":
+            if int(user.id) % 10 == (int(day)**3 + 33*int(month) + 12) % 10:
+                await channel.send("ça se trouve t'es peut-être god aujourd'hui ?")
+                return
+            await channel.send(random.choice([
+                "You spelled it wrong.",
+                "Dumbass",
+                "T'es sûr de toi ?",
+                "Wouf",
+                "Vasy toi aboies"
+            ]))
+            logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
+
         if MESSAGE.startswith("god"):
-            day = today.strftime("%d")
-            month = today.strftime("%m")
-            year = today.strftime("%y")
             MESSAGE = MESSAGE.replace("god", "")
             userID = ""
 
             if "<@" not in MESSAGE:
-                userID = int(user.id)
+                userID = int(user.id) + 3
                 # Track requests for yourself per day
                 today_str = today.strftime("%Y-%m-%d")
                 if userID not in god_requests or god_requests[userID]["date"] != today_str:
@@ -914,8 +927,8 @@ async def on_message(message):
                 logger.info(f"{user.name} - {message.guild.name} - C'était David")
                 return
             if userID % 5 != (int(day) + int(month)) % 5:
-                # 5% chance of being compared to a dogo ^^
-                if random.random() < 0.05:
+                # not a god? maybe a dog
+                if userID % 10 == (int(day)**3 + 33*int(month) + 12) % 10:
                     dogs = [
                         'https://t3.ftcdn.net/jpg/10/70/64/34/360_F_1070643477_lKOYkVTzLjAJ9SHjHLTGJU1GUCoMiaML.jpg',
                         'https://ichef.bbci.co.uk/ace/standard/624/cpsprodpb/E386/production/_88764285_tuna1.jpg',
@@ -964,22 +977,22 @@ async def on_message(message):
                 # If the user asks for himself and insists (2nd time+) => he is stupid
                 # Phrases for those who insist ಥ_ಥ
                 stubborn_phrases = [
-                    "T'est un descendant des conifères ? Genre t'es con et tu peux rien y faire ?",
+                    f"<@{userID}> T'est un descendant des conifères ? Genre t'es con et tu peux rien y faire ?",
                     "Ouais bon j'ai dit \"Not today (☞ﾟヮﾟ)☞\", lâche l'affaire nan ?",
-                    "T'as pas inventé l'eau chaude ...",
-                    "T'as pas la lumière à tous les étages toi, hein ?",
-                    "Vasy tu peux encore essayer, mais la réponse sera encore la même :)",
-                    "T'es le genre à relire les instructions du shampoing plusieurs fois.",
+                    f"<@{userID}> T'as pas inventé l'eau chaude ...",
+                    f"<@{userID}> T'as pas la lumière à tous les étages toi, hein ?",
+                    f"<@{userID}> Vasy tu peux encore essayer, mais la réponse sera toujours la même :)",
+                    f"<@{userID}> T'es le genre à relire les instructions du shampoing plusieurs fois.",
                     "Essaies encore une fois, juste pour voir ?",
                     "Tu sais que la définition de la folie c'est de répéter la même chose en espérant un résultat différent ?",
                     "Quelqu'un lui a dit que l'espoir fait vivre ? Bah là ça marche pas.",
                     "T'es têtu comme une mule, mais sans le charme.",
-                    "T'as les boules ?",
+                    f"T'as les boules <@{userID}> ?",
                     "Tu vas chialer ?",
                     "Encore une fois, juste pour me divertir stp"
                 ]
-                if "<@" not in MESSAGE and god_requests.get(userID, {}).get("count", 0) >= 2:
-                    await channel.send(f"<@{userID}> {random.choice(stubborn_phrases)}")
+                if "<@" not in MESSAGE and god_requests.get(userID, {}).get("count", 0) >= (rdnb % 3) + 2:
+                    await channel.send(f"{random.choice(stubborn_phrases)}")
                     logger.info(f"{user.name} - {message.guild.name} - Insiste pour être dieu (x{god_requests[userID]['count']})")
                 else:
                     await channel.send("Not today (☞ﾟヮﾟ)☞")
