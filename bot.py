@@ -2890,11 +2890,11 @@ async def dhcp(ctx, ip_range: str):
         ips = [str(ip) for ip in network]
         gateway = ips.pop(0)
     except ipaddress.AddressValueError:
-        ctx.send(
-            "Tu sais ce que c'est un CIDR ? En gros mets une IP et son masque quoi #IngénieurInformaticien (eg. 192.168.1.0/24")
+        await ctx.send(
+            "Tu sais ce que c'est un CIDR ? En gros mets une IP et son masque quoi #IngénieurInformaticien (eg. 192.168.1.0/24)")
         return
     except ValueError as e:
-        ctx.send("Je pense que tu t'es trompé sur ta range IP mon grand... : ", e)
+        await ctx.send(f"Je pense que tu t'es trompé sur ta range IP mon grand... : {e}")
         return
 
     if ips:
