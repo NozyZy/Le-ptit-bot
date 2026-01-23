@@ -119,3 +119,6 @@ je me babyfoot la salle de pause
 je m’auto-resolve le spoony
 jme cci le mail
 je me --addbranlette le petit bot
+je me mute le p'tit bot
+je m'intègre le mdo
+je me helm la chart
