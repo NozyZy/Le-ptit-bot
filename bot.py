@@ -2893,8 +2893,8 @@ async def dhcp(ctx, ip_range: str):
         await ctx.send(
             "Tu sais ce que c'est un CIDR ? En gros mets une IP et son masque quoi #IngénieurInformaticien (eg. 192.168.1.0/24)")
         return
-    except ValueError as e:
-        await ctx.send(f"Je pense que tu t'es trompé sur ta range IP mon grand... : {e}")
+    except ValueError:
+        await ctx.send("Je pense que tu t'es trompé sur ta range IP mon grand... (eg. 192.168.1.0/24)")
         return
 
     if ips:
