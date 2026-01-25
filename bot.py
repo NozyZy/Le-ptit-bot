@@ -564,6 +564,23 @@ async def on_message(message):
             logger.info(f"{user.name} - {message.guild.name} - A envoyé du love")
             await message.add_reaction("❤")
 
+        if "🧂" in MESSAGE:
+            if rdnb > 3:
+                reponses_sel = [
+                    "T'es une personne salé toi, nan ?",
+                    "Au moins avec toi on tombera pas à court de sel !",
+                    "Tu viens de la mer morte pour être aussi salé ?",
+                    "Tiens, prends un peu d'eau avec tout ce sel.",
+                    "Respire un coup, détends-toi !",
+                    "C'est pas bon pour la tension tout ce sel mon pote.",
+                    "T'es saunier ?"
+                ]
+                await channel.send(random.choice(reponses_sel))
+                logger.info(f"{user.name} - {message.guild.name} - A demandé à être salé")
+            else:
+                await message.add_reaction("🧂")
+                logger.info(f"{user.name} - {message.guild.name} - A reçu du sel")
+
         if (MESSAGE.strip(".;,?! \"')") in ["hein", "1"]) and rdnb > 3:
             logger.info(f"{user.name} - {message.guild.name} - A commencé par 1")
             reponses = ["deux", "2", "deux ?", "2 😏"]
