@@ -567,12 +567,12 @@ async def on_message(message):
         if "🧂" in MESSAGE:
             if rdnb > 3:
                 reponses_sel = [
-                    "T'es une personne salé toi, nan ?",
-                    "Au moins avec toi on tombera pas à court de sel !",
+                    "T'es une personne salée toi, nan ?",
+                    "Au moins avec toi on tombera pas à court de sel...",
                     "Tu viens de la mer morte pour être aussi salé ?",
                     "Tiens, prends un peu d'eau avec tout ce sel.",
-                    "Respire un coup, détends-toi !",
-                    "C'est pas bon pour la tension tout ce sel mon pote.",
+                    "Tu fais partie de l'îlot du sel ?",
+                    "C'est pas bon pour la tension tout ce sel mon p'tit pote.",
                     "T'es saunier ?"
                 ]
                 await channel.send(random.choice(reponses_sel))
@@ -1259,22 +1259,17 @@ async def on_message(message):
             await channel.send(embed=embed)
 
     # OneCOPS release date feature
-    if "onecops" in MESSAGE and MESSAGE.strip().endswith("?"):
+    if any(s in MESSAGE for s in ['1cops', '1kops', 'onecops', 'onekops']) and MESSAGE.strip().endswith("?"):
         logger.info(f"{user.name} - {message.guild.name} - A demandé quand sortira OneCOPS")
 
         # Increment and save the counter
         onecops_count = load_onecops_counter() + 1
         save_onecops_counter(onecops_count)
 
-        # Calculate release date
-        today = date.today()
-        current_month = today.month
-        current_year = today.year
-
         # Add counter months to current month
-        total_months = current_month + onecops_count
-        release_year = current_year + (total_months - 1) // 12
-        release_month = ((total_months - 1) % 12) + 1
+        total_months = int(month) + onecops_count
+        release_year = int(year) + (total_months - 1) // 12
+        release_month: int = (((total_months - 1) % len(FRENCH_MONTHS)) + 1) % len(FRENCH_MONTHS)
 
         # Format response
         month_name = FRENCH_MONTHS[release_month - 1]
@@ -1300,7 +1295,10 @@ async def on_message(message):
             " **--invite** pour savoir comment m'inviter\n"
             " **--isPrime** *nb* pour tester si *nb* est premier\n"
             " **--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
-            " **--p4** pour jouer au Puissance 4\n"
+            " **--p4** pour jouer au Puissance 4 en **versus**\n"
+            "\t - **--p4 pve** pour jouer contre le bot (difficulté normale)\n"
+            "\t - **--p4 pve [facile,moyen,difficile]** pour jouer contre le bot avec une difficulté spéciale\n"
+            "\t - **--p4 pve [offensif,equilibre,defensif]** pour jouer contre le bot avec une configuration spécial\n"
             " **--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
             " **--presentation** et **--master** pour créer des memes\n"
             " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
@@ -2036,11 +2034,23 @@ async def flag(interaction: discord.Interaction):
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.channel)  # 1 game per 30 seconds per channel
 async def puissance4(interaction):
-    logger.info(
-        f"{interaction.author.name} - A lancé une partie de puissance 4 {interaction.guild.name}"
-    )
-
     import copy
+
+    message_commands = interaction.message.content.replace("é", "e").split()
+    print(message_commands)
+    mode = "pve" if "pve" in message_commands else "pvp"
+
+    if mode == "pve":
+        difficulty  = "facile"      if "facile"     in message_commands else "difficile"    if "difficile"  in message_commands else "moyen"
+        playstyle   = "offensif"    if "offensif"   in message_commands else "defensif"     if "defensif"   in message_commands else "equilibre"
+
+        logger.info(
+            f"{interaction.author.name} - {interaction.guild.name} - A lancé une partie de puissance 4 en mode {mode}, difficulté {difficulty}, style {playstyle}"
+        )
+    else:
+        logger.info(
+            f"{interaction.author.name} - {interaction.guild.name} - A lancé une partie de puissance 4 en versus"
+        )
 
     ROWS = 6
     COLS = 7
@@ -2163,7 +2173,7 @@ async def puissance4(interaction):
                     break
             return best_col, value
 
-    def choose_ai_move(grid, difficulty="moyen", playstyle="offensif"):
+    def choose_ai_move(grid, difficulty="moyen", playstyle="equilibre"):
         """
         difficulty: "facile", "moyen", "difficile"
         playstyle: "equilibre", "offensif", "defensif"
@@ -2180,8 +2190,8 @@ async def puissance4(interaction):
             depth = 2
             randomness = 0.1
         else:
-            depth = 3
-            randomness = 0.07
+            depth = 4
+            randomness = 0.03
 
         # Ajuste le style de jeu
         offensive_factor = 1.0
@@ -2348,8 +2358,6 @@ async def puissance4(interaction):
         f"{yellow} - Est le joueur jaune {interaction.guild.name}"
     )
 
-    mode = "pvp"
-
     if mode == "pvp":
         redMessage = await interaction.send("**⬇ Joueur rouge ⬇**")
         await redMessage.add_reaction("🔴")
@@ -2421,7 +2429,7 @@ async def puissance4(interaction):
                     return (user == red and str(reaction.emoji) in numbers
                             and reaction.message.id == gridMessage.id)
             elif mode == "pve":
-                col = choose_ai_move(grid, difficulty="difficile", playstyle="offensif")
+                col = choose_ai_move(grid, difficulty=difficulty, playstyle=playstyle)
                 await addChip(grid, col, tour)
 
         else:
