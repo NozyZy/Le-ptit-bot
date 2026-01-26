@@ -444,7 +444,7 @@ async def on_message(message):
     if not MESSAGE.startswith("--"):
 
         # Random response for the TQ user with the image allez.png 
-        if (user.id == 756178270830985286 and random.randint(1, 20) == 1):
+        if user.id == 756178270830985286 and random.randint(1, 31) == int(day):
             logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
             await channel.send(file=discord.File("images/allez.png"))
 
