@@ -223,42 +223,42 @@ async def on_message(message):
         return
 
     # expansion of the dico, with words of every messages (stock only words, never complete message)
-    # we don't want a specific bot (from a friend) to expand the dico
+    # we don't want a specific bot (from a friend) to expand the dico => don't know who but it's ok ^^
     if message.author.id != 696099307706777610:
+        # Ignore code blocks
         if "```" in MESSAGE:
             return
-        mot = ""
-        for i in range(len(MESSAGE)):
-            mot += MESSAGE[i]
-            if MESSAGE[i] == " " or i == len(MESSAGE) - 1:
-                ponctuation = [
-                    " ",
-                    ".",
-                    ",",
-                    ";",
-                    "!",
-                    "?",
-                    "(",
-                    ")",
-                    "[",
-                    "]",
-                    ":",
-                    "*",
-                ]
-                for j in ponctuation:
-                    mot = mot.replace(j, " ")
-                if verifAlphabet(mot) and 0 < len(mot) < 27:
-                    mot += "\n"
-                    if mot not in dicoLines:
-                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {mot}")
-                        dicoLines.append(mot)
-                mot = ""
 
-    dicoLines.sort()
-    if len(dicoLines) > 0 and len(dicoLines) > dicoSize:
-        with open("txt/dico.txt", "w+") as dicoFile:
-            for i in dicoLines:
-                dicoFile.write(i)
+        # Split message into words
+        words = MESSAGE.split()
+
+        for word in words:
+            # Remove punctuation but keep apostrophes and alphabetic characters
+            # Examples: "m'entends" -> "m'entends", "l'arbre" -> "l'arbre", "aujourd'hui" -> "aujourd'hui"
+            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç''")
+            clean_word = clean_word.lower().strip()
+
+            # Filter valid words: length < 27
+            # Note: verifAlphabet will reject words with apostrophes, so we skip it for words with apostrophes
+            if clean_word and len(clean_word) < 27:
+                # If word contains apostrophe, accept it without verifAlphabet check
+                if "'" in clean_word or "'" in clean_word:
+                    word_with_newline = clean_word + "\n"
+                    if word_with_newline not in dicoLines:
+                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
+                        dicoLines.append(word_with_newline)
+                # Otherwise, apply verifAlphabet check
+                elif verifAlphabet(clean_word):
+                    word_with_newline = clean_word + "\n"
+                    if word_with_newline not in dicoLines:
+                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
+                        dicoLines.append(word_with_newline)
+
+    # Perf Opti ++ => sort + write to the file only after accumulating 10+ new words
+    if len(dicoLines) > dicoSize + 10:
+        dicoLines = sorted(set(dicoLines))
+        with open("txt/dico.txt", "w+", encoding="utf-8") as dicoFile:
+            dicoFile.writelines(dicoLines)
 
     # stock file full of insults (yes I know...)
     with open("txt/insultes.txt", "r+", encoding="utf-8") as fichierInsulte:
@@ -375,12 +375,14 @@ async def on_message(message):
         if text:
             text = text[0].upper() + text[1:]
         await channel.send(text)
+        return
 
     # send the number of words stocked in the dico
     if MESSAGE == "--dico":
         logger.info(f"{user.name} - {message.guild.name} - A compter le nombe de mots du dico")
         text = f"J'ai actuellement {str(len(dicoLines))} mots enregistrés, nickel"
         await channel.send(text)
+        return
 
     # rename bot command (admin only)
     if MESSAGE.startswith("--rename "):
@@ -436,9 +438,15 @@ async def on_message(message):
             await channel.send("❌ Je n'ai pas la permission de changer mon pseudo sur ce serveur.")
         except discord.HTTPException as e:
             await channel.send(f"❌ Erreur lors du reset du nom: {e}")
+        return
 
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
+
+        # Random response for the TQ user with the image allez.png 
+        if (user.id == 756178270830985286 and random.randint(1, 20) == 1):
+            logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
+            await channel.send(file=discord.File("images/allez.png"))
 
         if ("enerv" in MESSAGE or "énerv" in MESSAGE) and rdnb >= 2:
             logger.info(f"{user.name} - {message.guild.name} - S'est enervé")
