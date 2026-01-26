@@ -109,6 +109,29 @@ def save_server_names(server_names):
 
 server_names = load_server_names()
 
+
+# Load OneCOPS counter from file
+def load_onecops_counter():
+    try:
+        with open("txt/onecops_counter.txt", "r") as f:
+            return int(f.read().strip())
+    except (FileNotFoundError, ValueError):
+        return 0
+
+
+# Save OneCOPS counter to file
+def save_onecops_counter(count):
+    with open("txt/onecops_counter.txt", "w") as f:
+        f.write(str(count))
+
+
+# French month names
+FRENCH_MONTHS = [
+    "janvier", "février", "mars", "avril", "mai", "juin",
+    "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+]
+
+
 GUILD_IDS = [
     410766134569074691,
     1193546302970146846,
@@ -123,8 +146,9 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(
         name=f"insulter {nbtg} personnes"))
     logger.debug("Logged in as")
-    logger.debug(bot.user.name)
-    logger.debug(bot.user.id)
+    if bot.user:
+        logger.debug(bot.user.name)
+        logger.debug(bot.user.id)
 
     if args.dev:
         logger.debug("Synchronizing slash commands for guilds :")
@@ -199,42 +223,42 @@ async def on_message(message):
         return
 
     # expansion of the dico, with words of every messages (stock only words, never complete message)
-    # we don't want a specific bot (from a friend) to expand the dico
+    # we don't want a specific bot (from a friend) to expand the dico => don't know who but it's ok ^^
     if message.author.id != 696099307706777610:
+        # Ignore code blocks
         if "```" in MESSAGE:
             return
-        mot = ""
-        for i in range(len(MESSAGE)):
-            mot += MESSAGE[i]
-            if MESSAGE[i] == " " or i == len(MESSAGE) - 1:
-                ponctuation = [
-                    " ",
-                    ".",
-                    ",",
-                    ";",
-                    "!",
-                    "?",
-                    "(",
-                    ")",
-                    "[",
-                    "]",
-                    ":",
-                    "*",
-                ]
-                for j in ponctuation:
-                    mot = mot.replace(j, " ")
-                if verifAlphabet(mot) and 0 < len(mot) < 27:
-                    mot += "\n"
-                    if mot not in dicoLines:
-                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {mot}")
-                        dicoLines.append(mot)
-                mot = ""
 
-    dicoLines.sort()
-    if len(dicoLines) > 0 and len(dicoLines) > dicoSize:
-        with open("txt/dico.txt", "w+") as dicoFile:
-            for i in dicoLines:
-                dicoFile.write(i)
+        # Split message into words
+        words = MESSAGE.split()
+
+        for word in words:
+            # Remove punctuation but keep apostrophes and alphabetic characters
+            # Examples: "m'entends" -> "m'entends", "l'arbre" -> "l'arbre", "aujourd'hui" -> "aujourd'hui"
+            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç''")
+            clean_word = clean_word.lower().strip()
+
+            # Filter valid words: length < 27
+            # Note: verifAlphabet will reject words with apostrophes, so we skip it for words with apostrophes
+            if clean_word and len(clean_word) < 27:
+                # If word contains apostrophe, accept it without verifAlphabet check
+                if "'" in clean_word or "'" in clean_word:
+                    word_with_newline = clean_word + "\n"
+                    if word_with_newline not in dicoLines:
+                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
+                        dicoLines.append(word_with_newline)
+                # Otherwise, apply verifAlphabet check
+                elif verifAlphabet(clean_word):
+                    word_with_newline = clean_word + "\n"
+                    if word_with_newline not in dicoLines:
+                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
+                        dicoLines.append(word_with_newline)
+
+    # Perf Opti ++ => sort + write to the file only after accumulating 10+ new words
+    if len(dicoLines) > dicoSize + 10:
+        dicoLines = sorted(set(dicoLines))
+        with open("txt/dico.txt", "w+", encoding="utf-8") as dicoFile:
+            dicoFile.writelines(dicoLines)
 
     # stock file full of insults (yes I know...)
     with open("txt/insultes.txt", "r+", encoding="utf-8") as fichierInsulte:
@@ -309,7 +333,7 @@ async def on_message(message):
             return
 
     # if you tag this bot in any message
-    if f"<@{bot.user.id}>" in MESSAGE:
+    if bot.user and f"<@{bot.user.id}>" in MESSAGE:
         logger.info(f"{user.name} - {message.guild.name} - A ping le bot")
         user = str(message.author.nick)
         if user == "None":
@@ -351,12 +375,14 @@ async def on_message(message):
         if text:
             text = text[0].upper() + text[1:]
         await channel.send(text)
+        return
 
     # send the number of words stocked in the dico
     if MESSAGE == "--dico":
         logger.info(f"{user.name} - {message.guild.name} - A compter le nombe de mots du dico")
         text = f"J'ai actuellement {str(len(dicoLines))} mots enregistrés, nickel"
         await channel.send(text)
+        return
 
     # rename bot command (admin only)
     if MESSAGE.startswith("--rename "):
@@ -412,9 +438,15 @@ async def on_message(message):
             await channel.send("❌ Je n'ai pas la permission de changer mon pseudo sur ce serveur.")
         except discord.HTTPException as e:
             await channel.send(f"❌ Erreur lors du reset du nom: {e}")
+        return
 
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
+
+        # Random response for the TQ user with the image allez.png 
+        if (user.id == 756178270830985286 and random.randint(1, 20) == 1):
+            logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
+            await channel.send(file=discord.File("images/allez.png"))
 
         if ("enerv" in MESSAGE or "énerv" in MESSAGE) and rdnb >= 2:
             logger.info(f"{user.name} - {message.guild.name} - S'est enervé")
@@ -540,20 +572,37 @@ async def on_message(message):
             logger.info(f"{user.name} - {message.guild.name} - A envoyé du love")
             await message.add_reaction("❤")
 
+        if "🧂" in MESSAGE:
+            if rdnb > 3:
+                reponses_sel = [
+                    "T'es une personne salée toi, nan ?",
+                    "Au moins avec toi on tombera pas à court de sel...",
+                    "Tu viens de la mer morte pour être aussi salé ?",
+                    "Tiens, prends un peu d'eau avec tout ce sel.",
+                    "Tu fais partie de l'îlot du sel ?",
+                    "C'est pas bon pour la tension tout ce sel mon p'tit pote.",
+                    "T'es saunier ?"
+                ]
+                await channel.send(random.choice(reponses_sel))
+                logger.info(f"{user.name} - {message.guild.name} - A demandé à être salé")
+            else:
+                await message.add_reaction("🧂")
+                logger.info(f"{user.name} - {message.guild.name} - A reçu du sel")
+
         if (MESSAGE.strip(".;,?! \"')") in ["hein", "1"]) and rdnb > 3:
             logger.info(f"{user.name} - {message.guild.name} - A commencé par 1")
             reponses = ["deux", "2", "deux ?", "2 😏"]
             await channel.send(random.choice(reponses))
 
-            # waits for a message valiudating further instructions
-            def check(m):
+            # waits for a message validating further instructions
+            def check_count(m):
                 logger.info(m.content)
                 return (("3" in m.content or "trois" in m.content)
                         and m.channel == message.channel
                         and not m.content.startswith("http"))
 
             try:
-                await bot.wait_for("message", timeout=60.0, check=check)
+                await bot.wait_for("message", timeout=60.0, check=check_count)
             except asyncio.TimeoutError:
                 await message.add_reaction("☹")
                 logger.info(f"{user.name} - {message.guild.name} - A pas su compter")
@@ -571,12 +620,12 @@ async def on_message(message):
         if MESSAGE == "a" and rdnb > 2:
             logger.info(f"{user.name} - {message.guild.name} - A commencer par a")
 
-            def check(m):
+            def check_alphabet(m):
                 return m.content.lower(
                 ) == "b" and m.channel == message.channel
 
             try:
-                await bot.wait_for("message", timeout=60.0, check=check)
+                await bot.wait_for("message", timeout=60.0, check=check_alphabet)
             except asyncio.TimeoutError:
                 await message.add_reaction("☹")
                 logger.info(f"{user.name} - {message.guild.name} - A pas continué par b")
@@ -1217,32 +1266,59 @@ async def on_message(message):
             embed.set_image(url=choice.get("img"))
             await channel.send(embed=embed)
 
+    # OneCOPS release date feature
+    if any(s in MESSAGE for s in ['1cops', '1kops', 'onecops', 'onekops']) and MESSAGE.strip().endswith("?"):
+        logger.info(f"{user.name} - {message.guild.name} - A demandé quand sortira OneCOPS")
+
+        # Increment and save the counter
+        onecops_count = load_onecops_counter() + 1
+        save_onecops_counter(onecops_count)
+
+        # Add counter months to current month
+        total_months = int(month) + onecops_count
+        release_year = int(year) + (total_months - 1) // 12
+        release_month: int = (((total_months - 1) % len(FRENCH_MONTHS)) + 1) % len(FRENCH_MONTHS)
+
+        # Format response
+        month_name = FRENCH_MONTHS[release_month - 1]
+        await channel.send(f"Oulà, OneCOPS sortira pas avant fin {month_name} {release_year}")
+        logger.info(f"OneCOPS counter: {onecops_count} -> fin {month_name} {release_year}")
+
     # teh help command, add commands call, but not reactions
     if MESSAGE == "--help":
         logger.info(f"{user.name} - {message.guild.name} - A demandé de l'aide")
         await channel.send(
             "Commandes : \n"
             " **F** to pay respect\n"
-            " **--serverInfo** pour connaître les infos du server\n"
-            " **--clear** *nb* pour supprimer *nb* messages\n"
-            " **--addInsult** pour ajouter des insultes et **tg** pour te faire insulter\n"
             " **--addBranlette** pour ajouter une expression de branlette et **branle** pour en avoir une\n"
-            " **--game** pour jouer au jeu du **clap**\n"
-            " **--presentation** et **--master** pour créer des memes\n"
-            " **--repeat** pour que je répète ce qui vient après l'espace\n"
+            " **--addInsult** pour ajouter des insultes et **tg** pour te faire insulter\n"
+            " **--amongus** pour lancer une partie Among Us\n"
             " **--appel** puis le pseudo de ton pote pour l'appeler (admin only)\n"
-            " **--crypt** pour chiffrer/déchiffrer un message César (décalage)\n"
-            " **--random** pour écrire 5 mots aléatoires\n"
-            " **--randint** *nb1*, *nb2* pour avoir un nombre aléatoire entre ***nb1*** et ***nb2***\n"
             " **--calcul** *nb1* (+, -, /, *, ^, !) *nb2* pour avoir un calcul adéquat \n"
-            " **--isPrime** *nb* pour tester si *nb* est premier\n"
-            " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
-            " **--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
-            " **--rename** *nouveau_nom* pour changer mon nom sur ce serveur (admin only)\n"
-            " **--resetname** pour remettre mon nom par défaut (admin only)\n"
+            " **--clear** *nb* pour supprimer *nb* messages\n"
+            " **--crypt** pour chiffrer/déchiffrer un message César (décalage)\n"
+            " **--dhcp** *range* pour une activité d'attribution d'IPs\n"
+            " **--dico** pour connaître le nombre de mots dans mon dictionnaire\n"
+            " **--game** pour jouer au jeu du **clap**\n"
             " **--invite** pour savoir comment m'inviter\n"
+            " **--isPrime** *nb* pour tester si *nb* est premier\n"
+            " **--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
+            " **--p4** pour jouer au Puissance 4 en **versus**\n"
+            "\t - **--p4 pve** pour jouer contre le bot (difficulté normale)\n"
+            "\t - **--p4 pve [facile,moyen,difficile]** pour jouer contre le bot avec une difficulté spéciale\n"
+            "\t - **--p4 pve [offensif,equilibre,defensif]** pour jouer contre le bot avec une configuration spécial\n"
+            " **--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
+            " **--presentation** et **--master** pour créer des memes\n"
+            " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
+            " **--randint** *nb1*, *nb2* pour avoir un nombre aléatoire entre ***nb1*** et ***nb2***\n"
+            " **--random** pour écrire 5 mots aléatoires\n"
+            " **--rename** *nouveau_nom* pour changer mon nom sur ce serveur (admin only)\n"
+            " **--repeat** pour que je répète ce qui vient après l'espace\n"
+            " **--resetname** pour remettre mon nom par défaut (admin only)\n"
+            " **--serverInfo** pour connaître les infos du server\n"
             "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈"
         )
+            
     else:
         # allows command to process after the on_message() function call
         await bot.process_commands(message)
@@ -1355,9 +1431,7 @@ async def game(ctx):
     except asyncio.TimeoutError:
         await reponse.add_reaction("☹")
     else:
-        user = str(msg.author.nick)
-        if user == "None":
-            user = str(msg.author.name)
+        user = getattr(msg.author, 'nick', None) or msg.author.name
         text = f"**{user}** a gagné !"
         logger.info(f"{user} a gagné")
         await ctx.send(text)
@@ -1759,10 +1833,15 @@ async def presentation(ctx, *base):
 
 @bot.tree.command(name="ban", description="Tu veux vraiment bannir mes réactions ??? Enflure...")
 async def ban(ctx: discord.Interaction):
+    if not ctx.channel or not ctx.guild:
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur.")
+        return
+    channel_name = getattr(ctx.channel, 'name', 'DM')
     logger.info(
-        f"{ctx.user.name} - A demandé de me bannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        f"{ctx.user.name} - A demandé de me bannir du channel {channel_name} du serveur {ctx.guild.name} : ",
     )
-    if not ctx.user.guild_permissions.administrator:
+    member = ctx.guild.get_member(ctx.user.id)
+    if not member or not member.guild_permissions.administrator:
         await ctx.response.send_message("T'es pas admin, nananananère 😜")
         logger.info("mais n'a pas les droits")
         return
@@ -1783,10 +1862,15 @@ async def ban(ctx: discord.Interaction):
 
 @bot.tree.command(name="unban", description="OUI LIBERE-MOI")
 async def unban(ctx: discord.Interaction):
+    if not ctx.channel or not ctx.guild:
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur.")
+        return
+    channel_name = getattr(ctx.channel, 'name', 'DM')
     logger.info(
-        f"{ctx.user.name} - A demandé de me débannir du channel {ctx.channel.name} du serveur {ctx.guild.name} : ",
+        f"{ctx.user.name} - A demandé de me débannir du channel {channel_name} du serveur {ctx.guild.name} : ",
     )
-    if not ctx.user.guild_permissions.administrator:
+    member = ctx.guild.get_member(ctx.user.id)
+    if not member or not member.guild_permissions.administrator:
         await ctx.response.send_message("T'es pas admin, nananananère 😜")
         logger.info("mais n'a pas les droits")
         return
@@ -1811,8 +1895,9 @@ async def unban(ctx: discord.Interaction):
 
 @bot.tree.command(name="invite", description="Vasy invite moi sur un autre serveur, on s'emmerde ici")
 async def invite(ctx: discord.Interaction):
+    guild_name = ctx.guild.name if ctx.guild else "DM"
     logger.info(
-        f"{ctx.user.name} - A demandé une invitation dans le serveur {ctx.guild.name}"
+        f"{ctx.user.name} - A demandé une invitation dans le serveur {guild_name}"
     )
     await ctx.response.send_message(
         "Invitez-moi 🥵 !\n"
@@ -1857,8 +1942,9 @@ async def amongus(ctx):
                     users.add(user)
 
         ids = []
+        bot_id = bot.user.id if bot.user else None
         for user in users:
-            if user.id != bot.user.id:
+            if user.id != bot_id:
                 ids.append(user.id)
         random.shuffle(ids)
         if len(ids) < 5:
@@ -1956,11 +2042,23 @@ async def flag(interaction: discord.Interaction):
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.channel)  # 1 game per 30 seconds per channel
 async def puissance4(interaction):
-    logger.info(
-        f"{interaction.author.name} - A lancé une partie de puissance 4 {interaction.guild.name}"
-    )
-
     import copy
+
+    message_commands = interaction.message.content.replace("é", "e").split()
+    print(message_commands)
+    mode = "pve" if "pve" in message_commands else "pvp"
+
+    if mode == "pve":
+        difficulty  = "facile"      if "facile"     in message_commands else "difficile"    if "difficile"  in message_commands else "moyen"
+        playstyle   = "offensif"    if "offensif"   in message_commands else "defensif"     if "defensif"   in message_commands else "equilibre"
+
+        logger.info(
+            f"{interaction.author.name} - {interaction.guild.name} - A lancé une partie de puissance 4 en mode {mode}, difficulté {difficulty}, style {playstyle}"
+        )
+    else:
+        logger.info(
+            f"{interaction.author.name} - {interaction.guild.name} - A lancé une partie de puissance 4 en versus"
+        )
 
     ROWS = 6
     COLS = 7
@@ -2083,7 +2181,7 @@ async def puissance4(interaction):
                     break
             return best_col, value
 
-    def choose_ai_move(grid, difficulty="moyen", playstyle="offensif"):
+    def choose_ai_move(grid, difficulty="moyen", playstyle="equilibre"):
         """
         difficulty: "facile", "moyen", "difficile"
         playstyle: "equilibre", "offensif", "defensif"
@@ -2100,8 +2198,8 @@ async def puissance4(interaction):
             depth = 2
             randomness = 0.1
         else:
-            depth = 3
-            randomness = 0.07
+            depth = 4
+            randomness = 0.03
 
         # Ajuste le style de jeu
         offensive_factor = 1.0
@@ -2268,8 +2366,6 @@ async def puissance4(interaction):
         f"{yellow} - Est le joueur jaune {interaction.guild.name}"
     )
 
-    mode = "pvp"
-
     if mode == "pvp":
         redMessage = await interaction.send("**⬇ Joueur rouge ⬇**")
         await redMessage.add_reaction("🔴")
@@ -2289,11 +2385,14 @@ async def puissance4(interaction):
             return
         logger.info(f"{red} - Est le joueur red {interaction.guild.name}")
     elif mode == "pve":
+        if not bot.user:
+            await interaction.send("Erreur: le bot n'est pas prêt.")
+            return
         red = bot.user
         redMessage = await interaction.send("Je serai l'adversaire rouge, tiens-toi prêt 😈")
 
-    yellowPing = "<@!" + str(yellow.id) + "> 🟡"
-    redPing = "<@!" + str(red.id) + "> 🔴"
+    yellowPing = "<@!" + str(yellow.id) + "> 🟡"  # type: ignore[union-attr]
+    redPing = "<@!" + str(red.id) + "> 🔴"  # type: ignore[union-attr]
 
     text = yellowPing + " et " + redPing + " tenez vous prêts !"
     gridMessage = await interaction.send(text)
@@ -2338,7 +2437,7 @@ async def puissance4(interaction):
                     return (user == red and str(reaction.emoji) in numbers
                             and reaction.message.id == gridMessage.id)
             elif mode == "pve":
-                col = choose_ai_move(grid, difficulty="difficile", playstyle="offensif")
+                col = choose_ai_move(grid, difficulty=difficulty, playstyle=playstyle)
                 await addChip(grid, col, tour)
 
         else:
@@ -2380,7 +2479,7 @@ async def puissance4(interaction):
                         logger.info(
                             f"{loser} - A perdu contre le bot au P4 (noob)"
                         )
-                        await changeScoreLeaderboard(loser.id, loser, win=False, filename="pve.txt")
+                        await changeScoreLeaderboard(loser.id, loser, win=False, filename="pve.txt")  # type: ignore[union-attr]
                         text = f"{ping} gagne ! (c'est moi)\n{random.choice(messages)}"
                 else:
                     loser = red
@@ -2390,8 +2489,8 @@ async def puissance4(interaction):
                         logger.info(
                             f"{winner} - A gagné contre le bot au P4 (gg)"
                         )
-                        await changeScoreLeaderboard(winner.id, winner, win=True, filename="pve.txt")
-                        score = int((await getScoreLeaderBoard(winner.id, filename="pve.txt"))[0])
+                        await changeScoreLeaderboard(winner.id, winner, win=True, filename="pve.txt")  # type: ignore[union-attr]
+                        score = int((await getScoreLeaderBoard(winner.id, filename="pve.txt"))[0])  # type: ignore[union-attr]
                         if score == 3:
                             text = ping + " remporte ses 3 victoires d'affilé ! Voilà le flag : ||t'as vraiment cru que j'allais donner le flag en public ? Regarde tes DM petit filou, ou fais `/flag`||"
                             await interaction.send(text)
@@ -2409,8 +2508,8 @@ async def puissance4(interaction):
                     f"{winner} - Est le gagnant vs {loser} ! {interaction.guild.name}"
                 )
                 if mode == "pvp":
-                    await addScoreLeaderboard(winner.id, winner)
-                    await addLoseLeaderboard(loser.id, loser)
+                    await addScoreLeaderboard(winner.id, winner)  # type: ignore[union-attr]
+                    await addLoseLeaderboard(loser.id, loser)  # type: ignore[union-attr]
                 await gridMessage.add_reaction("✅")
                 await updateGrid(
                     grid,
@@ -2418,8 +2517,8 @@ async def puissance4(interaction):
                     gridMessage,
                 )
                 if mode == "pvp":
-                    score = (await getScoreLeaderBoard(winner.id))[0]
-                    place = await getPlaceLeaderbord(winner.id)
+                    score = (await getScoreLeaderBoard(winner.id))[0]  # type: ignore[union-attr]
+                    place = await getPlaceLeaderbord(winner.id)  # type: ignore[union-attr]
                     text = f"{ping} gagne ! **Score actuel : {score} victoires** - {place}"
                 if not sent:
                     await interaction.send(text)
@@ -2431,18 +2530,18 @@ async def puissance4(interaction):
                     f"{red} et {yellow} - Sont à égalité ! {interaction.guild.name}"
                 )
                 if mode == "pvp":
-                    await addScoreLeaderboard(yellow.id, yellow)
-                    await addScoreLeaderboard(red.id, red)
+                    await addScoreLeaderboard(yellow.id, yellow)  # type: ignore[union-attr]
+                    await addScoreLeaderboard(red.id, red)  # type: ignore[union-attr]
                     text = (
                             "Bravo à vous deux, c'est une égalité ! Bien que rare, ça arrive... Donc une victoire en plus chacun ! gg\n"
                             "**Score de " + yellowPing + " : " +
-                            (await getScoreLeaderBoard(yellow.id))[0] +
+                            (await getScoreLeaderBoard(yellow.id))[0] +  # type: ignore[union-attr]
                             " victoires !**\n **Score de " + redPing + " : " +
-                            (await getScoreLeaderBoard(red.id))[0] + " victoires !**")
+                            (await getScoreLeaderBoard(red.id))[0] + " victoires !**")  # type: ignore[union-attr]
                     await interaction.send(text)
                 elif mode == "pve":
                     text = "Ah bah une égalité tiens, c'est rare... Viens on en discute en MP? Sinon fais `/flag`"
-                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt", draw=True)
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt", draw=True)  # type: ignore[union-attr]
                     await interaction.send(text)
                     await send_mp(yellow, type="draw")
 
@@ -2458,11 +2557,11 @@ async def puissance4(interaction):
                 await updateGrid(
                     grid, "Tour n°" + str(tour) + " - " + redPing + "\n",
                     gridMessage)
-                await addScoreLeaderboard(yellow.id, yellow)
-                await addLoseLeaderboard(red.id, red)
+                await addScoreLeaderboard(yellow.id, yellow)  # type: ignore[union-attr]
+                await addLoseLeaderboard(red.id, red)  # type: ignore[union-attr]
                 # await score/place into variables and ensure place is a string fallback
-                score = (await getScoreLeaderBoard(yellow.id))[0]
-                place = await getPlaceLeaderbord(yellow.id)
+                score = (await getScoreLeaderBoard(yellow.id))[0]  # type: ignore[union-attr]
+                place = await getPlaceLeaderbord(yellow.id)  # type: ignore[union-attr]
                 if place is None:
                     place = "Non classé"
                 text = (
@@ -2479,10 +2578,10 @@ async def puissance4(interaction):
                     gridMessage)
 
                 if mode == "pvp":
-                    await addScoreLeaderboard(red.id, red)
-                    await addLoseLeaderboard(yellow.id, yellow)
-                    score = (await getScoreLeaderBoard(red.id))[0]
-                    place = await getPlaceLeaderbord(red.id)
+                    await addScoreLeaderboard(red.id, red)  # type: ignore[union-attr]
+                    await addLoseLeaderboard(yellow.id, yellow)  # type: ignore[union-attr]
+                    score = (await getScoreLeaderBoard(red.id))[0]  # type: ignore[union-attr]
+                    place = await getPlaceLeaderbord(red.id)  # type: ignore[union-attr]
                     if place is None:
                         place = "Non classé"
                     text = (
@@ -2491,7 +2590,7 @@ async def puissance4(interaction):
                         + score + " victoires - " + place
                     )
                 elif mode == "pve":
-                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt")
+                    await changeScoreLeaderboard(yellow.id, yellow, win=False, filename="pve.txt")  # type: ignore[union-attr]
                     text = f"J'en connais un qui est parti flag d'autres challs, et a abandonné le miens... Bah t'as perdu {yellowPing}, cheh"
             await interaction.send(text)
             end = True
@@ -2518,8 +2617,8 @@ async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
         leaderboard_users = file.readlines()
     for i in range(len(leaderboard_users)):
         if str(id) in leaderboard_users[i]:
-            leaderboard_users[i] = leaderboard_users[i].split("-")
-            return leaderboard_users[i][1].replace("\n", ""), leaderboard_users[i][2].replace("\n", "")
+            parts = leaderboard_users[i].split("-")
+            return parts[1].replace("\n", ""), parts[2].replace("\n", "")
     return "0", "0"
 
 
@@ -2539,10 +2638,9 @@ async def getPlaceLeaderbord(id):
 
 async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt", draw=False):
     with open("txt/" + filename, "r+") as file:
-        leaderboard_users = file.readlines()
+        leaderboard_users = [line.split("-") for line in file.readlines()]
     isIn = False
     for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
         if str(id) in leaderboard_users[i]:
             isIn = True
             leaderboard_users[i][1] = "0" if not win else str(int(leaderboard_users[i][1]) + 1)
@@ -2564,10 +2662,9 @@ async def changeScoreLeaderboard(id, name, win=False, filename="leaderboard.txt"
 
 async def addScoreLeaderboard(id, name):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
+        leaderboard_users = [line.split("-") for line in file.readlines()]
     isIn = False
     for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
         if str(id) in leaderboard_users[i]:
             isIn = True
             leaderboard_users[i][1] = str(int(leaderboard_users[i][1]) + 1)
@@ -2588,10 +2685,9 @@ async def addScoreLeaderboard(id, name):
 
 async def addLoseLeaderboard(id, name):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
+        leaderboard_users = [line.split("-") for line in file.readlines()]
     isIn = False
     for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
         if str(id) in leaderboard_users[i]:
             isIn = True
             leaderboard_users[i][2] = str(int(leaderboard_users[i][2]) + 1)
@@ -2613,9 +2709,7 @@ async def addLoseLeaderboard(id, name):
 @bot.tree.command(name="leaderboard", description="Affiche le classement au Puissance 4")
 async def leaderboard(ctx: discord.Interaction):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
-    for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
+        leaderboard_users = [line.split("-") for line in file.readlines()]
 
     numbers = [
         "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"
@@ -2668,9 +2762,7 @@ async def leaderboard(ctx: discord.Interaction):
 @bot.tree.command(name="rank", description="Affiche le rang d'une personne au Puissance 4")
 async def rank(ctx: discord.Interaction, user: typing.Optional[discord.Member]):
     with open("txt/leaderboard.txt", "r+") as file:
-        leaderboard_users = file.readlines()
-    for i in range(len(leaderboard_users)):
-        leaderboard_users[i] = leaderboard_users[i].split("-")
+        leaderboard_users = [line.split("-") for line in file.readlines()]
 
     user_id = user.id if user is not None else ctx.user.id
 
@@ -2685,7 +2777,7 @@ async def rank(ctx: discord.Interaction, user: typing.Optional[discord.Member]):
     for i in range(len(leaderboard_users)):
         name = leaderboard_users[i]
         if str(user_id) in name:
-            await ctx.send(
+            await ctx.followup.send(
                 f"@{user_id} est **{str(i + 1)}e/{len(leaderboard_users)}** des ratios,"
                 f" avec **{name[3]} V/D**"
                 f" ({str(round(int(name[1]) / (int(name[1]) + int(name[2])) * 100, 2))}%) !"
@@ -2740,7 +2832,8 @@ async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
     ]
 
     await ctx.response.send_message(f"> {text}\n" + responses[counter % len(responses)])
-    logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé '{text}' : " + responses[counter % len(responses)])
+    guild_name = ctx.guild.name if ctx.guild else "DM"
+    logger.info(f"{ctx.user.name} - {guild_name} - A demandé '{text}' : " + responses[counter % len(responses)])
 
 
 @bot.tree.command(name="skin", description="Minecraft ?")
@@ -2749,8 +2842,9 @@ async def skin(ctx: discord.Interaction):
     response = requests.get(url + "/en/skins/random")
     soup = BeautifulSoup(response.text, "html.parser")
     tag = soup.find_all("a")[62]
-    img = tag.find("img")["src"]
-    author = img.split("/")[-1].split("-")[0]
+    img_tag = tag.find("img")
+    img = str(img_tag["src"]) if img_tag else ""
+    author = img.split("/")[-1].split("-")[0] if img else "Unknown"
     embed = discord.Embed(
         description="Skin of %s" % author,
         title="Random minecraft skin",
@@ -2777,7 +2871,7 @@ async def panda(ctx: discord.Interaction):
     url = "https://generatorfun.com"
     response = requests.get(url + "/random-panda-image")
     soup = BeautifulSoup(response.text, "html.parser")
-    img = soup.find_all("img")[0]["src"]
+    img = str(soup.find_all("img")[0]["src"])
     embed = discord.Embed(
         title="Take that Panda",
         color=0xffffff,
@@ -2811,7 +2905,7 @@ async def chat(ctx: discord.Interaction):
         )
         embed.set_author(
             name=ctx.user.display_name,
-            icon_url=ctx.user.avatar.url,
+            icon_url=ctx.user.avatar.url if ctx.user.avatar else None,
         )
         embed.set_image(url=cat_url)
         embed.set_footer(text="chat - by thecatapi.com")
@@ -2829,11 +2923,11 @@ async def dhcp(ctx, ip_range: str):
         ips = [str(ip) for ip in network]
         gateway = ips.pop(0)
     except ipaddress.AddressValueError:
-        ctx.send(
-            "Tu sais ce que c'est un CIDR ? En gros mets une IP et son masque quoi #IngénieurInformaticien (eg. 192.168.1.0/24")
+        await ctx.send(
+            "Tu sais ce que c'est un CIDR ? En gros mets une IP et son masque quoi #IngénieurInformaticien (eg. 192.168.1.0/24)")
         return
-    except ValueError as e:
-        ctx.send("Je pense que tu t'es trompé sur ta range IP mon grand... : ", e)
+    except ValueError:
+        await ctx.send("Je pense que tu t'es trompé sur ta range IP mon grand... (eg. 192.168.1.0/24)")
         return
 
     if ips:
@@ -2859,8 +2953,9 @@ async def dhcp(ctx, ip_range: str):
         for reaction in firstMessage.reactions:
 
             if str(reaction.emoji) == yes:
+                bot_id = bot.user.id if bot.user else None
                 async for user in reaction.users():
-                    if user.id != bot.user.id:
+                    if user.id != bot_id:
                         users.add(user)
         text = """
         Suis les étapes suivantes :
@@ -2915,12 +3010,13 @@ async def activity(ctx: discord.Interaction, participants: int):
 async def search(ctx: discord.Interaction, mot: str):
     with open("txt/dico.txt", "r+") as dico:
         lines = dico.read().split('\n')
-        if mot.lower() in lines:
-            await ctx.response.send_message(f"Yup, j'ai la connaissance du terme \"{mot}\"")
-            logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé si '{mot}' existe, eh bien oui")
-        else:
-            await ctx.response.send_message(f"De quoi tu me parles ? C'est quoi \"{mot}\" ?")
-            logger.info(f"{ctx.user.name} - {ctx.guild.name} - A demandé si '{mot}' existe, bah non")
+    guild_name = ctx.guild.name if ctx.guild else "DM"
+    if mot.lower() in lines:
+        await ctx.response.send_message(f"Yup, j'ai la connaissance du terme \"{mot}\"")
+        logger.info(f"{ctx.user.name} - {guild_name} - A demandé si '{mot}' existe, eh bien oui")
+    else:
+        await ctx.response.send_message(f"De quoi tu me parles ? C'est quoi \"{mot}\" ?")
+        logger.info(f"{ctx.user.name} - {guild_name} - A demandé si '{mot}' existe, bah non")
 
 
 @bot.command()
@@ -2936,4 +3032,6 @@ async def sync(ctx):
 logger.debug(
     "\n############\nDEV MODE\n############\n" if args.dev else "\n############\n/!\\ PRODUCTION MODE /!\\\n############\n")
 TOKEN = os.getenv('DEVELOPMENT_TOKEN') if args.dev else os.getenv('PRODUCTION_TOKEN')
+if not TOKEN:
+    raise ValueError("TOKEN non défini dans les variables d'environnement")
 bot.run(TOKEN)
