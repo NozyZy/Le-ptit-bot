@@ -59,6 +59,10 @@ with open("txt/tg.txt", "r+") as tgFile:
     nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
 
+with open("txt/sexe.txt", "r", encoding="utf-8") as sexeFile:
+    sexe_words = sexeFile.read().split("\n")
+    sexe_words = [w for w in sexe_words if w]
+
 # Locks to protect global variables from race conditions
 nbtg_lock = asyncio.Lock()
 nbprime_lock = asyncio.Lock()
@@ -67,9 +71,13 @@ nbprime_lock = asyncio.Lock()
 # Track last usage time for each user (user_id -> last_use_timestamp)
 user_cooldowns = defaultdict(float)
 
-# Tracking of “god” requests per user per day
+# Tracking of "god" requests per user per day
 # Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
 god_requests = {}
+
+# Tracking of sexe word usage per user per day
+# Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
+sexe_requests = {}
 
 def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
     """
@@ -123,6 +131,37 @@ def load_onecops_counter():
 def save_onecops_counter(count):
     with open("txt/onecops_counter.txt", "w") as f:
         f.write(str(count))
+
+
+# Load sexe stats from file
+def load_sexe_stats():
+    try:
+        with open("data/sexe_stats.txt", "r") as f:
+            stats = {}
+            for line in f:
+                if line.strip():
+                    parts = line.strip().split(":")
+                    if len(parts) == 3:
+                        user_id, date, size = parts
+                        if user_id not in stats:
+                            stats[user_id] = []
+                        stats[user_id].append({"date": date, "size": int(size)})
+            return stats
+    except FileNotFoundError:
+        return {}
+
+
+# Save sexe stats to file
+def save_sexe_stats(stats):
+    with open("data/sexe_stats.txt", "w") as f:
+        for user_id, entries in stats.items():
+            for entry in entries:
+                f.write(f"{user_id}:{entry['date']}:{entry['size']}\n")
+
+
+# Sexe stats history per user
+# Format: {user_id: [{"date": "YYYY-MM-DD", "size": int}, ...]}
+sexe_stats = load_sexe_stats()
 
 
 # French month names
@@ -491,21 +530,69 @@ async def on_message(message):
             ]
             await channel.send(random.choice(reponses))
 
-        if MESSAGE in [
-            "bite",
-            "zizi",
-            "teub",
-            "zboub",
-            "penis",
-            "chybre",
-            "chybrax",
-            "chibre",
-            "kekette",
-        ]:
+        if MESSAGE in sexe_words:
             logger.info(f"{user.name} - {message.guild.name} - A parlé de bite")
-            text = "8" + "=" * random.randint(0, int(
-                today.strftime("%d"))) + "D"
-            await channel.send(text)
+
+            # Track sexe requests per user per day
+            user_id = user.id
+            current_date = today.strftime("%Y-%m-%d")
+
+            if user_id not in sexe_requests or sexe_requests[user_id]["date"] != current_date:
+                sexe_requests[user_id] = {"date": current_date, "count": 0}
+
+            sexe_requests[user_id]["count"] += 1
+            count = sexe_requests[user_id]["count"]
+
+            # Generate dick size for the day 8=D
+            seed = hash((user.id, today.strftime("%Y-%m-%d")))
+            rng = random.Random(seed)
+            max_size = 31
+            size = rng.randint(0, max_size)
+            text = "8" + "=" * size + "D"
+
+            # Save stats only on first request of the day
+            if count == 1:
+                user_id_str = str(user_id)
+                if user_id_str not in sexe_stats:
+                    sexe_stats[user_id_str] = []
+                # Check if we already have an entry for today
+                if not any(entry["date"] == current_date for entry in sexe_stats[user_id_str]):
+                    sexe_stats[user_id_str].append({"date": current_date, "size": size})
+                    save_sexe_stats(sexe_stats)
+
+            # Special message for max size
+            if size == max_size and count == 1:
+                text += "\n*Wow champion du jour !*"
+
+            #  Mocking messages based on the number of dick requests
+            if count == 2:
+                text += "\n*Toujours pareil mec...*"
+            elif count == 3:
+                text += "\n*Ça va pas grandir hein*"
+            elif count == 4:
+                text += "\n*T'es sûr que ça va ?*"
+            elif count == 5:
+                text += "\n*Bon ça suffit maintenant*"
+            elif count >= 6:
+                mockeries = [
+                    "\n*Obsédé*",
+                    "\n*T'as vraiment que ça à faire ?*",
+                    "\n*...*",
+                    "\n*Sérieusement ?*",
+                    "\n*C'est pas en vérifiant 50 fois que ça va changer*",
+                    "\n*Ok je crois t'as compris là*",
+                ]
+                text += random.choice(mockeries)
+
+            if size == 0 and count == 1:
+                # Load images dynamically from images/sexe/ (only on first request)
+                sexe_images = [
+                    f"images/sexe/{img}" for img in os.listdir("images/sexe/")
+                    if os.path.isfile(f"images/sexe/{img}") and not img.startswith(".")
+                ]
+                await channel.send(text, file=discord.File(rng.choice(sexe_images)))
+            else:
+                await channel.send(text)
 
         if MESSAGE == "pouet":
             await channel.send("Roooooh ta gueuuuuule putaiiiiin")
@@ -1316,6 +1403,8 @@ async def on_message(message):
             " **--repeat** pour que je répète ce qui vient après l'espace\n"
             " **--resetname** pour remettre mon nom par défaut (admin only)\n"
             " **--serverInfo** pour connaître les infos du server\n"
+            " **--sexe** pour voir la liste des mots déclencheurs\n"
+            " **--sexestats** pour voir tes statistiques 🍆\n"
             "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈"
         )
             
@@ -1341,6 +1430,47 @@ async def clear(ctx, nombre: int):
     messages = [message async for message in ctx.channel.history(limit=nombre + 1, oldest_first=False)]
     for message in messages:
         await message.delete()
+
+
+@bot.command()  # show the list of words that trigger the sexe reaction
+async def sexe(ctx):
+    logger.info(f"{ctx.author.name} - A demandé la liste des mots sexe")
+    await ctx.send(f"Mots déclencheurs : {', '.join(sexe_words)}")
+
+
+@bot.command()  # show sexe statistics for the user
+async def sexestats(ctx):
+    logger.info(f"{ctx.author.name} - A demandé ses stats sexe")
+    user_id = str(ctx.author.id)
+
+    if user_id not in sexe_stats or not sexe_stats[user_id]:
+        await ctx.send("Aucune statistique disponible. Dis un mot sexe pour commencer !")
+        return
+
+    entries = sexe_stats[user_id]
+    sizes = [entry["size"] for entry in entries]
+
+    # Calculate stats
+    total_days = len(sizes)
+    max_size = max(sizes)
+    min_size = min(sizes)
+    avg_size = sum(sizes) / total_days
+    zero_count = sizes.count(0)
+    max31_count = sizes.count(31)
+
+    # Find max date(s)
+    max_dates = [entry["date"] for entry in entries if entry["size"] == max_size]
+
+    # Build response
+    response = f"**Statistiques de {ctx.author.name}** 🍆\n"
+    response += f"- Jours enregistrés : {total_days}\n"
+    response += f"- Taille max : {max_size} (le {', '.join(max_dates[:3])}{'...' if len(max_dates) > 3 else ''})\n"
+    response += f"- Taille min : {min_size}\n"
+    response += f"- Moyenne : {avg_size:.1f}\n"
+    response += f"- Nombre de 0 : {zero_count} ({zero_count/total_days*100:.1f}%)\n"
+    response += f"- Nombre de 31 : {max31_count} ({max31_count/total_days*100:.1f}%)\n"
+
+    await ctx.send(response)
 
 
 @bot.command()  # repeat the 'text', and delete the original message

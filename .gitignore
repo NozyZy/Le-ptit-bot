@@ -7,6 +7,7 @@ txt/names.txt
 txt/ShPeu.txt
 .env
 stats.py
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -957,3 +958,4 @@ venv
 /venv/Scripts/youtube-dl.exe
 /venv/share/doc/youtube_dl/README.txt
 /venv/share/man/man1/youtube-dl.1
+.DS_Store
