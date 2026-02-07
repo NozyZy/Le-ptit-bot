@@ -534,25 +534,24 @@ async def on_message(message):
             logger.info(f"{user.name} - {message.guild.name} - A parlé de bite")
 
             # Track sexe requests per user per day
-            user_id = user.id
             current_date = today.strftime("%Y-%m-%d")
 
-            if user_id not in sexe_requests or sexe_requests[user_id]["date"] != current_date:
-                sexe_requests[user_id] = {"date": current_date, "count": 0}
+            if user.id not in sexe_requests or sexe_requests[user.id]["date"] != current_date:
+                sexe_requests[user.id] = {"date": current_date, "count": 0}
 
-            sexe_requests[user_id]["count"] += 1
-            count = sexe_requests[user_id]["count"]
+            sexe_requests[user.id]["count"] += 1
+            count = sexe_requests[user.id]["count"]
 
             # Generate dick size for the day 8=D
             seed = hash((user.id, today.strftime("%Y-%m-%d")))
-            rng = random.Random(seed)
-            max_size = 31
-            size = rng.randint(0, max_size)
+            random.seed(seed)
+            max_size = 30
+            size = random.choices(range(0, max_size+1), weights=[1 / i for i in range(1, max_size+2)])[0]
             text = "8" + "=" * size + "D"
 
             # Save stats only on first request of the day
             if count == 1:
-                user_id_str = str(user_id)
+                user_id_str = str(user.id)
                 if user_id_str not in sexe_stats:
                     sexe_stats[user_id_str] = []
                 # Check if we already have an entry for today
@@ -560,39 +559,44 @@ async def on_message(message):
                     sexe_stats[user_id_str].append({"date": current_date, "size": size})
                     save_sexe_stats(sexe_stats)
 
-            # Special message for max size
-            if size == max_size and count == 1:
-                text += "\n*Wow champion du jour !*"
+            bruh = []
+            file = None
+            random.seed(None)
 
-            #  Mocking messages based on the number of dick requests
-            if count == 2:
-                text += "\n*Toujours pareil mec...*"
-            elif count == 3:
-                text += "\n*Ça va pas grandir hein*"
-            elif count == 4:
-                text += "\n*T'es sûr que ça va ?*"
-            elif count == 5:
-                text += "\n*Bon ça suffit maintenant*"
-            elif count >= 6:
-                mockeries = [
-                    "\n*Obsédé*",
-                    "\n*T'as vraiment que ça à faire ?*",
-                    "\n*...*",
-                    "\n*Sérieusement ?*",
-                    "\n*C'est pas en vérifiant 50 fois que ça va changer*",
-                    "\n*Ok je crois t'as compris là*",
-                ]
-                text += random.choice(mockeries)
+            if count == 1:
+                if size == 0:
+                    sexe_images = [
+                        f"images/sexe/{img}" for img in os.listdir("images/sexe/")
+                        if os.path.isfile(f"images/sexe/{img}") and not img.startswith(".")
+                    ]
+                    file = discord.File(random.choice(sexe_images))
 
-            if size == 0 and count == 1:
-                # Load images dynamically from images/sexe/ (only on first request)
-                sexe_images = [
-                    f"images/sexe/{img}" for img in os.listdir("images/sexe/")
-                    if os.path.isfile(f"images/sexe/{img}") and not img.startswith(".")
+                elif size == max_size:
+                    text += "\n\nAlleeeeeeeezzz, le champion du jour ! 🥳 @everyone"
+
+            elif count >= 2:
+                if count >= 6:
+                    bruh = [
+                        "Putain d'obsédé",
+                        "T'as vraiment que ça à faire ?",
+                        "...",
+                        "🤡🤡🤡",
+                        "C'est pas en vérifiant 50 fois que ça va changer",
+                        "Ok je crois t'as compris là",
+                        "Bon allez lâche moi la bite là (*tu l'as ?*)",
+                        "Bizarre votre pote là"
+                    ]
+                bruh += [
+                    "Toujours pareil mec...",
+                    "Ça va pas grandir hein, tu le sais ?",
+                    "T'es sûr que ça va ?",
+                    "Arrête de me casser les couilles, et va faire autre chose",
+                    "Bon ta gueule nan ?",
+                    "C'est marrant ça... le zizi..."
                 ]
-                await channel.send(text, file=discord.File(rng.choice(sexe_images)))
-            else:
-                await channel.send(text)
+                text += "\n\n" + random.choice(bruh)
+
+            await channel.send(text, file=file)
 
         if MESSAGE == "pouet":
             await channel.send("Roooooh ta gueuuuuule putaiiiiin")
