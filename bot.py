@@ -549,21 +549,19 @@ async def on_message(message):
             size = random.choices(range(0, max_size+1), weights=[1 / i for i in range(1, max_size+2)])[0]
             text = "8" + "=" * size + "D"
 
-            # Save stats only on first request of the day
-            if count == 1:
-                user_id_str = str(user.id)
-                if user_id_str not in sexe_stats:
-                    sexe_stats[user_id_str] = []
-                # Check if we already have an entry for today
-                if not any(entry["date"] == current_date for entry in sexe_stats[user_id_str]):
-                    sexe_stats[user_id_str].append({"date": current_date, "size": size})
-                    save_sexe_stats(sexe_stats)
-
             bruh = []
             file = None
             random.seed(None)
 
             if count == 1:
+                user_id_str = str(user.id)
+                if user_id_str not in sexe_stats:
+                    sexe_stats[user_id_str] = []
+
+                if not any(entry["date"] == current_date for entry in sexe_stats[user_id_str]):
+                    sexe_stats[user_id_str].append({"date": current_date, "size": size})
+                    save_sexe_stats(sexe_stats)
+
                 if size == 0:
                     sexe_images = [
                         f"images/sexe/{img}" for img in os.listdir("images/sexe/")
