@@ -129,3 +129,9 @@ je me spooni le xsoar-autoresolve
 je me tristan le lab de lille
 je me pierre-etienne le polytechnique
 je me mass-resolve le w
+je me review la mr
+je me git blame le commit
+je me flake le nixos
+je m'overflow le buffer 🤤
+je me bash le man
+je m’epstein le bash
