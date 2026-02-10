@@ -9,6 +9,7 @@ import time as time_module
 import typing
 from collections import defaultdict
 from datetime import date
+from urllib.parse import quote
 import random
 
 # Third-party imports
@@ -34,6 +35,10 @@ from fonctions import (
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger()
+
+# Disable debug logs from urllib3 and requests
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('requests').setLevel(logging.WARNING)
 
 load_dotenv()
 
@@ -533,6 +538,33 @@ async def on_message(message):
         if MESSAGE in sexe_words:
             logger.info(f"{user.name} - {message.guild.name} - A parlé de bite")
 
+            # if mention someone
+            if message.mentions:
+                # if mention him/herself
+                if user in message.mentions:
+                    reponses_self_mention = [
+                        "Attends t'es en train de te ping pour parler de bite ? T'es bizarre toi...",
+                        "Euh... pourquoi tu te mentions toi-même là ? Ça va pas non ?",
+                        "Okay... donc tu te ping toi-même. T'as besoin d'aide ?",
+                        "Ah bah bravo, tu te parles tout seul maintenant...",
+                        "Je sais pas ce qui se passe dans ta tête mais c'est chelou là"
+                    ]
+                    await channel.send(random.choice(reponses_self_mention))
+                    return
+                # if mention someone else
+                else:
+                    mentioned = message.mentions[0].mention
+                    reponses_other_mention = [
+                        f"Bah alors ce n'est pas à toi ça ! Pourquoi tu parles de celle de {mentioned} ?",
+                        f"Oh oh oh, {mentioned} c'est pas la tienne hein !",
+                        f"Euh... je crois que {mentioned} apprécierait que tu arrêtes de parler de la sienne",
+                        f"Hé {mentioned}, on parle de toi là apparemment...",
+                        f"{mentioned}, t'as une touche je crois !",
+                        f"{mentioned} veux faire paf contre paf avec toi visiblement"
+                    ]
+                    await channel.send(random.choice(reponses_other_mention))
+                    return
+
             # Track sexe requests per user per day
             current_date = today.strftime("%Y-%m-%d")
 
@@ -595,6 +627,44 @@ async def on_message(message):
                 text += "\n\n" + random.choice(bruh)
 
             await channel.send(text, file=file)
+
+        if MESSAGE == "pokemon" or MESSAGE == "pokémon":
+            logger.info(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour")
+
+            day_of_year = today.timetuple().tm_yday
+            seed = hash((user.id, day_of_year, today.year))
+            random.seed(seed)
+            pokemon_id = random.randint(1, 1125)
+            random.seed(None)
+
+            pokemon_name = "Pokémon"
+            try:
+                url = f"https://www.pokepedia.fr/Pokémon_n°{pokemon_id}"
+                response = requests.get(url, timeout=5)
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    title = soup.find('title')
+                    if title:
+                        # extract Pokemon name from title (format: "Name — Poképédia")
+                        pokemon_name = title.text.split('—')[0].strip()
+            except Exception as e:
+                logger.error(f"Error fetching Pokemon name: {e}")
+                pokemon_name = f"{pokemon_id}"
+            logger.info(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon_name} : {pokemon_id}")
+
+            image_url = f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
+
+            pokepedia_url = f"https://www.pokepedia.fr/{quote(pokemon_name)}"
+
+            embed = discord.Embed(
+                title=f"Ton Pokémon du jour !",
+                description=f"Aujourd'hui, tu es comme **[{pokemon_name}]({pokepedia_url})** !",
+                color=0xFF0000
+            )
+            embed.set_image(url=image_url)
+            embed.set_footer(text=f"Pokémon n°{pokemon_id} | Reviens demain pour découvrir un nouveau Pokémon !")
+
+            await channel.send(embed=embed)
 
         if MESSAGE == "pouet":
             await channel.send("Roooooh ta gueuuuuule putaiiiiin")
@@ -1008,11 +1078,11 @@ async def on_message(message):
             url = "https://api.kanye.rest/"
             response = requests.get(url)
             json_p = response.content.decode('utf-8')
-            quote = json.loads(json_p)['quote']
+            kanye_quote = json.loads(json_p)['quote']
 
             embed = discord.Embed(
                 description="Kanye said",
-                title=quote,
+                title=kanye_quote,
                 color=0xfed400,
                 url=url
             )
@@ -1147,13 +1217,13 @@ async def on_message(message):
                 ['https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api', 'Tezcatlipoca'],
                 ['https://static.wikia.nocookie.net/the-demonic-paradise/images/2/2b/62000d56c16c35ada35f1da338de087e309313e9r1-736-735v2_uhq.jpg/revision/latest?cb=20200531061757', 'Arawn'],
                 ['https://cdnb.artstation.com/p/assets/images/images/011/390/921/large/mohamed-sax-sobek.jpg', 'Sobek'],
-                ['https://www.deviantart.com/purplerhino/art/Ishtar-Babylonian-goddess-of-love-and-war-939024002', 'Ishtar'],
+                ['https://image.lexica.art/full_webp/b6f92c48-59bc-44f0-aa6d-121d6f4e4aa9', 'Ishtar'],
                 ['https://tolkiengateway.net/w/images/4/48/Elena_Kukanova_-_Vana_the_Ever-Young.jpg', 'Vána'],
                 ['https://i.pinimg.com/originals/22/a3/01/22a3013477b4edde4da351b4f2c800d9.jpg', 'Hades'],
                 ['https://i.pinimg.com/736x/dc/b2/b2/dcb2b25f78cce0ef7fd19b5694875327.jpg', 'Thor'],
                 ['https://tse1.explicit.bing.net/th?id=OIP.KXfuA_jDa_cfDkrMInOMfQHaJq&pid=Api', 'Shiva'],
                 ['https://tse3.mm.bing.net/th?id=OIP.3NR2eZEBm46mrcFM_p14RgHaJ3&pid=Api', 'Osiris'],
-                ['https://i.redd.it/7q9as4hojtd61.jpg', 'Apollo'],
+                ['https://cdna.artstation.com/p/assets/images/images/012/036/496/large/guangjian-huang-632bafadgy1ftohrhmt8yj217b1xg4qr.jpg?1532685000', 'Apollo'],
                 ['https://cdna.artstation.com/p/assets/images/images/019/778/880/large/ekaterina-chesalova-enki.jpg', 'Enki'],
                 ['https://static.wikia.nocookie.net/villains/images/7/72/Lovecraft-cthulhu.jpg/revision/latest?cb=20151128095138', 'Cthulhu'],
                 ['https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api', 'Anubis'],
@@ -1165,11 +1235,11 @@ async def on_message(message):
                 ['https://upload.wikimedia.org/wikipedia/commons/d/d1/Amaterasu_cave_crop.jpg', 'Amaterasu'],
                 ['https://cdnb.artstation.com/p/assets/images/images/012/343/689/large/yiye-gong-img-20180806-173554.jpg', 'Dio'],
                 ['https://i.pinimg.com/originals/e1/4a/2b/e14a2b86ccd88ba31ad3ac3945737d26.jpg', 'God zilla'],
-                ['https://cdn3.f-cdn.com//files/download/124058119/erlikk2.jpg?width=780&height=1011&fit=crop', 'Erlik Khan'],
+                ['https://mir-s3-cdn-cf.behance.net/project_modules/max_3840/fd8137122982357.60e505e257de7.jpg', 'Erlik Khan'],
                 ['https://legendaryladieshub.com/wp-content/uploads/2023/10/Venus_LLH.jpeg', 'Venus'],
                 ['https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api', 'Poseidon'],
                 ['https://i.pinimg.com/736x/cd/79/9d/cd799dc51f48b1a88dddf5a8017d288f.jpg', 'Mara'],
-                ['https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8809c8cd-04d2-4fc2-bc24-f9e2460d0f36/d8vo0pe-00f82d4e-4560-462d-9d19-594b1455f009.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzg4MDljOGNkLTA0ZDItNGZjMi1iYzI0LWY5ZTI0NjBkMGYzNlwvZDh2bzBwZS0wMGY4MmQ0ZS00NTYwLTQ2MmQtOWQxOS01OTRiMTQ1NWYwMDkuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.w8B7yWVQ2_wrZKZvJ_p9JzrXymLB3XWWmEdOx-JXmP4','Anu']
+                ['https://static.wikia.nocookie.net/deities/images/c/ce/AnuByBrolken.jpg/revision/latest?cb=20210108190959','Anu']
             ]
             embed = discord.Embed(
                 title="This is God",
