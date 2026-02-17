@@ -3,6 +3,7 @@ import argparse
 import asyncio
 import json
 import logging
+import math
 import os
 import re
 import time as time_module
@@ -543,10 +544,9 @@ async def on_message(message):
                 # if mention him/herself
                 if user in message.mentions:
                     reponses_self_mention = [
-                        "Attends t'es en train de te ping pour parler de bite ? T'es bizarre toi...",
-                        "Euh... pourquoi tu te mentions toi-même là ? Ça va pas non ?",
-                        "Okay... donc tu te ping toi-même. T'as besoin d'aide ?",
-                        "Ah bah bravo, tu te parles tout seul maintenant...",
+                        "T'es au courant que c'est toi-même que tu ping là ?",
+                        "Mais t'es mal câblé ma parole",
+                        f"Ah parce que tu parles de {MESSAGE}, mais EN PLUS tu parles seul ? Mazette",
                         "Je sais pas ce qui se passe dans ta tête mais c'est chelou là"
                     ]
                     await channel.send(random.choice(reponses_self_mention))
@@ -555,11 +555,12 @@ async def on_message(message):
                 else:
                     mentioned = message.mentions[0].mention
                     reponses_other_mention = [
-                        f"Bah alors ce n'est pas à toi ça ! Pourquoi tu parles de celle de {mentioned} ?",
+                        f"Tu demandes vraiment le {MESSAGE.upper()} de quelqu'un là ? Gros pervers",
+                        f"Bah alors ce n'est pas à toi ça 🤨 Pourquoi tu parles de celle de {mentioned} ?",
                         f"Oh oh oh, {mentioned} c'est pas la tienne hein !",
                         f"Euh... je crois que {mentioned} apprécierait que tu arrêtes de parler de la sienne",
                         f"Hé {mentioned}, on parle de toi là apparemment...",
-                        f"{mentioned}, t'as une touche je crois !",
+                        f"{mentioned}, t'as une occasion à saisir là je pense 😏",
                         f"{mentioned} veux faire paf contre paf avec toi visiblement"
                     ]
                     await channel.send(random.choice(reponses_other_mention))
@@ -578,7 +579,7 @@ async def on_message(message):
             seed = hash((user.id, today.strftime("%Y-%m-%d")))
             random.seed(seed)
             max_size = 30
-            size = random.choices(range(0, max_size+1), weights=[1 / i for i in range(1, max_size+2)])[0]
+            size = random.choices(range(0, max_size+1), weights=[math.exp(-0.07 * i) for i in range(1, max_size + 1)])[0]
             text = "8" + "=" * size + "D"
 
             bruh = []
@@ -628,16 +629,49 @@ async def on_message(message):
 
             await channel.send(text, file=file)
 
-        if MESSAGE == "pokemon" or MESSAGE == "pokémon":
+        if MESSAGE.startswith("pokémon") or MESSAGE.startswith("pokemon"):
             logger.info(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour")
 
+            if message.mentions and user not in message.mentions:
+                user = message.mentions[0]
+                print(message.mentions[0])
+            print(user)
             day_of_year = today.timetuple().tm_yday
             seed = hash((user.id, day_of_year, today.year))
             random.seed(seed)
             pokemon_id = random.randint(1, 1125)
+            print(pokemon_id)
+            text = random.choice([
+                "En vrai, pas dingue",
+                "Stylé en sah",
+                "J'aurai préféré être une barbie à ta place",
+                "Franchement je suis un peu jaloux",
+                "Pas de quoi se vanter",
+                "J'espère pour toi que ce sera mieux demain",
+                "T'es accro avoue ?"
+            ])
             random.seed(None)
 
-            pokemon_name = "Pokémon"
+            colors = {
+                "acier": 0x60A2B9,
+                "combat": 0xFF8100,
+                "dragon": 0x4F60E2,
+                "eau": 0x2481EF,
+                "feu": 0xE72324,
+                "glace": 0x3DD9FF,
+                "insecte": 0x92A212,
+                "normal": 0xA0A2A0,
+                "obscur": 0x000000,
+                "plante": 0x3DA224,
+                "poison": 0x923FCC,
+                "psy": 0xEF3F7A,
+                "ténèbres": 0x4F3F3D,
+                "roche": 0xB0AA82,
+                "sol": 0x92501B,
+                "spectre": 0x703F70,
+                "vol": 0x82BAEF
+            }
+
             try:
                 url = f"https://www.pokepedia.fr/Pokémon_n°{pokemon_id}"
                 response = requests.get(url, timeout=5)
@@ -647,24 +681,38 @@ async def on_message(message):
                     if title:
                         # extract Pokemon name from title (format: "Name — Poképédia")
                         pokemon_name = title.text.split('—')[0].strip()
+                        pokemon_type = soup.select_one('table.ficheinfo')['class'][-1]
+
+                        image_url = f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
+
+                        pokepedia_url = f"https://www.pokepedia.fr/{quote(pokemon_name)}"
+
+                        embed = discord.Embed(
+                            title=f"Ton Pokémon du jour !",
+                            description=f"Aujourd'hui, tu es **[{pokemon_name}]({pokepedia_url})** !",
+                            color=colors.get(pokemon_type, 0xFCFCFC)
+                        )
+                        embed.set_author(
+                            name="Le p'tit dog",
+                            url="https://github.com/NozyZy/Le-ptit-bot",
+                            icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                        )
+                        embed.set_thumbnail(url=user.avatar.url)
+                        embed.set_image(url=image_url)
+                        embed.set_footer(
+                            text=f"Pokémon n°{pokemon_id} | Reviens demain pour découvrir un nouveau Pokémon !")
+
+                        await channel.send(text, embed=embed)
+                        logger.info(
+                            f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon_name} : {pokemon_id}")
+                else:
+                    await channel.send("https://p19-common-sign.tiktokcdn-us.com/tos-useast2a-p-0037-euttp/ogkXZ6BGNdSTZI9BCoEvAKL4iw0TN1BWIHiIE~tplv-tiktokx-dmt-logom:tos-useast2a-i-0068-euttp/ooIwBHIvIAAi0aAEZkoSXB56CjiEtJA0VB2LE.image?dr=9634&x-expires=1771484400&x-signature=okyDYUt%2BU22PWUHJT3XDKVOXdv8%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=55bbe6a9&idc=useast8")
+                    logger.info(
+                        f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour, mais mauvaise nouvelle")
             except Exception as e:
                 logger.error(f"Error fetching Pokemon name: {e}")
-                pokemon_name = f"{pokemon_id}"
-            logger.info(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon_name} : {pokemon_id}")
+                await channel.send("C'est un flop, appelez-moi un admin immédiatement")
 
-            image_url = f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
-
-            pokepedia_url = f"https://www.pokepedia.fr/{quote(pokemon_name)}"
-
-            embed = discord.Embed(
-                title=f"Ton Pokémon du jour !",
-                description=f"Aujourd'hui, tu es comme **[{pokemon_name}]({pokepedia_url})** !",
-                color=0xFF0000
-            )
-            embed.set_image(url=image_url)
-            embed.set_footer(text=f"Pokémon n°{pokemon_id} | Reviens demain pour découvrir un nouveau Pokémon !")
-
-            await channel.send(embed=embed)
 
         if MESSAGE == "pouet":
             await channel.send("Roooooh ta gueuuuuule putaiiiiin")
