@@ -3,12 +3,14 @@ import argparse
 import asyncio
 import json
 import logging
+import math
 import os
 import re
 import time as time_module
 import typing
 from collections import defaultdict
 from datetime import date
+from urllib.parse import quote
 import random
 
 # Third-party imports
@@ -34,6 +36,10 @@ from fonctions import (
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger()
+
+# Disable debug logs from urllib3 and requests
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('requests').setLevel(logging.WARNING)
 
 load_dotenv()
 
@@ -533,6 +539,33 @@ async def on_message(message):
         if MESSAGE in sexe_words:
             logger.info(f"{user.name} - {message.guild.name} - A parlé de bite")
 
+            # if mention someone
+            if message.mentions:
+                # if mention him/herself
+                if user in message.mentions:
+                    reponses_self_mention = [
+                        "T'es au courant que c'est toi-même que tu ping là ?",
+                        "Mais t'es mal câblé ma parole",
+                        f"Ah parce que tu parles de {MESSAGE}, mais EN PLUS tu parles seul ? Mazette",
+                        "Je sais pas ce qui se passe dans ta tête mais c'est chelou là"
+                    ]
+                    await channel.send(random.choice(reponses_self_mention))
+                    return
+                # if mention someone else
+                else:
+                    mentioned = message.mentions[0].mention
+                    reponses_other_mention = [
+                        f"Tu demandes vraiment le {MESSAGE.upper()} de quelqu'un là ? Gros pervers",
+                        f"Bah alors ce n'est pas à toi ça 🤨 Pourquoi tu parles de celle de {mentioned} ?",
+                        f"Oh oh oh, {mentioned} c'est pas la tienne hein !",
+                        f"Euh... je crois que {mentioned} apprécierait que tu arrêtes de parler de la sienne",
+                        f"Hé {mentioned}, on parle de toi là apparemment...",
+                        f"{mentioned}, t'as une occasion à saisir là je pense 😏",
+                        f"{mentioned} veux faire paf contre paf avec toi visiblement"
+                    ]
+                    await channel.send(random.choice(reponses_other_mention))
+                    return
+
             # Track sexe requests per user per day
             current_date = today.strftime("%Y-%m-%d")
 
@@ -546,7 +579,7 @@ async def on_message(message):
             seed = hash((user.id, today.strftime("%Y-%m-%d")))
             random.seed(seed)
             max_size = 30
-            size = random.choices(range(0, max_size+1), weights=[1 / i for i in range(1, max_size+2)])[0]
+            size = random.choices(range(0, max_size+1), weights=[math.exp(-0.07 * i) for i in range(1, max_size + 1)])[0]
             text = "8" + "=" * size + "D"
 
             bruh = []
@@ -595,6 +628,91 @@ async def on_message(message):
                 text += "\n\n" + random.choice(bruh)
 
             await channel.send(text, file=file)
+
+        if MESSAGE.startswith("pokémon") or MESSAGE.startswith("pokemon"):
+            logger.info(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour")
+
+            if message.mentions and user not in message.mentions:
+                user = message.mentions[0]
+                print(message.mentions[0])
+            print(user)
+            day_of_year = today.timetuple().tm_yday
+            seed = hash((user.id, day_of_year, today.year))
+            random.seed(seed)
+            pokemon_id = random.randint(1, 1125)
+            print(pokemon_id)
+            text = random.choice([
+                "En vrai, pas dingue",
+                "Stylé en sah",
+                "J'aurai préféré être une barbie à ta place",
+                "Franchement je suis un peu jaloux",
+                "Pas de quoi se vanter",
+                "J'espère pour toi que ce sera mieux demain",
+                "T'es accro avoue ?"
+            ])
+            random.seed(None)
+
+            colors = {
+                "acier": 0x60A2B9,
+                "combat": 0xFF8100,
+                "dragon": 0x4F60E2,
+                "eau": 0x2481EF,
+                "feu": 0xE72324,
+                "glace": 0x3DD9FF,
+                "insecte": 0x92A212,
+                "normal": 0xA0A2A0,
+                "obscur": 0x000000,
+                "plante": 0x3DA224,
+                "poison": 0x923FCC,
+                "psy": 0xEF3F7A,
+                "ténèbres": 0x4F3F3D,
+                "roche": 0xB0AA82,
+                "sol": 0x92501B,
+                "spectre": 0x703F70,
+                "vol": 0x82BAEF
+            }
+
+            try:
+                url = f"https://www.pokepedia.fr/Pokémon_n°{pokemon_id}"
+                response = requests.get(url, timeout=5)
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    title = soup.find('title')
+                    if title:
+                        # extract Pokemon name from title (format: "Name — Poképédia")
+                        pokemon_name = title.text.split('—')[0].strip()
+                        pokemon_type = soup.select_one('table.ficheinfo')['class'][-1]
+
+                        image_url = f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
+
+                        pokepedia_url = f"https://www.pokepedia.fr/{quote(pokemon_name)}"
+
+                        embed = discord.Embed(
+                            title=f"Ton Pokémon du jour !",
+                            description=f"Aujourd'hui, tu es **[{pokemon_name}]({pokepedia_url})** !",
+                            color=colors.get(pokemon_type, 0xFCFCFC)
+                        )
+                        embed.set_author(
+                            name="Le p'tit dog",
+                            url="https://github.com/NozyZy/Le-ptit-bot",
+                            icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                        )
+                        embed.set_thumbnail(url=user.avatar.url)
+                        embed.set_image(url=image_url)
+                        embed.set_footer(
+                            text=f"Pokémon n°{pokemon_id} | Reviens demain pour découvrir un nouveau Pokémon !")
+
+                        await channel.send(text, embed=embed)
+                        logger.info(
+                            f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon_name} : {pokemon_id}")
+                else:
+                    await channel.send("https://p19-common-sign.tiktokcdn-us.com/tos-useast2a-p-0037-euttp/ogkXZ6BGNdSTZI9BCoEvAKL4iw0TN1BWIHiIE~tplv-tiktokx-dmt-logom:tos-useast2a-i-0068-euttp/ooIwBHIvIAAi0aAEZkoSXB56CjiEtJA0VB2LE.image?dr=9634&x-expires=1771484400&x-signature=okyDYUt%2BU22PWUHJT3XDKVOXdv8%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=55bbe6a9&idc=useast8")
+                    logger.info(
+                        f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour, mais mauvaise nouvelle")
+            except Exception as e:
+                logger.error(f"Error fetching Pokemon name: {e}")
+                await channel.send("C'est un flop, appelez-moi un admin immédiatement")
+
 
         if MESSAGE == "pouet":
             await channel.send("Roooooh ta gueuuuuule putaiiiiin")
@@ -1008,11 +1126,11 @@ async def on_message(message):
             url = "https://api.kanye.rest/"
             response = requests.get(url)
             json_p = response.content.decode('utf-8')
-            quote = json.loads(json_p)['quote']
+            kanye_quote = json.loads(json_p)['quote']
 
             embed = discord.Embed(
                 description="Kanye said",
-                title=quote,
+                title=kanye_quote,
                 color=0xfed400,
                 url=url
             )
@@ -1147,13 +1265,13 @@ async def on_message(message):
                 ['https://tse2.mm.bing.net/th?id=OIP.pVKMpFtFLRjIpAEsPMafJgAAAA&pid=Api', 'Tezcatlipoca'],
                 ['https://static.wikia.nocookie.net/the-demonic-paradise/images/2/2b/62000d56c16c35ada35f1da338de087e309313e9r1-736-735v2_uhq.jpg/revision/latest?cb=20200531061757', 'Arawn'],
                 ['https://cdnb.artstation.com/p/assets/images/images/011/390/921/large/mohamed-sax-sobek.jpg', 'Sobek'],
-                ['https://www.deviantart.com/purplerhino/art/Ishtar-Babylonian-goddess-of-love-and-war-939024002', 'Ishtar'],
+                ['https://image.lexica.art/full_webp/b6f92c48-59bc-44f0-aa6d-121d6f4e4aa9', 'Ishtar'],
                 ['https://tolkiengateway.net/w/images/4/48/Elena_Kukanova_-_Vana_the_Ever-Young.jpg', 'Vána'],
                 ['https://i.pinimg.com/originals/22/a3/01/22a3013477b4edde4da351b4f2c800d9.jpg', 'Hades'],
                 ['https://i.pinimg.com/736x/dc/b2/b2/dcb2b25f78cce0ef7fd19b5694875327.jpg', 'Thor'],
                 ['https://tse1.explicit.bing.net/th?id=OIP.KXfuA_jDa_cfDkrMInOMfQHaJq&pid=Api', 'Shiva'],
                 ['https://tse3.mm.bing.net/th?id=OIP.3NR2eZEBm46mrcFM_p14RgHaJ3&pid=Api', 'Osiris'],
-                ['https://i.redd.it/7q9as4hojtd61.jpg', 'Apollo'],
+                ['https://cdna.artstation.com/p/assets/images/images/012/036/496/large/guangjian-huang-632bafadgy1ftohrhmt8yj217b1xg4qr.jpg?1532685000', 'Apollo'],
                 ['https://cdna.artstation.com/p/assets/images/images/019/778/880/large/ekaterina-chesalova-enki.jpg', 'Enki'],
                 ['https://static.wikia.nocookie.net/villains/images/7/72/Lovecraft-cthulhu.jpg/revision/latest?cb=20151128095138', 'Cthulhu'],
                 ['https://tse3.mm.bing.net/th?id=OIP.M2w0Dn5HK19lF68UcicLUwHaMv&pid=Api', 'Anubis'],
@@ -1165,11 +1283,11 @@ async def on_message(message):
                 ['https://upload.wikimedia.org/wikipedia/commons/d/d1/Amaterasu_cave_crop.jpg', 'Amaterasu'],
                 ['https://cdnb.artstation.com/p/assets/images/images/012/343/689/large/yiye-gong-img-20180806-173554.jpg', 'Dio'],
                 ['https://i.pinimg.com/originals/e1/4a/2b/e14a2b86ccd88ba31ad3ac3945737d26.jpg', 'God zilla'],
-                ['https://cdn3.f-cdn.com//files/download/124058119/erlikk2.jpg?width=780&height=1011&fit=crop', 'Erlik Khan'],
+                ['https://mir-s3-cdn-cf.behance.net/project_modules/max_3840/fd8137122982357.60e505e257de7.jpg', 'Erlik Khan'],
                 ['https://legendaryladieshub.com/wp-content/uploads/2023/10/Venus_LLH.jpeg', 'Venus'],
                 ['https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api', 'Poseidon'],
                 ['https://i.pinimg.com/736x/cd/79/9d/cd799dc51f48b1a88dddf5a8017d288f.jpg', 'Mara'],
-                ['https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8809c8cd-04d2-4fc2-bc24-f9e2460d0f36/d8vo0pe-00f82d4e-4560-462d-9d19-594b1455f009.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzg4MDljOGNkLTA0ZDItNGZjMi1iYzI0LWY5ZTI0NjBkMGYzNlwvZDh2bzBwZS0wMGY4MmQ0ZS00NTYwLTQ2MmQtOWQxOS01OTRiMTQ1NWYwMDkuanBnIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.w8B7yWVQ2_wrZKZvJ_p9JzrXymLB3XWWmEdOx-JXmP4','Anu']
+                ['https://static.wikia.nocookie.net/deities/images/c/ce/AnuByBrolken.jpg/revision/latest?cb=20210108190959','Anu']
             ]
             embed = discord.Embed(
                 title="This is God",
