@@ -579,7 +579,7 @@ async def on_message(message):
             seed = hash((user.id, today.strftime("%Y-%m-%d")))
             random.seed(seed)
             max_size = 30
-            size = random.choices(range(0, max_size+1), weights=[math.exp(-0.07 * i) for i in range(1, max_size + 1)])[0]
+            size = random.choices(range(0, max_size+1), weights=[math.exp(-0.07 * i) for i in range(1, max_size+2)])[0]
             text = "8" + "=" * size + "D"
 
             bruh = []
