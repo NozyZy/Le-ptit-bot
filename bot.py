@@ -629,18 +629,19 @@ async def on_message(message):
 
             await channel.send(text, file=file)
 
-        if MESSAGE.startswith("pokémon") or MESSAGE.startswith("pokemon"):
-            logger.info(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour")
+        if "pokémon" in MESSAGE.split() or "pokemon" in MESSAGE.split():
+            # Save
+            author = user
 
+            # If someone is mentioned, show their Pokemon instead
             if message.mentions and user not in message.mentions:
                 user = message.mentions[0]
-                print(message.mentions[0])
-            print(user)
+
             day_of_year = today.timetuple().tm_yday
             seed = hash((user.id, day_of_year, today.year))
             random.seed(seed)
-            pokemon_id = random.randint(1, 1125)
-            print(pokemon_id)
+            pokemon_id = random.randint(1, 1025)
+
             text = random.choice([
                 "En vrai, pas dingue",
                 "Stylé en sah",
@@ -675,27 +676,40 @@ async def on_message(message):
             try:
                 url = f"https://www.pokepedia.fr/Pokémon_n°{pokemon_id}"
                 response = requests.get(url, timeout=5)
-                if response.status_code == 200:
+                if response.status_code != 200:
                     soup = BeautifulSoup(response.text, 'html.parser')
                     title = soup.find('title')
                     if title:
                         # extract Pokemon name from title (format: "Name — Poképédia")
                         pokemon_name = title.text.split('—')[0].strip()
-                        pokemon_type = soup.select_one('table.ficheinfo')['class'][-1]
+
+                        # Extract Pokemon type for color
+                        pokemon_type = None
+                        ficheinfo = soup.select_one('table.ficheinfo')
+                        if ficheinfo and ficheinfo.get('class'):
+                            pokemon_type = ficheinfo['class'][-1]
 
                         image_url = f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
 
                         pokepedia_url = f"https://www.pokepedia.fr/{quote(pokemon_name)}"
 
+                        # Adapt message based on whether it's for the author or someone else
+                        if user == author:
+                            title = "Ton Pokémon du jour !"
+                            description = f"Aujourd'hui, tu es **[{pokemon_name}]({pokepedia_url})** !"
+                        else:
+                            title = f"Pokémon du jour de {user.display_name}"
+                            description = f"Aujourd'hui, {user.mention} est **[{pokemon_name}]({pokepedia_url})** !"
+
                         embed = discord.Embed(
-                            title=f"Ton Pokémon du jour !",
-                            description=f"Aujourd'hui, tu es **[{pokemon_name}]({pokepedia_url})** !",
-                            color=colors.get(pokemon_type, 0xFCFCFC)
+                            title=title,
+                            description=description,
+                            color=colors.get(pokemon_type, 0xFCFCFC) if pokemon_type else 0xFF0000
                         )
                         embed.set_author(
-                            name="Le p'tit dog",
+                            name=message.guild.me.display_name,
                             url="https://github.com/NozyZy/Le-ptit-bot",
-                            icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                            icon_url=message.guild.me.display_avatar.url,
                         )
                         embed.set_thumbnail(url=user.avatar.url)
                         embed.set_image(url=image_url)
@@ -706,11 +720,16 @@ async def on_message(message):
                         logger.info(
                             f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon_name} : {pokemon_id}")
                 else:
-                    await channel.send("https://p19-common-sign.tiktokcdn-us.com/tos-useast2a-p-0037-euttp/ogkXZ6BGNdSTZI9BCoEvAKL4iw0TN1BWIHiIE~tplv-tiktokx-dmt-logom:tos-useast2a-i-0068-euttp/ooIwBHIvIAAi0aAEZkoSXB56CjiEtJA0VB2LE.image?dr=9634&x-expires=1771484400&x-signature=okyDYUt%2BU22PWUHJT3XDKVOXdv8%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=55bbe6a9&idc=useast8")
-                    logger.info(
-                        f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour, mais mauvaise nouvelle")
+                    error_file = discord.File("images/failled.jpg")
+                    await channel.send(file=error_file)
+                    await channel.send("C'est un flop, appelez-moi un admin immédiatement")
+                    logger.warning(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour, mais mauvaise nouvelle")
+                    logger.warning(f"Pokepedia response status code: {response.status_code}")
+                    logger.warning(f"Pokepedia URL: {url}")
             except Exception as e:
                 logger.error(f"Error fetching Pokemon name: {e}")
+                error_file = discord.File("images/failled.jpg")
+                await channel.send(file=error_file)
                 await channel.send("C'est un flop, appelez-moi un admin immédiatement")
 
 
@@ -1112,10 +1131,9 @@ async def on_message(message):
                 "https://www.pngitem.com/pimgs/m/135-1357735_transparent-sanic-png-sonic-meme-png-png-download.png",
             ]))
             embed.set_author(
-                name="Le p'tit god",
+                name=message.guild.me.display_name,
                 url="https://github.com/NozyZy/Le-ptit-bot",
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url=message.guild.me.display_avatar.url,
             )
             embed.set_image(url=go)
             embed.set_footer(text="SOinc")
@@ -1137,8 +1155,7 @@ async def on_message(message):
             embed.set_author(
                 name="Kanye West",
                 url=url,
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url=message.guild.me.display_avatar.url,
             )
             embed.set_footer(text="provided by kanye.rest")
             await channel.send("Kanyeah", embed=embed)
@@ -1221,9 +1238,9 @@ async def on_message(message):
                     )
                     embed.set_thumbnail(url=pfp)
                     embed.set_author(
-                        name="Le p'tit dog",
+                        name=message.guild.me.display_name,
                         url="https://github.com/NozyZy/Le-ptit-bot",
-                        icon_url="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                        icon_url=message.guild.me.display_avatar.url,
                     )
                     embed.set_image(url=random.choice(dogs))
                     embed.set_footer(text="Wouf wouf")
@@ -1302,10 +1319,9 @@ async def on_message(message):
             god = gods[((userID // 365 + int(day) ** 3 * int(year)) // int(month)) % len(gods)]
             embed.set_thumbnail(url=pfp)
             embed.set_author(
-                name="Le p'tit god",
+                name=message.guild.me.display_name,
                 url="https://github.com/NozyZy/Le-ptit-bot",
-                icon_url=
-                "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+                icon_url=message.guild.me.display_avatar.url,
             )
             embed.set_image(url=god[0])
             embed.set_footer(text=god[1])
@@ -3115,26 +3131,6 @@ async def skin(ctx: discord.Interaction):
     embed.set_footer(text="%s - by mskins.net" % author)
     await ctx.response.send_message("Get skinned", embed=embed)
 
-
-@bot.tree.command(name="panda", description="🐼")
-async def panda(ctx: discord.Interaction):
-    url = "https://generatorfun.com"
-    response = requests.get(url + "/random-panda-image")
-    soup = BeautifulSoup(response.text, "html.parser")
-    img = str(soup.find_all("img")[0]["src"])
-    embed = discord.Embed(
-        title="Take that Panda",
-        color=0xffffff,
-        url=url + "/random-panda-image",
-    )
-    embed.set_author(
-        name=ctx.user.display_name,
-        icon_url=
-        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
-    )
-    embed.set_image(url=url + "/" + img)
-    embed.set_footer(text="panda - by generatorfun.com")
-    await ctx.response.send_message("🐼", embed=embed)
 
 
 @bot.tree.command(name="chat", description="😺")
