@@ -1811,6 +1811,7 @@ aux
 auxquelles
 avaant
 avaient
+availability
 available
 avais
 avait
@@ -4240,6 +4241,7 @@ ceuneuda
 ceux
 ceuxquisavent
 cexfsyffvdyrejssxcerix
+cf
 cfou
 cg
 cgrfwseg
@@ -5066,6 +5068,7 @@ clément
 clémentine
 clémon
 cléo
+cléopsytra
 clér
 clés
 cmake
@@ -5094,6 +5097,7 @@ cocasse
 cocci
 coche
 cocher
+cochignon
 cochon
 coché
 cochée
@@ -6014,6 +6018,7 @@ cornichons
 cornèbre
 coronavirus
 corosync
+corphish
 corpo
 corporate
 corps
@@ -9661,6 +9666,7 @@ espagnol
 espagnole
 espagnols
 espana
+espathra
 español
 espece
 espere
@@ -9886,6 +9892,7 @@ exceptions
 excitant
 excitation
 exclu
+exclure
 exclusif
 exclusion
 exclusive
@@ -10644,6 +10651,7 @@ firefox
 firelox
 fireman
 firewall
+firewalling
 firewalls
 firey
 firmware
@@ -11805,6 +11813,7 @@ gnocchis
 gnome
 gnon
 gnous
+go
 goaat
 goad
 goal
@@ -11921,6 +11930,7 @@ gooners
 goose
 gorafi
 gore
+gorebyss
 gorets
 gorge
 gorgeous
@@ -12968,6 +12978,7 @@ httpd
 httplaboxvcom
 httplaboxvcomplanninglabo
 https
+httpsdiscordcomchannels
 httpsficsrsepitafr
 httpszabbixmonrezo
 htvee
@@ -13809,6 +13820,7 @@ interfaces
 intergalactique
 intergouvernementalisation
 interieurement
+interinfra
 interjection
 interlocuteur
 interlocutor
@@ -13852,6 +13864,7 @@ interros
 interrupteur
 interruption
 intersidérale
+intersite
 interstellan
 interstellar
 interval
@@ -14969,6 +14982,7 @@ l'expérience
 l'extérieur
 l'idée
 l'instant
+l'iso
 l'utilise
 la
 laarbi
@@ -15579,6 +15593,7 @@ livreé
 livré
 livrées
 livrés
+lixy
 liyue
 liée
 liées
@@ -20053,6 +20068,7 @@ pillar
 pillier
 pillow
 pillé
+piloswine
 pilot
 pilotes
 pilots
@@ -23622,6 +23638,7 @@ rootkit
 rootme
 roquette
 roro
+rosabyss
 rosaria
 rose
 roserade
@@ -24939,6 +24956,7 @@ shinimiya
 shining
 shinjou
 shinomiya
+shinx
 shiny
 shinys
 shinysparkles
@@ -26117,6 +26135,7 @@ submit
 subnames
 subnautica
 subnet
+subnets
 subscribe
 subsiste
 subspace
@@ -26263,6 +26282,7 @@ supersecretpassword
 supersonic
 superuser
 supervise
+superviseurs
 supervising
 supléant
 supp
@@ -28421,6 +28441,7 @@ vboriwmnnry
 vbox
 vboxqqch
 vcenter
+vcpu
 vdeo
 vdepe
 vdjyj
@@ -28919,6 +28940,7 @@ voracious
 vori
 vos
 vosi
+vostourno
 votant
 vote
 voted
@@ -28978,6 +29000,7 @@ voyons
 voyou
 voyous
 vozec
+vpn
 vrac
 vrai
 vraie
@@ -29839,6 +29862,7 @@ zéro
 écouté
 écran
 écrans
+écrapince
 écrasant
 écrase
 écrasé
