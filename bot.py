@@ -251,59 +251,52 @@ async def on_message(message):
     year = today.strftime("%y")
     user = message.author
 
+    # Ignore code blocks
+    if "```" in MESSAGE:
+        return
+
+    if message.author == bot.user:  # we don't want the bot to repeat itself
+        return
+
+    with open("txt/bans.txt", "r+") as bansFile:
+        bansLines = bansFile.read().split('\n')
+
+    if str(channel.id) in bansLines:  # option to ban reactions from some channels
+        await bot.process_commands(message)
+        return
+
     # open and stock the dico, with a lot of words
     with open("txt/dico.txt", "r+") as dicoFile:
         dicoLines = dicoFile.readlines()
     dicoSize = len(dicoLines)
 
-    with open("txt/bans.txt", "r+") as bansFile:
-        bansLines = bansFile.readlines()
-
-    if message.author == bot.user:  # we don't want the bot to repeat itself
-        return
-
-    if (str(channel.id) +
-        "\n") in bansLines:  # option to ban reactions from some channels
-        await bot.process_commands(message)
-        return
-
     # expansion of the dico, with words of every messages (stock only words, never complete message)
     # we don't want a specific bot (from a friend) to expand the dico => don't know who but it's ok ^^
     if message.author.id != 696099307706777610:
-        # Ignore code blocks
-        if "```" in MESSAGE:
-            return
 
         # Split message into words
         words = MESSAGE.split()
 
         for word in words:
             # Remove punctuation but keep apostrophes and alphabetic characters
-            # Examples: "m'entends" -> "m'entends", "l'arbre" -> "l'arbre", "aujourd'hui" -> "aujourd'hui"
-            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç''")
+            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç'")
             clean_word = clean_word.lower().strip()
 
             # Filter valid words: length < 27
             # Note: verifAlphabet will reject words with apostrophes, so we skip it for words with apostrophes
             if clean_word and len(clean_word) < 27:
                 # If word contains apostrophe, accept it without verifAlphabet check
-                if "'" in clean_word or "'" in clean_word:
-                    word_with_newline = clean_word + "\n"
-                    if word_with_newline not in dicoLines:
-                        logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
-                        dicoLines.append(word_with_newline)
-                # Otherwise, apply verifAlphabet check
-                elif verifAlphabet(clean_word):
+                if verifAlphabet(clean_word):
                     word_with_newline = clean_word + "\n"
                     if word_with_newline not in dicoLines:
                         logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
                         dicoLines.append(word_with_newline)
 
-    # Perf Opti ++ => sort + write to the file only after accumulating 10+ new words
-    if len(dicoLines) > dicoSize + 10:
-        dicoLines = sorted(set(dicoLines))
+    newDico = sorted(set(dicoLines))
+    if len(newDico) > dicoSize:
+        logger.info(f"Saving Dico.... Total words : {len(newDico)}")
         with open("txt/dico.txt", "w+", encoding="utf-8") as dicoFile:
-            dicoFile.writelines(dicoLines)
+            dicoFile.writelines(newDico)
 
     # stock file full of insults (yes I know...)
     with open("txt/insultes.txt", "r+", encoding="utf-8") as fichierInsulte:
