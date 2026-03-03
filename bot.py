@@ -603,7 +603,7 @@ async def on_message(message):
                     file = discord.File(random.choice(sexe_images))
 
                 elif size == max_size:
-                    text += "\n\nAlleeeeeeeezzz, le champion du jour ! 🥳 @everyone"
+                    text += "\n\nAlleeeeeeeezzz, le champion du jour ! 🥳 @tout le monde"
 
             elif count >= 2:
                 if count >= 6:
