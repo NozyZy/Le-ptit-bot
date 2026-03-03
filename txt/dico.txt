@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-=======
->>>>>>> 21be3e03e535824ce641f296e73c07e9c562bf62
 a
 aaegmea
 aahahahahah
