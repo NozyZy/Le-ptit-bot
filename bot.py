@@ -676,7 +676,7 @@ async def on_message(message):
             try:
                 url = f"https://www.pokepedia.fr/Pokémon_n°{pokemon_id}"
                 response = requests.get(url, timeout=5)
-                if response.status_code != 200:
+                if response.status_code == 200:
                     soup = BeautifulSoup(response.text, 'html.parser')
                     title = soup.find('title')
                     if title:
