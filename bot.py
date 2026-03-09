@@ -5,21 +5,22 @@ import json
 import logging
 import math
 import os
+import random
 import re
+import time
 import time as time_module
 import typing
 from collections import defaultdict
 from datetime import date
 from urllib.parse import quote
-import random
 
 # Third-party imports
 import discord
 import requests
+from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
 from discord.ext import commands
 from dotenv import load_dotenv
-from PIL import Image, ImageDraw, ImageFont
 
 # Local application imports
 from fonctions import (
@@ -3046,11 +3047,9 @@ async def rank(ctx: discord.Interaction, user: typing.Optional[discord.Member]):
     await ctx.response.send_message(
         "Mmmmh... Tu n'es pas dans le classement, essaies de jouer !")
 
-
 @bot.tree.command(name="github", description="Tiens prends mon lien github")
 async def github(ctx: discord.Interaction):
     await ctx.response.send_message("Mais avec plaisir !\nhttps://github.com/NozyZy/Le-ptit-bot")
-
 
 @bot.tree.command(name="ask", description="Déclenche une petite activité aléatoire")
 async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
@@ -3094,7 +3093,6 @@ async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
     guild_name = ctx.guild.name if ctx.guild else "DM"
     logger.info(f"{ctx.user.name} - {guild_name} - A demandé '{text}' : " + responses[counter % len(responses)])
 
-
 @bot.tree.command(name="skin", description="Minecraft ?")
 async def skin(ctx: discord.Interaction):
     url = "https://mskins.net"
@@ -3124,8 +3122,6 @@ async def skin(ctx: discord.Interaction):
     embed.set_footer(text="%s - by mskins.net" % author)
     await ctx.response.send_message("Get skinned", embed=embed)
 
-
-
 @bot.tree.command(name="chat", description="😺")
 async def chat(ctx: discord.Interaction):
     url = "https://api.thecatapi.com/v1/images/search?limit=1"
@@ -3151,7 +3147,6 @@ async def chat(ctx: discord.Interaction):
         await ctx.response.send_message("😺", embed=embed)
     except requests.exceptions.RequestException as e:
         await ctx.response.send_message("Pas de chat, j'ai un problème... Désolé :(")
-
 
 @bot.command()
 async def dhcp(ctx, ip_range: str):
@@ -3216,7 +3211,6 @@ async def dhcp(ctx, ip_range: str):
     else:
         await ctx.send("Sah ya plus d'IP")
 
-
 @bot.tree.command(name="activity", description="Déclenche une petite activité aléatoire")
 async def activity(ctx: discord.Interaction, participants: int):
     url = "https://bored-api.appbrewery.com/filter"
@@ -3256,6 +3250,377 @@ async def search(ctx: discord.Interaction, mot: str):
     else:
         await ctx.response.send_message(f"De quoi tu me parles ? C'est quoi \"{mot}\" ?")
         logger.info(f"{ctx.user.name} - {guild_name} - A demandé si '{mot}' existe, bah non")
+
+
+def load_questions():
+    with open("txt/nous.txt", "r+", encoding="utf-8") as f:
+        questions = f.read().split("\n")
+    random.shuffle(questions)
+    return questions
+
+def add_questions(question):
+    with open("txt/nous.txt", "a+", encoding="utf-8") as f:
+        questions = f.read().split("\n")
+        questions.append(question)
+        f.write("\n".join(questions))
+
+class QuiDeNousGame:
+    def __init__(self, host: discord.Member):
+        self.host = host
+        self.players: list[discord.Member] = []
+        self.round = 0
+        self.started = False
+        self.ended = False
+
+        # Timers
+        self.open_duration = 60
+        self.turn_duration = 25
+        self.timer_task: asyncio.Task | None = None
+        self.phase_start_time: float | None = None
+
+        # Votes
+        self.votes: dict[int, int] = {}
+        self.player_votes: dict[int, int] = {}
+
+        # Questions
+        self.questions = load_questions()
+        self.total_questions = len(self.questions)
+
+    def get_next_question(self):
+        return f"Qui d'entre nous __{self.questions[self.round % self.total_questions]}__ ?"
+
+class QuiDeNousView(discord.ui.View):
+    def __init__(self, game: QuiDeNousGame):
+        super().__init__(timeout=None)
+        self.game = game
+        self.base_description: str = f"Bienvenue dans le jeu ! {random.choice('🥳🤡😈😋🤯🤠🤫🫣')}"
+        self.current_message: discord.Message | None = None
+
+        self.join_button = discord.ui.Button(label="Rejoindre", style=discord.ButtonStyle.primary)
+        self.start_button = discord.ui.Button(label="Démarrer", style=discord.ButtonStyle.success)
+        self.join_button.callback = self.rejoindre
+        self.start_button.callback = self.demarrer
+        self.add_item(self.join_button)
+        self.add_item(self.start_button)
+
+    # ---------------- Rejoindre ----------------
+    async def rejoindre(self, interaction: discord.Interaction):
+        if self.game.ended:
+            await interaction.response.send_message("La partie est terminée !", ephemeral=True)
+            return
+        if interaction.user in self.game.players:
+            await interaction.response.send_message("Tu es déjà inscrit.", ephemeral=True)
+            return
+
+        self.game.players.append(interaction.user)
+        await interaction.response.send_message(f"Tu as rejoint la partie !", ephemeral=True)
+
+        if self.game.started:
+            await self.refresh_vote_select(interaction)
+        else:
+            await self.update_embed_on_current_message()
+
+    # ---------------- Démarrer ----------------
+    async def demarrer(self, interaction: discord.Interaction):
+        if self.game.ended:
+            await interaction.response.send_message("La partie est déjà terminée !", ephemeral=True)
+            return
+        if self.game.started:
+            await interaction.response.send_message("La partie a déjà commencé enfin !", ephemeral=True)
+            return
+        if interaction.user != self.game.host:
+            await interaction.response.send_message("Seul le maître du jeu peut démarrer.", ephemeral=True)
+            return
+        if len(self.game.players) < 1:
+            await interaction.response.send_message("Il faut au moins 2 joueurs.", ephemeral=True)
+            return
+
+        await self.disable_all_buttons()
+
+        # Lancer le jeu
+        self.game.started = True
+        self.base_description = self.game.get_next_question()
+        self.game.round = 1
+        self.game.votes = {}
+        self.game.player_votes = {}
+
+        await self.send_new_turn_message(interaction)
+        await interaction.response.defer()
+
+    # ---------------- Tour suivant ----------------
+    async def tour_suivant(self, interaction: discord.Interaction):
+        if self.game.ended:
+            await interaction.response.send_message("La partie est terminée !", ephemeral=True)
+            return
+        if not self.game.started:
+            await interaction.response.send_message("La partie n'a pas encore commencé !", ephemeral=True)
+            return
+        if interaction.user != self.game.host:
+            await interaction.response.send_message("Seul le maître du jeu peut changer de tour.", ephemeral=True)
+            return
+
+        # Afficher Top 3 final sur le message du tour précédent
+        await self.update_embed_on_current_message()
+
+        if self.game.timer_task:
+            self.game.timer_task.cancel()
+
+        await self.disable_all_buttons()
+
+        # Nouveau tour
+        self.game.round += 1
+        self.game.votes = {}
+        self.game.player_votes = {}
+        self.base_description = self.game.get_next_question()
+
+        # ENVOI D’UN NOUVEAU MESSAGE pour le nouveau tour
+        await self.send_new_turn_message(interaction)
+        await interaction.response.send_message(f"Tour {self.game.round} démarré !", ephemeral=True)
+
+    # ---------------- Votes via Select ----------------
+    async def create_vote_select(self):
+        if not self.game.players:
+            return None
+        options = [
+            discord.SelectOption(label=p.display_name, value=str(p.id))
+            for p in self.game.players
+        ]
+        select = discord.ui.Select(
+            placeholder="Vote pour un joueur...",
+            min_values=1,
+            max_values=1,
+            options=options
+        )
+        select.callback = self.vote_select_callback
+        return select
+
+    async def vote_select_callback(self, interaction: discord.Interaction):
+        if self.game.ended or not self.game.started:
+            await interaction.response.send_message("Vote impossible.", ephemeral=True)
+            return
+
+        voter_id = interaction.user.id
+        new_vote_id = int(interaction.data['values'][0])
+
+        if interaction.user not in self.game.players:
+            await interaction.response.send_message("Inscrit-toi pour jouer !", ephemeral=True)
+            return
+
+        # Retirer l'ancien vote si existant
+        if voter_id in self.game.player_votes:
+            old_vote_id = self.game.player_votes[voter_id]
+            if old_vote_id in self.game.votes:
+                self.game.votes[old_vote_id] -= 1
+                if self.game.votes[old_vote_id] <= 0:
+                    del self.game.votes[old_vote_id]
+
+        # Enregistrer le nouveau vote
+        self.game.player_votes[voter_id] = new_vote_id
+        self.game.votes[new_vote_id] = self.game.votes.get(new_vote_id, 0) + 1
+
+        # Mise à jour du message du tour
+        await self.update_embed_on_current_message()
+        await interaction.response.send_message("Vote enregistré ! ✅", ephemeral=True)
+
+    async def refresh_vote_select(self, interaction: discord.Interaction):
+        """
+        Recrée la liste déroulante de vote pour inclure
+        les joueurs qui ont rejoint en cours de tour
+        """
+        # Supprimer uniquement les Select existants
+        self.clear_items()
+
+        # Recréer les boutons + la nouvelle Select
+        await self.create_vote_buttons(interaction)
+
+    # ---------------- Construction embed ----------------
+    def build_embed_description(self):
+        desc = self.base_description
+        if not self.game.started:
+            # Phase d'inscription
+            if self.game.players:
+                desc += "\n\nInscrits :\n"
+                for p in self.game.players:
+                    desc += f"- {p.mention}\n"
+        else:
+            # Tour en cours : Top 3
+            if self.game.votes:
+                desc += "\n\n🏆 Top 5 :\n"
+                sorted_votes = sorted(self.game.votes.items(), key=lambda x: x[1], reverse=True)[:3]
+                for i, (uid, votes) in enumerate(sorted_votes):
+                    member = discord.utils.get(self.game.players, id=uid)
+                    if not member:
+                        continue
+                    desc += f"- {['🥇', '🥈', '🥉'][i]} {member.mention} : {votes} {'🟦' * votes}\n"
+        return desc
+
+    async def update_embed_on_current_message(self, color = None):
+        if self.current_message:
+            embed = self.current_message.embeds[0]
+            embed.description = self.build_embed_description()
+            embed = discord.Embed(
+                title=embed.title,
+                description=self.build_embed_description(),
+                color= color if color else embed.color
+            )
+            await self.current_message.edit(embed=embed, view=self)
+
+    async def send_new_turn_message(self, interaction: discord.Interaction):
+        """Envoie un nouveau message pour le tour actuel"""
+        await self.create_vote_buttons(interaction)
+        embed = discord.Embed(
+            title=f"Tour {self.game.round}",
+            description=self.build_embed_description(),
+            color=discord.Color.green()
+        )
+        self.current_message = await interaction.channel.send(embed=embed, view=self)
+        await self.start_timer_on_message(self.current_message, self.game.turn_duration)
+
+    # ---------------- Créer boutons + Select ----------------
+    async def create_vote_buttons(self, interaction: discord.Interaction, initial=False):
+        self.clear_items()
+
+        # Bouton tour suivant pour le maître
+        next_turn_button = discord.ui.Button(label="Tour suivant", style=discord.ButtonStyle.secondary)
+        next_turn_button.callback = self.tour_suivant
+        self.add_item(next_turn_button)
+
+        # Bouton fin de jeu
+        end_button = discord.ui.Button(label="Fin de jeu", style=discord.ButtonStyle.danger)
+        end_button.callback = self.fin_de_jeu
+        self.add_item(end_button)
+
+        # Liste déroulante de vote
+        vote_select = await self.create_vote_select()
+        if vote_select:
+            self.add_item(vote_select)
+
+        # Rejoindre entre tours
+        if not initial and not self.game.ended:
+            join_button = discord.ui.Button(label="Rejoindre", style=discord.ButtonStyle.success)
+            join_button.callback = self.rejoindre
+            self.add_item(join_button)
+
+    # ---------------- Fin de jeu ----------------
+    async def fin_de_jeu(self, interaction: discord.Interaction):
+        if interaction.user != self.game.host:
+            await interaction.response.send_message("Seul le maître du jeu peut terminer le jeu.", ephemeral=True)
+            return
+        if self.game.timer_task:
+            self.game.timer_task.cancel()
+        self.game.ended = True
+        await self.disable_all_buttons()
+
+        await interaction.response.send_message("Merci d'avoir joué !\nSi tu veux ajouter des questions, utilise `/addquidenous`")
+
+    # ---------------- Timer ----------------
+    async def start_timer_on_message(self, message: discord.Message, duration: int):
+        if self.game.timer_task:
+            self.game.timer_task.cancel()
+        self.game.phase_start_time = time.time()
+
+        async def timer():
+            try:
+                while True:
+                    elapsed = int(time.time() - self.game.phase_start_time)
+                    if elapsed >= duration:
+                        await self.timeout_turn_on_message(message)
+                        break
+                    remaining = duration - elapsed
+                    bar = self.progress_bar(elapsed, duration)
+                    time_txt = self.format_time(remaining)
+                    embed = message.embeds[0]
+                    embed.set_footer(text=f"{bar} ⏱️ {time_txt}")
+                    await message.edit(embed=embed)
+                    await asyncio.sleep(5)
+            except asyncio.CancelledError:
+                pass
+
+        self.game.timer_task = asyncio.create_task(timer())
+
+    async def timeout_turn_on_message(self, message: discord.Message):
+        await self.update_embed_on_current_message()
+        self.game.ended = True
+        await self.disable_all_buttons()
+        embed = message.embeds[0]
+        embed.set_footer(text="⏱️ Temps écoulé !")
+        await message.edit(embed=embed, view=self)
+
+    # ---------------- Utilitaires ----------------
+    async def disable_all_buttons(self):
+        for item in self.children:
+            item.disabled = True
+        await self.update_embed_on_current_message(color = discord.Color.greyple())
+
+
+    def format_time(self, seconds: int) -> str:
+        m, s = divmod(seconds, 60)
+        return f"{m:02d}:{s:02d}"
+
+    def progress_bar(self, elapsed: int, total: int, size: int = 10) -> str:
+        filled = int(size * elapsed / total)
+        return "🟩" * filled + "⬜" * (size - filled)
+
+@bot.tree.command(name="quidenous", description="Lance une partie de 'Qui d'entre nous ?'")
+async def quidenous(interaction: discord.Interaction):
+    logger.info(f"{interaction.user.name} - {interaction.guild.name} - A lancé une partie de \"Qui d'entre nous ?\"")
+
+    game = QuiDeNousGame(interaction.user)
+    view = QuiDeNousView(game)
+
+    embed = discord.Embed(
+        title="Qui d'entre nous ? 👀",
+        description=f"Clique sur **Rejoindre** pour participer.\n⏱️ Inscription ouvertes pendant {game.open_duration} secondes.",
+        color=discord.Color.blurple()
+    )
+    embed.set_author(
+        name=interaction.user.display_name,
+        icon_url=interaction.user.display_avatar.url
+    )
+    await interaction.response.send_message(embed=embed, view=view)
+    message = await interaction.original_response()
+
+    view.current_message = message
+
+    # Timer pour la phase d'inscription
+    async def open_phase_timeout():
+        if not game.started and not game.ended:
+            game.ended = True
+            await view.disable_all_buttons()
+            embed = discord.Embed(
+                title="Temps écoulé",
+                description="La partie n'a pas été lancée à temps.",
+                color=discord.Color.red()
+            )
+            await interaction.edit_original_response(embed=embed, view=view)
+
+    view.game.timer_task = asyncio.create_task(asyncio.sleep(game.open_duration))
+    await asyncio.sleep(game.open_duration)
+    await open_phase_timeout()
+
+@bot.tree.command(name="addquidenous", description="Ajoute une question au 'Qui d'entre nous ?'")
+async def addquidenous(interaction: discord.Interaction, question: str):
+    logger.info(f"{interaction.user.name} - {interaction.guild.name} - A demandé à ajouter la question \"{question}\"")
+    original_question = question.lower()
+    question_pattern = re.compile(r"^qui d\'entre nous ([a-z0-9,'\"€$()éèàêûüë -]+) \?$")
+    if not original_question.startswith("qui d'entre nous "):
+        await interaction.response.send_message("T'as pas compris le principe du jeu je crois... La question doit commencer par 'Qui d'entre nous ' (ouais c'est chiant à écrire, pas mon problème)", ephemeral=True)
+        return
+    if not original_question.endswith("?"):
+        await interaction.response.send_message("Sans point d'interrogation, c'est pas une question andouille !", ephemeral=True)
+        return
+    if not (question_match := re.match(question_pattern, original_question)):
+        await interaction.response.send_message("Je sais pas ce que t'as essayer de m'envoyer, mais ca correspond pas au format attendu. C'est balo !", ephemeral=True)
+        return
+    final_question = question_match.groups()[0]
+
+    questions = load_questions()
+    if final_question in questions:
+        await interaction.response.send_message("Dommage, cette question existe déjà !", ephemeral=True)
+        return
+
+    add_questions(final_question)
+    await interaction.response.send_message(f"La question suivante a bien été ajoutée : {question}\n\nJ'espère qu'elle vaut le coup...", ephemeral=True)
 
 
 @bot.command()

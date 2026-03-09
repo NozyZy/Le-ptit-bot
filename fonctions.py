@@ -528,3 +528,4 @@ def winner(grille):
         print("Le joueur", " noir ", "gagne !", sep="")
     else:
         print("Le joueur", " rouge ", "gagne !", sep="")
+
