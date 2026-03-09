@@ -3274,7 +3274,7 @@ class QuiDeNousGame:
 
         # Timers
         self.open_duration = 60
-        self.turn_duration = 25
+        self.turn_duration = 10 * 60
         self.timer_task: asyncio.Task | None = None
         self.phase_start_time: float | None = None
 
@@ -3331,7 +3331,7 @@ class QuiDeNousView(discord.ui.View):
         if interaction.user != self.game.host:
             await interaction.response.send_message("Seul le maître du jeu peut démarrer.", ephemeral=True)
             return
-        if len(self.game.players) < 1:
+        if len(self.game.players) < 2:
             await interaction.response.send_message("Il faut au moins 2 joueurs.", ephemeral=True)
             return
 
