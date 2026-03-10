@@ -572,7 +572,7 @@ async def on_message(message):
             # Generate dick size for the day 8=D
             seed = hash((user.id, today.strftime("%Y-%m-%d")))
             random.seed(seed)
-            max_size = 30
+            max_size = 31
             size = random.choices(range(0, max_size+1), weights=[math.exp(-0.07 * i) for i in range(1, max_size+2)])[0]
             text = "8" + "=" * size + "D"
 
