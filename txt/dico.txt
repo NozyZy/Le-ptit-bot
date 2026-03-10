@@ -809,6 +809,7 @@ alternatifs
 alternative
 alternatives
 alterne
+alterpseudo
 altheboss
 although
 alto
@@ -1410,6 +1411,7 @@ arnaqueurs
 arnaqué
 arnaud
 aron
+aroorat
 aros
 around
 arpa
@@ -2250,6 +2252,7 @@ bandade
 bande
 bandeau
 bander
+bandit
 bandé
 bane
 banette
@@ -2723,6 +2726,7 @@ billetterie
 billingue
 billy
 bilou
+bim
 binaire
 binaires
 bind
@@ -4200,6 +4204,7 @@ catherine
 cathodique
 catholique
 cathy
+cathédrales
 catin
 catnapping
 cats
@@ -5101,6 +5106,7 @@ clichés
 click
 clicked
 clickers
+clicks
 clické
 clics
 clide
@@ -5589,6 +5595,7 @@ comprises
 comprit
 comprneds
 compro
+compromettre
 compromis
 compronpo
 compros
@@ -6359,6 +6366,7 @@ coïncidence
 coño
 coût
 coûte
+coûteront
 coûté
 cpables
 cpafacil
@@ -6901,6 +6909,7 @@ dammit
 dammn
 damn
 damnation
+damnn
 damns
 damnée
 damon
@@ -6975,12 +6984,15 @@ datez
 daté
 datée
 daube
+dauberman
 daubermann
 dauberton
 dauphin
 dauphinois
 dauphins
 dausmenil
+dautre
+dautres
 dauzghduygazgiuy
 david
 davigo
@@ -7121,6 +7133,7 @@ deeps
 deepslate
 deerlings
 deerlingspring
+def
 defaites
 default
 defaults
@@ -8201,6 +8214,7 @@ doji
 dojsioudhaziudzhqiu
 doki
 dole
+doleron
 doline
 doliprane
 dolipranes
@@ -8326,6 +8340,7 @@ douché
 douchée
 doucp
 doudonne
+doudou
 doudouvet
 douille
 douiller
@@ -9170,6 +9185,7 @@ earthbound
 easier
 easy
 easyone
+eat
 eats
 eaux
 eaxct
@@ -9525,6 +9541,7 @@ enculé
 enculée
 enculés
 encyclopédies
+end
 ende
 endoctriner
 endomagé
@@ -9654,6 +9671,7 @@ enseirb
 enseirn
 ensemble
 ensembles
+enseptembre
 ensibs
 ensmelve
 enssemble
@@ -9839,6 +9857,7 @@ escalators
 escale
 escalier
 escaliers
+escalopes
 escape
 escargaume
 escargot
@@ -10015,6 +10034,7 @@ europe
 european
 européen
 européenne
+européennes
 européens
 euros
 euuh
@@ -11209,6 +11229,7 @@ formation
 formations
 formats
 formattage
+formatter
 formatting
 forme
 formel
@@ -11291,6 +11312,8 @@ fourbe
 fourbes
 fourchette
 fourchetto
+fourgonette
+fourgonnette
 fourier
 fourmillier
 fourmis
@@ -11691,6 +11714,7 @@ gallets
 galvaran
 galère
 galèrent
+galèrer
 galères
 galèré
 galérant
@@ -11930,6 +11954,7 @@ gguy
 ggwp
 ggyieuifbzp
 ggzp
+gh
 ghame
 ghdl
 ghetis
@@ -12492,6 +12517,7 @@ gtgt
 gtoucassé
 gtoume
 gtrépeur
+guacamole
 gualipette
 guapa
 guard
@@ -12661,6 +12687,7 @@ géré
 gérés
 géteau
 gévu
+gîte
 h
 haahhaahah
 habile
@@ -13208,6 +13235,7 @@ hors
 horsea
 hortyamazed
 hortylook
+hortypika
 hose
 hospitalières
 hosr
@@ -13277,6 +13305,7 @@ httpstenorcomviewsussagif
 httpsyggleaktopfr
 httpszabbixmonrezo
 htvee
+htyhihi
 htylurk
 htysyncope
 huawei
@@ -13459,6 +13488,7 @@ idiots
 idir
 idkhow
 idkwhy
+idoké
 idol
 idole
 idor
@@ -13525,6 +13555,7 @@ ikoà
 il
 ilab
 ilagine
+ile
 ilegal
 iles
 ilisateurs
@@ -13572,6 +13603,7 @@ imagine
 imaginer
 imaginez
 imaginons
+imaginé
 iman
 imbatable
 imbatables
@@ -14466,6 +14498,7 @@ j'aurais
 j'en
 j'hésite
 j'imagine
+ja
 jabami
 jabori
 jabva
@@ -14772,6 +14805,7 @@ jreconnais
 jrigole
 jrue
 jrv
+js
 jsais
 jsdopczopevjzervhnoef
 jsens
@@ -14859,6 +14893,7 @@ jusqu'à
 jusqua
 jusque
 jusquici
+jusquà
 jussieu
 just
 juste
@@ -15197,6 +15232,7 @@ klee
 klink
 klithe
 klourd
+km
 kmeans
 kmelo
 kmimech
@@ -15366,6 +15402,7 @@ laboxvcom
 labs
 labuus
 labyrinthe
+lac
 lacets
 lache
 lachent
@@ -15377,6 +15414,7 @@ lactose
 lactée
 ladd
 ladder
+ladmet
 ladmin
 ladresse
 lads
@@ -15405,6 +15443,7 @@ laisse
 laissent
 laisser
 laisserai
+laisseront
 laissez
 laissé
 lait
@@ -15647,6 +15686,7 @@ legion
 legit
 legitime
 lego
+legocom
 legolas
 legos
 legosse
@@ -15716,6 +15756,7 @@ leshit
 lesieur
 lesieux
 leslie
+lespagne
 lesquelles
 lesquels
 lesrattrapages
@@ -15945,6 +15986,7 @@ lists
 listé
 listée
 lit
+litalie
 lite
 literallement
 literally
@@ -16043,6 +16085,7 @@ logan
 loge
 logement
 logements
+loger
 logger
 logical
 logiciel
@@ -16425,6 +16468,7 @@ maha
 mahamoudou
 mahomet
 mahometh
+mai
 maid
 maigre
 maiheu
@@ -16611,6 +16655,7 @@ manageable
 managed
 management
 manager
+managers
 manche
 manches
 manchester
@@ -17223,6 +17268,7 @@ messe
 messenger
 messi
 messieurs
+mest
 mesurant
 mesure
 mesurer
@@ -17353,6 +17399,8 @@ miince
 mikaela
 mikrotik
 miku
+milan
+milanaises
 milano
 mile
 miler
@@ -17670,6 +17718,7 @@ moitier
 moitié
 mojang
 mojo
+molette
 molière
 molle
 mollet
@@ -18738,6 +18787,7 @@ notée
 notés
 noui
 nouille
+nouilles
 nounours
 nour
 nouredine
@@ -19901,6 +19951,7 @@ parliez
 parlor
 parlé
 parmer
+parmi
 parodies
 parodn
 parois
@@ -20283,6 +20334,8 @@ peojet
 people
 pepere
 peperonni
+pepeshy
+pepesus
 pepitas
 pepite
 pepouse
@@ -20463,6 +20516,7 @@ pfizered
 pfouaa
 pfsense
 pfsensead
+pg
 pgcd
 pge
 pges
@@ -21138,6 +21192,7 @@ poor
 poourquoi
 poourtant
 poowerpoint
+pop
 popa
 popcorn
 popcorns
@@ -21154,6 +21209,7 @@ populaire
 populaires
 population
 populisme
+popunder
 popup
 popurqoi
 poquito
@@ -22039,6 +22095,7 @@ prévisisble
 prévisualisation
 prévoie
 prévoir
+prévoit
 prévoyant
 prévoyez
 prévu
@@ -22249,6 +22306,7 @@ python
 pytjon
 pyton
 pznse
+pzr
 pzrle
 pzrler
 pâques
@@ -23073,6 +23131,7 @@ rectifier
 recto
 rectum
 recu
+recuire
 recul
 recule
 recup
@@ -23289,6 +23348,7 @@ reject
 rejected
 rejeton
 rejeté
+rejetée
 rejetées
 rejoigne
 rejoignent
@@ -23886,6 +23946,7 @@ retry
 return
 retweet
 retélécharger
+reu
 reuf
 reufs
 reugels
@@ -24200,6 +24261,7 @@ rolling
 rolls
 rololo
 rolycoly
+rom
 romaibn
 romain
 romaindeuxtrois
@@ -24812,6 +24874,7 @@ sacrebleu
 sacrifice
 sacrifier
 sacrilège
+sacripant
 sacré
 sacs
 sactiver
@@ -24842,6 +24905,7 @@ sagesse
 sagouin
 sagouins
 sagrossedaronne
+sah
 sahur
 said
 saignant
@@ -27394,6 +27458,7 @@ tangible
 tango
 tanhue
 tank
+tanker
 tanks
 tannée
 tanphétamine
@@ -27648,6 +27713,7 @@ tentent
 tenter
 tentera
 tenterai
+tentes
 tentino
 tentr
 tenté
@@ -29059,6 +29125,7 @@ vaisselle
 vala
 valable
 valables
+valait
 valalalalalalala
 valdie
 valdié
@@ -29242,6 +29309,7 @@ verbe
 verbes
 verbose
 verde
+verdure
 verge
 verglacé
 vergnol
@@ -29479,6 +29547,7 @@ virés
 visa
 visage
 visages
+visais
 visas
 visble
 viscieux
@@ -29514,6 +29583,7 @@ visuelle
 visuellement
 visuels
 visé
+vit
 vitale
 vitality
 vitamines
@@ -29609,6 +29679,7 @@ voix
 voià
 voiàa
 vokal
+vol
 volagal
 volaire
 volait
@@ -29665,6 +29736,7 @@ voquer
 voracious
 vori
 vos
+vosges
 vosi
 vostourno
 votant
@@ -29853,6 +29925,7 @@ wan
 wanda
 wandavision
 wanker
+wanna
 wannacry
 want
 wanted
@@ -30558,6 +30631,7 @@ zéparti
 zéparty
 zéro
 à
+àskip
 âges
 âpre
 âzdko
