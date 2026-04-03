@@ -2,7 +2,7 @@
 
 The best discord python bot :100:
 
-<img src="https://cdn.discordapp.com/attachments/754976677808832512/771094907996733460/unknown.png" width="400"/>
+<img src="https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.webp" width="400"/>
 
 ## What is Le ptit bot
 
