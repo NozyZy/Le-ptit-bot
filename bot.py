@@ -160,6 +160,7 @@ def load_sexe_stats():
 
 # Save sexe stats to file
 def save_sexe_stats(stats):
+    os.makedirs("data", exist_ok=True)
     with open("data/sexe_stats.txt", "w") as f:
         for user_id, entries in stats.items():
             for entry in entries:
@@ -286,8 +287,7 @@ async def on_message(message):
             # Filter valid words: length < 27
             # Note: verifAlphabet will reject words with apostrophes, so we skip it for words with apostrophes
             if clean_word and len(clean_word) < 27:
-                # If word contains apostrophe, accept it without verifAlphabet check
-                if verifAlphabet(clean_word):
+                if "'" in clean_word or verifAlphabet(clean_word):
                     word_with_newline = clean_word + "\n"
                     if word_with_newline not in dicoLines:
                         logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
@@ -1589,29 +1589,40 @@ async def sexestats(ctx):
         return
 
     entries = sexe_stats[user_id]
-    sizes = [entry["size"] for entry in entries]
+    total_days = len(entries)
 
-    # Calculate stats
-    total_days = len(sizes)
-    max_size = max(sizes)
-    min_size = min(sizes)
-    avg_size = sum(sizes) / total_days
-    zero_count = sizes.count(0)
-    max31_count = sizes.count(31)
+    # Single pass over entries
+    max_size = min_size = entries[0]["size"]
+    total = zero_count = max31_count = 0
+    max_dates = []
+    for entry in entries:
+        s = entry["size"]
+        total += s
+        if s > max_size:
+            max_size = s
+            max_dates = [entry["date"]]
+        elif s == max_size:
+            max_dates.append(entry["date"])
+        if s < min_size:
+            min_size = s
+        if s == 0:
+            zero_count += 1
+        if s == 31:
+            max31_count += 1
 
-    # Find max date(s)
-    max_dates = [entry["date"] for entry in entries if entry["size"] == max_size]
+    avg_size = total / total_days
+    dates_str = ", ".join(max_dates[:3]) + ("..." if len(max_dates) > 3 else "")
 
-    # Build response
-    response = f"**Statistiques de {ctx.author.name}** 🍆\n"
-    response += f"- Jours enregistrés : {total_days}\n"
-    response += f"- Taille max : {max_size} (le {', '.join(max_dates[:3])}{'...' if len(max_dates) > 3 else ''})\n"
-    response += f"- Taille min : {min_size}\n"
-    response += f"- Moyenne : {avg_size:.1f}\n"
-    response += f"- Nombre de 0 : {zero_count} ({zero_count/total_days*100:.1f}%)\n"
-    response += f"- Nombre de 31 : {max31_count} ({max31_count/total_days*100:.1f}%)\n"
-
-    await ctx.send(response)
+    lines = [
+        f"**Statistiques de {ctx.author.name}** 🍆",
+        f"- Jours enregistrés : {total_days}",
+        f"- Taille max : {max_size} (le {dates_str})",
+        f"- Taille min : {min_size}",
+        f"- Moyenne : {avg_size:.1f}",
+        f"- Nombre de 0 : {zero_count} ({zero_count/total_days*100:.1f}%)",
+        f"- Nombre de 31 : {max31_count} ({max31_count/total_days*100:.1f}%)",
+    ]
+    await ctx.send("\n".join(lines))
 
 
 @bot.command()  # repeat the 'text', and delete the original message
