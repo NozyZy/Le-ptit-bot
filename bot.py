@@ -1,6 +1,7 @@
 # Standard library imports
 import argparse
 import asyncio
+import io
 import json
 import logging
 import math
@@ -1622,7 +1623,68 @@ async def sexestats(ctx):
         f"- Nombre de 0 : {zero_count} ({zero_count/total_days*100:.1f}%)",
         f"- Nombre de 31 : {max31_count} ({max31_count/total_days*100:.1f}%)",
     ]
-    await ctx.send("\n".join(lines))
+
+    # Generate graph
+    W, H = 800, 400
+    PAD_L, PAD_R, PAD_T, PAD_B = 60, 30, 30, 50
+    graph_w = W - PAD_L - PAD_R
+    graph_h = H - PAD_T - PAD_B
+    MAX_VAL = 31
+
+    img = Image.new("RGB", (W, H), (30, 30, 30))
+    draw = ImageDraw.Draw(img)
+    font_small = ImageFont.truetype("fonts/Impact.ttf", 14)
+    font_title = ImageFont.truetype("fonts/Impact.ttf", 18)
+
+    # Title
+    draw.text((W // 2, 8), f"Évolution de {ctx.author.name}", fill=(255, 255, 255), font=font_title, anchor="mt")
+
+    # Grid lines & Y labels (0, 5, 10, 15, 20, 25, 31)
+    for val in range(0, MAX_VAL + 1, 5):
+        y = PAD_T + graph_h - int(val / MAX_VAL * graph_h)
+        draw.line([(PAD_L, y), (W - PAD_R, y)], fill=(60, 60, 60), width=1)
+        draw.text((PAD_L - 5, y), str(val), fill=(180, 180, 180), font=font_small, anchor="rm")
+
+    # Average line
+    avg_y = PAD_T + graph_h - int(avg_size / MAX_VAL * graph_h)
+    draw.line([(PAD_L, avg_y), (W - PAD_R, avg_y)], fill=(255, 200, 0), width=1)
+    draw.text((W - PAD_R + 2, avg_y), f"moy", fill=(255, 200, 0), font=font_small, anchor="lm")
+
+    # Data points & lines
+    sizes_list = [e["size"] for e in entries]
+    step = graph_w / max(total_days - 1, 1)
+
+    def to_xy(i, s):
+        x = PAD_L + int(i * step)
+        y = PAD_T + graph_h - int(s / MAX_VAL * graph_h)
+        return x, y
+
+    for i in range(total_days - 1):
+        x1, y1 = to_xy(i, sizes_list[i])
+        x2, y2 = to_xy(i + 1, sizes_list[i + 1])
+        draw.line([(x1, y1), (x2, y2)], fill=(100, 180, 255), width=2)
+
+    for i, s in enumerate(sizes_list):
+        x, y = to_xy(i, s)
+        draw.ellipse([(x - 3, y - 3), (x + 3, y + 3)], fill=(100, 180, 255))
+
+    # X axis labels (first, last, and a few in between)
+    label_indices = [0, total_days - 1]
+    if total_days > 4:
+        label_indices += [total_days // 4, total_days // 2, 3 * total_days // 4]
+    for i in sorted(set(label_indices)):
+        x, _ = to_xy(i, 0)
+        draw.text((x, H - PAD_B + 5), entries[i]["date"], fill=(180, 180, 180), font=font_small, anchor="mt")
+
+    # Axes
+    draw.line([(PAD_L, PAD_T), (PAD_L, PAD_T + graph_h)], fill=(200, 200, 200), width=2)
+    draw.line([(PAD_L, PAD_T + graph_h), (W - PAD_R, PAD_T + graph_h)], fill=(200, 200, 200), width=2)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    await ctx.send("\n".join(lines), file=discord.File(buf, filename="sexestats.png"))
 
 
 @bot.command()  # repeat the 'text', and delete the original message
