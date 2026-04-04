@@ -482,10 +482,21 @@ async def on_message(message):
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
-        # Random response for the TQ user with the image allez.png 
-        if user.id == 756178270830985286 and random.randint(1, 31) == int(day):
-            logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
-            await channel.send(file=discord.File("images/allez.png"))
+        # Random response for the TQ user with the image allez.png
+        if user.id == 756178270830985286:
+            tq_rand = random.randint(1, 100)
+            if tq_rand <= 3:  # ~3% ≈ 1/31
+                logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
+                await channel.send(file=discord.File("images/allez.png"))
+            elif tq_rand <= 8:  # ~5% ≈ 1/20
+                logger.info(f"{user.name} - {message.guild.name} - Tristan vient d'arriver")
+                msg = await channel.send("Tristan arrive dans 7 ...")
+                for i in range(6, 0, -1):
+                    await asyncio.sleep(1)
+                    await msg.edit(content=f"Tristan arrive dans {i} ...")
+                await asyncio.sleep(1)
+                await msg.delete()
+                await channel.send(content="Tristan vient d'arriver.", file=discord.File("images/tq.gif"))
 
         if ("enerv" in MESSAGE or "énerv" in MESSAGE) and rdnb >= 2:
             logger.info(f"{user.name} - {message.guild.name} - S'est enervé")
