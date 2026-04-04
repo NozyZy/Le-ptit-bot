@@ -342,7 +342,7 @@ async def on_message(message):
 
     # expansion of the dico, with words of every messages (stock only words, never complete message)
     # we don't want a specific bot (from a friend) to expand the dico => don't know who but it's ok ^^
-    if message.author.id != 696099307706777610:
+    if message.author.id != 696099307706777610 and not MESSAGE.startswith("--"):
 
         # Split message into words
         words = MESSAGE.split()
@@ -1662,6 +1662,7 @@ async def on_message(message):
             "**--calcul** *nb1* (+, -, /, *, ^, !) *nb2* pour avoir un calcul adéquat\n"
             "**--clear** *nb* pour supprimer *nb* messages\n"
             "**--crypt** pour chiffrer/déchiffrer un message César (décalage)\n"
+            "**--deletestarter** pour supprimer ton starter\n"
             "**--dhcp** *range* pour une activité d'attribution d'IPs\n"
             "**--dico** pour connaître le nombre de mots dans mon dictionnaire\n"
             "**--game** pour jouer au jeu du **clap**\n"
@@ -2002,6 +2003,10 @@ async def serverinfo(ctx):
 
 @bot.command()  # send the 26 possibilites of a ceasar un/decryption
 async def crypt(ctx, *text):
+    if len(text) == 0:
+        await ctx.send("Rentre un message à crypter/décrypter")
+        logger.info(f"{ctx.author.name} - A demandé de crypter sans rentrer de message")
+        return
     mot = " ".join(text)
     messages = [message async for message in ctx.channel.history(limit=1)]
     for message in messages:
