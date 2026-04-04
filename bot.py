@@ -173,6 +173,73 @@ def save_sexe_stats(stats):
 sexe_stats = load_sexe_stats()
 
 
+# ── Pokémon starter system ────────────────────────────────────────────────────
+# Each starter: list of (name, evo_level) tuples. evo_level=None = final form.
+with open("database/pokemon/starters.json", "r", encoding="utf-8") as _f:
+    _raw = json.load(_f)
+STARTERS = {
+    gen: [[tuple(entry) for entry in chain] for chain in chains]
+    for gen, chains in _raw.items()
+}
+
+# Flat lookup: starter_name → full evolution chain
+STARTER_CHAINS: dict[str, list] = {}
+STARTER_BASE_NAMES: list[str] = []
+for gen_chains in STARTERS.values():
+    for chain in gen_chains:
+        base = chain[0][0]
+        STARTER_BASE_NAMES.append(base)
+        for form, *_ in chain:
+            STARTER_CHAINS[form.lower()] = chain
+
+POKEMON_DATA_FILE = "data/pokemon_starters.json"
+
+# Load Pokémon data 
+def load_pokemon_data() -> dict:
+    os.makedirs("data", exist_ok=True)
+    try:
+        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+# Save Pokémon data
+def save_pokemon_data(data: dict):
+    os.makedirs("data", exist_ok=True)
+    with open(POKEMON_DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+# calculate XP needed to level up
+def xp_to_next_level(level: int) -> int:
+    """XP needed to go from `level` to `level + 1`."""
+    return level * 50
+
+
+def get_pokemon_entry(data: dict, guild_id: str, user_id: str) -> dict | None:
+    return data.get(guild_id, {}).get(user_id)
+
+
+def pokemon_artwork_url(pokemon_id: int) -> str:
+    return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
+
+
+def make_silhouette(image_bytes: bytes, color: tuple) -> io.BytesIO:
+    """Return a BytesIO PNG where every non-transparent pixel is replaced by `color`."""
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+    r, g, b, a = img.split()
+    colored = Image.new("RGBA", img.size, color + (255,))
+    colored.putalpha(a)
+    buf = io.BytesIO()
+    colored.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
+# server → user → {"starter": str, "pokemon": str, "level": int, "xp": int}
+pokemon_data: dict = load_pokemon_data()
+
+
+
 # French month names
 FRENCH_MONTHS = [
     "janvier", "février", "mars", "avril", "mai", "juin",
@@ -479,6 +546,77 @@ async def on_message(message):
         except discord.HTTPException as e:
             await channel.send(f"❌ Erreur lors du reset du nom: {e}")
         return
+
+    # Pokémon XP gain 
+    guild_id = str(message.guild.id)
+    user_id_str = str(user.id)
+    entry = get_pokemon_entry(pokemon_data, guild_id, user_id_str)
+    if entry and not MESSAGE.startswith("--"):
+        xp_gain = random.randint(10, 25)
+        xp_gain = xp_to_next_level(entry["level"]) #test
+        entry["xp"] += xp_gain
+        leveled_up = False
+        while entry["xp"] >= xp_to_next_level(entry["level"]):
+            entry["xp"] -= xp_to_next_level(entry["level"])
+            entry["level"] += 1
+            leveled_up = True
+
+        if leveled_up:
+            chain = STARTER_CHAINS.get(entry["pokemon"].lower())
+            evolved = False
+            if chain:
+                for i, (name, evo_level, *_) in enumerate(chain):
+                    if name.lower() == entry["pokemon"].lower() and evo_level is not None and entry["level"] >= evo_level:
+                        next_name = chain[i + 1][0]
+                        old_name = entry["pokemon"]
+                        entry["pokemon"] = next_name
+                        evolved = True
+
+                        old_id = chain[i][2] if len(chain[i]) > 2 else None
+                        new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
+
+                        # Fetch old artwork bytes once
+                        old_bytes = None
+                        if old_id:
+                            try:
+                                old_bytes = requests.get(pokemon_artwork_url(old_id), timeout=5).content
+                            except Exception:
+                                pass
+
+                        # 1. Show old Pokémon
+                        caption = f"Quoi ?! **{old_name}** de {user.mention} se transforme..."
+                        if old_bytes:
+                            msg = await channel.send(caption, file=discord.File(io.BytesIO(old_bytes), filename="poke.png"))
+                        else:
+                            msg = await channel.send(caption)
+
+                        # 2. Alternate black/white silhouettes
+                        if old_bytes:
+                            for color in [(0, 0, 0), (255, 255, 255), (0, 0, 0), (255, 255, 255)]:
+                                await asyncio.sleep(0.6)
+                                await msg.delete()
+                                msg = await channel.send(caption, file=discord.File(make_silhouette(old_bytes, color), filename="poke.png"))
+                        else:
+                            await asyncio.sleep(2)
+
+                        # 3. Show new Pokémon
+                        await asyncio.sleep(0.6)
+                        await msg.delete()
+                        final_caption = f"🎉 {user.mention} **{old_name}** a évolué en **{next_name}** !"
+                        if new_id:
+                            try:
+                                new_bytes = requests.get(pokemon_artwork_url(new_id), timeout=5).content
+                                await channel.send(final_caption, file=discord.File(io.BytesIO(new_bytes), filename="poke_new.png"))
+                            except Exception:
+                                await channel.send(final_caption)
+                        else:
+                            await channel.send(final_caption)
+                        break
+
+            if not evolved:
+                await channel.send(f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{entry['level']}** !")
+
+        save_pokemon_data(pokemon_data)
 
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
@@ -1534,8 +1672,8 @@ async def on_message(message):
             " **--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
             " **--p4** pour jouer au Puissance 4 en **versus**\n"
             "\t - **--p4 pve** pour jouer contre le bot (difficulté normale)\n"
-            "\t - **--p4 pve [facile,moyen,difficile]** pour jouer contre le bot avec une difficulté spéciale\n"
-            "\t - **--p4 pve [offensif,equilibre,defensif]** pour jouer contre le bot avec une configuration spécial\n"
+            "- **--p4 pve [facile,moyen,difficile]** pour jouer contre le bot avec une difficulté spéciale\n"
+            "- **--p4 pve [offensif,equilibre,defensif]** pour jouer contre le bot avec une configuration spécial\n"
             " **--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
             " **--presentation** et **--master** pour créer des memes\n"
             " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
@@ -1685,6 +1823,117 @@ async def sexestats(ctx):
     buf.seek(0)
 
     await ctx.send("\n".join(lines), file=discord.File(buf, filename="sexestats.png"))
+
+
+@bot.command()  # choose or display your starter Pokémon
+async def starter(ctx, *, choix: str = None):
+    guild_id = str(ctx.guild.id)
+    user_id = str(ctx.author.id)
+    entry = get_pokemon_entry(pokemon_data, guild_id, user_id)
+
+    # No argument: show the list 
+    if choix is None:
+        if entry:
+            chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
+            cur_idx = next((i for i, (n, *_) in enumerate(chain) if n.lower() == entry["pokemon"].lower()), -1)
+            xp_needed = xp_to_next_level(entry["level"])
+            bar_filled = int(entry["xp"] / xp_needed * 10)
+            bar = "█" * bar_filled + "░" * (10 - bar_filled)
+            if cur_idx >= 0 and chain[cur_idx][1] is not None:
+                next_name = chain[cur_idx + 1][0]
+                next_level = chain[cur_idx][1]
+                next_evo_str = f"Prochaine évolution : **{next_name}** au niveau {next_level}"
+            else:
+                next_evo_str = "Forme finale atteinte !"
+            poke_id = chain[cur_idx][2] if cur_idx >= 0 and len(chain[cur_idx]) > 2 else None
+            embed = discord.Embed(
+                title=entry["pokemon"],
+                description=(
+                    f"Starter d'origine : {entry['starter']}\n"
+                    f"Niveau : **{entry['level']}** | XP : {entry['xp']}/{xp_needed} [{bar}]\n"
+                    f"{next_evo_str}"
+                ),
+                color=discord.Color.green()
+            )
+            if poke_id:
+                embed.set_thumbnail(url=pokemon_artwork_url(poke_id))
+            embed.set_footer(text="Utilise --monstarter pour plus de détails.")
+            await ctx.send(embed=embed)
+            return
+        # or current Pokémon
+        lines = ["**Choisis ton starter ! Utilise `--starter <nom>`**\n"]
+        for gen, chains in STARTERS.items():
+            names = " · ".join(chain[0][0] for chain in chains)
+            lines.append(f"**{gen}** : {names}")
+        await ctx.send("\n".join(lines))
+        return
+
+    # Choose a starter
+    if entry:
+        await ctx.send(f"Tu as déjà **{entry['pokemon']}** ! Tu ne peux pas changer de starter.")
+        return
+
+    choix_clean = choix.strip().lower()
+    found_chain = None
+    for chain in (c for chains in STARTERS.values() for c in chains):
+        if chain[0][0].lower() == choix_clean:
+            found_chain = chain
+            break
+
+    if not found_chain:
+        await ctx.send(f"**{choix}** n'est pas un starter valide. Utilise `--starter` pour voir la liste.")
+        return
+
+    if guild_id not in pokemon_data:
+        pokemon_data[guild_id] = {}
+
+    pokemon_data[guild_id][user_id] = {
+        "starter": found_chain[0][0],
+        "pokemon": found_chain[0][0],
+        "level": 1,
+        "xp": 0,
+    }
+    save_pokemon_data(pokemon_data)
+    logger.info(f"{ctx.author.name} - {ctx.guild.name} - A choisi {found_chain[0][0]} comme starter")
+    await ctx.send(f"🎉 {ctx.author.mention} a choisi **{found_chain[0][0]}** comme starter ! Bonne aventure !")
+
+
+@bot.command()  # show your starter Pokémon details
+async def monstarter(ctx):
+    guild_id = str(ctx.guild.id)
+    user_id = str(ctx.author.id)
+    entry = get_pokemon_entry(pokemon_data, guild_id, user_id)
+
+    if not entry:
+        await ctx.send("Tu n'as pas encore de starter ! Utilise `--starter` pour en choisir un.")
+        return
+
+    chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
+    xp_needed = xp_to_next_level(entry["level"])
+    bar_filled = int(entry["xp"] / xp_needed * 10)
+    bar = "█" * bar_filled + "░" * (10 - bar_filled)
+
+    cur_idx = next((i for i, (n, *_) in enumerate(chain) if n.lower() == entry["pokemon"].lower()), -1)
+    poke_id = chain[cur_idx][2] if cur_idx >= 0 and len(chain[cur_idx]) > 2 else None
+
+    evo_line = ""
+    for name, evo_level, *_ in chain:
+        marker = "▶ " if name.lower() == entry["pokemon"].lower() else "    "
+        evo_line += f"\n{marker}**{name}**" + (f" *(évolue niv. {evo_level})*" if evo_level else " *(forme finale)*")
+
+    embed = discord.Embed(
+        title=f"{entry['pokemon']} — Niv. {entry['level']}",
+        description=(
+            f"Starter d'origine : {entry['starter']}\n"
+            f"XP : {entry['xp']}/{xp_needed} [{bar}]\n"
+            f"\n**Chaîne d'évolution :**{evo_line}"
+        ),
+        color=discord.Color.blue()
+    )
+    if poke_id:
+        embed.set_image(url=pokemon_artwork_url(poke_id))
+    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+    await ctx.send(embed=embed)
 
 
 @bot.command()  # repeat the 'text', and delete the original message

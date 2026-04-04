@@ -1,0 +1,47 @@
+{
+  "Gen 1": [
+    [["Bulbizarre", 16, 1], ["Herbizarre", 32, 2], ["Florizarre", null, 3]],
+    [["Salamèche", 16, 4], ["Reptincel", 36, 5], ["Dracaufeu", null, 6]],
+    [["Carapuce", 16, 7], ["Carabaffe", 36, 8], ["Tortank", null, 9]]
+  ],
+  "Gen 2": [
+    [["Germignon", 16, 152], ["Macronium", 32, 153], ["Méganium", null, 154]],
+    [["Hericendre", 14, 155], ["Feurisson", 36, 156], ["Typhlosion", null, 157]],
+    [["Kaiminus", 18, 158], ["Crocrodil", 30, 159], ["Aligatueur", null, 160]]
+  ],
+  "Gen 3": [
+    [["Arcko", 16, 252], ["Massko", 36, 253], ["Jungko", null, 254]],
+    [["Poussifeu", 16, 255], ["Combusken", 36, 256], ["Braségali", null, 257]],
+    [["Gobou", 16, 258], ["Flobio", 36, 259], ["Laggron", null, 260]]
+  ],
+  "Gen 4": [
+    [["Tortipouss", 18, 387], ["Boskara", 32, 388], ["Torterra", null, 389]],
+    [["Ouisticram", 14, 390], ["Chimpenfeu", 36, 391], ["Simiabraz", null, 392]],
+    [["Tiplouf", 16, 393], ["Prinplouf", 36, 394], ["Pingoléon", null, 395]]
+  ],
+  "Gen 5": [
+    [["Vipélierre", 17, 495], ["Lianaja", 36, 496], ["Majaspic", null, 497]],
+    [["Gruikui", 17, 498], ["Grotichon", 36, 499], ["Roitiflam", null, 500]],
+    [["Moustillon", 17, 501], ["Miradar", 36, 502], ["Clamiral", null, 503]]
+  ],
+  "Gen 6": [
+    [["Marisson", 16, 650], ["Boguérisse", 36, 651], ["Blindépique", null, 652]],
+    [["Feunnec", 16, 653], ["Roussil", 36, 654], ["Délphox", null, 655]],
+    [["Grenousse", 16, 656], ["Croâporal", 36, 657], ["Amphinobi", null, 658]]
+  ],
+  "Gen 7": [
+    [["Brindibou", 17, 722], ["Archéduc", 34, 723], ["Passerouge", null, 724]],
+    [["Flamiaou", 17, 725], ["Matoufeu", 34, 726], ["Félinferno", null, 727]],
+    [["Otaquin", 17, 728], ["Otarlette", 34, 729], ["Oratoria", null, 730]]
+  ],
+  "Gen 8": [
+    [["Ouistempo", 16, 810], ["Badabouin", 35, 811], ["Gorythmic", null, 812]],
+    [["Flambino", 16, 813], ["Lapyro", 35, 814], ["Lapokapo", null, 815]],
+    [["Larméléon", 16, 816], ["Arrozard", 35, 817], ["Lézargus", null, 818]]
+  ],
+  "Gen 9": [
+    [["Poussacha", 16, 906], ["Floragato", 36, 907], ["Miascarade", null, 908]],
+    [["Chochodile", 16, 909], ["Crocalosse", 36, 910], ["Skeledirex", null, 911]],
+    [["Coiffeton", 16, 912], ["Canard", 36, 913], ["Palmaval", null, 914]]
+  ]
+}
