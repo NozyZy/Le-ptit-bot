@@ -1909,6 +1909,41 @@ async def starter(ctx, *, choix: str = None):
     await ctx.send(embed=embed)
 
 
+@bot.command()  # delete your starter Pokémon after reaction confirmation
+async def deletestarter(ctx):
+    guild_id = str(ctx.guild.id)
+    user_id = str(ctx.author.id)
+    entry = get_pokemon_entry(pokemon_data, guild_id, user_id)
+
+    if not entry:
+        await ctx.send("Tu n'as pas de Pokémon à supprimer.")
+        return
+
+    msg = await ctx.send(
+        f"⚠️ Tu es sur le point de supprimer **{entry['pokemon']}** (niv. {entry['level']}).\n"
+        f"Réagis avec ✅ pour confirmer ou ❌ pour annuler. *(30 secondes)*"
+    )
+    await msg.add_reaction("✅")
+    await msg.add_reaction("❌")
+
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ("✅", "❌") and reaction.message.id == msg.id
+
+    try:
+        reaction, _ = await bot.wait_for("reaction_add", timeout=30.0, check=check)
+    except asyncio.TimeoutError:
+        await msg.edit(content=f"Temps écoulé, suppression annulée.")
+        return
+
+    if str(reaction.emoji) == "✅":
+        pokemon_data[guild_id].pop(user_id)
+        save_pokemon_data(pokemon_data)
+        logger.info(f"{ctx.author.name} - {ctx.guild.name} - A supprimé son starter {entry['pokemon']}")
+        await msg.edit(content=f"🗑️ **{entry['pokemon']}** a été supprimé. Tu peux choisir un nouveau starter avec `--starter`.")
+    else:
+        await msg.edit(content=f"Suppression annulée, **{entry['pokemon']}** est en sécurité.")
+
+
 @bot.command()  # show your starter Pokémon details
 async def monstarter(ctx):
     guild_id = str(ctx.guild.id)
