@@ -11600,6 +11600,7 @@ flags
 flaguez
 flambeau
 flambent
+flambino
 flamboyante
 flambusard
 flambé
@@ -28193,6 +28194,7 @@ stasunies
 stat
 state
 statement
+stater
 states
 stathan
 static

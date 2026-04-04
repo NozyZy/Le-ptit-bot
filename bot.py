@@ -547,79 +547,78 @@ async def on_message(message):
             await channel.send(f"❌ Erreur lors du reset du nom: {e}")
         return
 
-    # Pokémon XP gain 
-    guild_id = str(message.guild.id)
-    user_id_str = str(user.id)
-    entry = get_pokemon_entry(pokemon_data, guild_id, user_id_str)
-    if entry and not MESSAGE.startswith("--"):
-        xp_gain = random.randint(10, 25)
-        xp_gain = xp_to_next_level(entry["level"]) #test
-        entry["xp"] += xp_gain
-        leveled_up = False
-        while entry["xp"] >= xp_to_next_level(entry["level"]):
-            entry["xp"] -= xp_to_next_level(entry["level"])
-            entry["level"] += 1
-            leveled_up = True
-
-        if leveled_up:
-            chain = STARTER_CHAINS.get(entry["pokemon"].lower())
-            evolved = False
-            if chain:
-                for i, (name, evo_level, *_) in enumerate(chain):
-                    if name.lower() == entry["pokemon"].lower() and evo_level is not None and entry["level"] >= evo_level:
-                        next_name = chain[i + 1][0]
-                        old_name = entry["pokemon"]
-                        entry["pokemon"] = next_name
-                        evolved = True
-
-                        old_id = chain[i][2] if len(chain[i]) > 2 else None
-                        new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
-
-                        # Fetch old artwork bytes once
-                        old_bytes = None
-                        if old_id:
-                            try:
-                                old_bytes = requests.get(pokemon_artwork_url(old_id), timeout=5).content
-                            except Exception:
-                                pass
-
-                        # 1. Show old Pokémon
-                        caption = f"Quoi ?! **{old_name}** de {user.mention} se transforme..."
-                        if old_bytes:
-                            msg = await channel.send(caption, file=discord.File(io.BytesIO(old_bytes), filename="poke.png"))
-                        else:
-                            msg = await channel.send(caption)
-
-                        # 2. Alternate black/white silhouettes
-                        if old_bytes:
-                            for color in [(0, 0, 0), (255, 255, 255), (0, 0, 0), (255, 255, 255)]:
-                                await asyncio.sleep(0.6)
-                                await msg.delete()
-                                msg = await channel.send(caption, file=discord.File(make_silhouette(old_bytes, color), filename="poke.png"))
-                        else:
-                            await asyncio.sleep(2)
-
-                        # 3. Show new Pokémon
-                        await asyncio.sleep(0.6)
-                        await msg.delete()
-                        final_caption = f"🎉 {user.mention} **{old_name}** a évolué en **{next_name}** !"
-                        if new_id:
-                            try:
-                                new_bytes = requests.get(pokemon_artwork_url(new_id), timeout=5).content
-                                await channel.send(final_caption, file=discord.File(io.BytesIO(new_bytes), filename="poke_new.png"))
-                            except Exception:
-                                await channel.send(final_caption)
-                        else:
-                            await channel.send(final_caption)
-                        break
-
-            if not evolved:
-                await channel.send(f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{entry['level']}** !")
-
-        save_pokemon_data(pokemon_data)
-
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
+
+        # Pokémon XP gain
+        guild_id = str(message.guild.id)
+        user_id_str = str(user.id)
+        entry = get_pokemon_entry(pokemon_data, guild_id, user_id_str)
+        if entry and not MESSAGE.startswith("--"):
+            xp_gain = random.randint(10, 25)
+            entry["xp"] += xp_gain
+            leveled_up = False
+            while entry["xp"] >= xp_to_next_level(entry["level"]):
+                entry["xp"] -= xp_to_next_level(entry["level"])
+                entry["level"] += 1
+                leveled_up = True
+
+            if leveled_up:
+                chain = STARTER_CHAINS.get(entry["pokemon"].lower())
+                evolved = False
+                if chain:
+                    for i, (name, evo_level, *_) in enumerate(chain):
+                        if name.lower() == entry["pokemon"].lower() and evo_level is not None and entry["level"] >= evo_level:
+                            next_name = chain[i + 1][0]
+                            old_name = entry["pokemon"]
+                            entry["pokemon"] = next_name
+                            evolved = True
+
+                            old_id = chain[i][2] if len(chain[i]) > 2 else None
+                            new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
+
+                            # Fetch old artwork
+                            old_bytes = None
+                            if old_id:
+                                try:
+                                    old_bytes = requests.get(pokemon_artwork_url(old_id), timeout=5).content
+                                except Exception:
+                                    pass
+
+                            # 1. Show old Pokémon
+                            caption = f"Quoi ?! **{old_name}** de {user.mention} se transforme..."
+                            if old_bytes:
+                                msg = await channel.send(caption, file=discord.File(io.BytesIO(old_bytes), filename="poke.png"))
+                            else:
+                                msg = await channel.send(caption)
+
+                            # 2. Alternate black/white silhouettes
+                            if old_bytes:
+                                for color in [(0, 0, 0), (255, 255, 255), (0, 0, 0), (255, 255, 255)]:
+                                    await asyncio.sleep(0.6)
+                                    await msg.delete()
+                                    msg = await channel.send(caption, file=discord.File(make_silhouette(old_bytes, color), filename="poke.png"))
+                            else:
+                                await asyncio.sleep(2)
+
+                            # 3. Show new Pokémon
+                            await asyncio.sleep(0.6)
+                            await msg.delete()
+                            final_caption = f"🎉 {user.mention} **{old_name}** a évolué en **{next_name}** !"
+                            if new_id:
+                                try:
+                                    new_bytes = requests.get(pokemon_artwork_url(new_id), timeout=5).content
+                                    await channel.send(final_caption, file=discord.File(io.BytesIO(new_bytes), filename="poke_new.png"))
+                                except Exception:
+                                    await channel.send(final_caption)
+                            else:
+                                await channel.send(final_caption)
+                            break
+
+                if not evolved:
+                    await channel.send(f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{entry['level']}** !")
+
+            save_pokemon_data(pokemon_data)
 
         # Random response for the TQ user with the image allez.png
         if user.id == 756178270830985286:
@@ -1899,7 +1898,15 @@ async def starter(ctx, *, choix: str = None):
     }
     save_pokemon_data(pokemon_data)
     logger.info(f"{ctx.author.name} - {ctx.guild.name} - A choisi {found_chain[0][0]} comme starter")
-    await ctx.send(f"🎉 {ctx.author.mention} a choisi **{found_chain[0][0]}** comme starter ! Bonne aventure !")
+    poke_id = found_chain[0][2] if len(found_chain[0]) > 2 else None
+    embed = discord.Embed(
+        title=f"🎉 {found_chain[0][0]}",
+        description=f"{ctx.author.mention} a choisi **{found_chain[0][0]}** comme starter ! Bonne aventure !",
+        color=discord.Color.gold()
+    )
+    if poke_id:
+        embed.set_image(url=pokemon_artwork_url(poke_id))
+    await ctx.send(embed=embed)
 
 
 @bot.command()  # show your starter Pokémon details
