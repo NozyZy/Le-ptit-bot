@@ -175,10 +175,13 @@ sexe_stats = load_sexe_stats()
 
 # ── Pokémon starter system ────────────────────────────────────────────────────
 # Each starter: list of (name, evo_level) tuples. evo_level=None = final form.
+def _to_poke_tuple(entry: list) -> tuple[str | int | None, ...]:
+    return tuple(entry)  # type: ignore[return-value]
+
 with open("database/pokemon/starters.json", "r", encoding="utf-8") as _f:
     _raw = json.load(_f)
-STARTERS = {
-    gen: [[tuple(entry) for entry in chain] for chain in chains]
+STARTERS: dict[str, list[list[tuple[str | int | None, ...]]]] = {
+    gen: [[_to_poke_tuple(entry) for entry in chain] for chain in chains]
     for gen, chains in _raw.items()
 }
 
@@ -187,10 +190,10 @@ STARTER_CHAINS: dict[str, list] = {}
 STARTER_BASE_NAMES: list[str] = []
 for gen_chains in STARTERS.values():
     for chain in gen_chains:
-        base = chain[0][0]
+        base = str(chain[0][0])
         STARTER_BASE_NAMES.append(base)
         for form, *_ in chain:
-            STARTER_CHAINS[form.lower()] = chain
+            STARTER_CHAINS[str(form).lower()] = chain
 
 POKEMON_DATA_FILE = "data/pokemon_starters.json"
 
@@ -1830,7 +1833,7 @@ async def sexestats(ctx):
 
 
 @bot.command()  # choose or display your starter Pokémon
-async def starter(ctx, *, choix: str = None):
+async def starter(ctx, *, choix: str | None = None):
     guild_id = str(ctx.guild.id)
     user_id = str(ctx.author.id)
     entry = get_pokemon_entry(pokemon_data, guild_id, user_id)
@@ -1867,7 +1870,7 @@ async def starter(ctx, *, choix: str = None):
         # or current Pokémon
         lines = ["**Choisis ton starter ! Utilise `--starter <nom>`**\n"]
         for gen, chains in STARTERS.items():
-            names = " · ".join(chain[0][0] for chain in chains)
+            names = " · ".join(str(chain[0][0]) for chain in chains)
             lines.append(f"**{gen}** : {names}")
         await ctx.send("\n".join(lines))
         return
@@ -1878,9 +1881,9 @@ async def starter(ctx, *, choix: str = None):
         return
 
     choix_clean = choix.strip().lower()
-    found_chain = None
+    found_chain: list[tuple[str | int | None, ...]] | None = None
     for chain in (c for chains in STARTERS.values() for c in chains):
-        if chain[0][0].lower() == choix_clean:
+        if str(chain[0][0]).lower() == choix_clean:
             found_chain = chain
             break
 
@@ -1900,13 +1903,14 @@ async def starter(ctx, *, choix: str = None):
     save_pokemon_data(pokemon_data)
     logger.info(f"{ctx.author.name} - {ctx.guild.name} - A choisi {found_chain[0][0]} comme starter")
     poke_id = found_chain[0][2] if len(found_chain[0]) > 2 else None
+    starter_name = str(found_chain[0][0])  # type: ignore[index]
     embed = discord.Embed(
-        title=f"🎉 {found_chain[0][0]}",
-        description=f"{ctx.author.mention} a choisi **{found_chain[0][0]}** comme starter ! Bonne aventure !",
+        title=f"🎉 {starter_name}",
+        description=f"{ctx.author.mention} a choisi **{starter_name}** comme starter ! Bonne aventure !",
         color=discord.Color.gold()
     )
     if poke_id:
-        embed.set_image(url=pokemon_artwork_url(poke_id))
+        embed.set_image(url=pokemon_artwork_url(int(poke_id)))
     await ctx.send(embed=embed)
 
 
@@ -3649,9 +3653,9 @@ def add_questions(question):
         f.write("\n".join(questions))
 
 class QuiDeNousGame:
-    def __init__(self, host: discord.Member):
+    def __init__(self, host: discord.User | discord.Member):
         self.host = host
-        self.players: list[discord.Member] = []
+        self.players: list[discord.User | discord.Member] = []
         self.round = 0
         self.started = False
         self.ended = False
@@ -3784,7 +3788,7 @@ class QuiDeNousView(discord.ui.View):
             return
 
         voter_id = interaction.user.id
-        new_vote_id = int(interaction.data['values'][0])
+        new_vote_id = int(interaction.data['values'][0])  # type: ignore[index]
 
         if interaction.user not in self.game.players:
             await interaction.response.send_message("Inscrit-toi pour jouer !", ephemeral=True)
@@ -3857,7 +3861,8 @@ class QuiDeNousView(discord.ui.View):
             description=self.build_embed_description(),
             color=discord.Color.green()
         )
-        self.current_message = await interaction.channel.send(embed=embed, view=self)
+        assert interaction.channel is not None and hasattr(interaction.channel, 'send')
+        self.current_message = await interaction.channel.send(embed=embed, view=self)  # type: ignore[union-attr]
         await self.start_timer_on_message(self.current_message, self.game.turn_duration)
 
     # ---------------- Créer boutons + Select ----------------
@@ -3906,7 +3911,7 @@ class QuiDeNousView(discord.ui.View):
         async def timer():
             try:
                 while True:
-                    elapsed = int(time.time() - self.game.phase_start_time)
+                    elapsed = int(time.time() - (self.game.phase_start_time or 0.0))
                     if elapsed >= duration:
                         await self.timeout_turn_on_message(message)
                         break
@@ -3933,7 +3938,7 @@ class QuiDeNousView(discord.ui.View):
     # ---------------- Utilitaires ----------------
     async def disable_all_buttons(self):
         for item in self.children:
-            item.disabled = True
+            item.disabled = True  # type: ignore[attr-defined]
         await self.update_embed_on_current_message(color = discord.Color.greyple())
 
 
@@ -3947,7 +3952,7 @@ class QuiDeNousView(discord.ui.View):
 
 @bot.tree.command(name="quidenous", description="Lance une partie de 'Qui d'entre nous ?'")
 async def quidenous(interaction: discord.Interaction):
-    logger.info(f"{interaction.user.name} - {interaction.guild.name} - A lancé une partie de \"Qui d'entre nous ?\"")
+    logger.info(f"{interaction.user.name} - {interaction.guild.name if interaction.guild else 'DM'} - A lancé une partie de \"Qui d'entre nous ?\"")
 
     game = QuiDeNousGame(interaction.user)
     view = QuiDeNousView(game)
@@ -3984,7 +3989,7 @@ async def quidenous(interaction: discord.Interaction):
 
 @bot.tree.command(name="addquidenous", description="Ajoute une question au 'Qui d'entre nous ?'")
 async def addquidenous(interaction: discord.Interaction, question: str):
-    logger.info(f"{interaction.user.name} - {interaction.guild.name} - A demandé à ajouter la question \"{question}\"")
+    logger.info(f"{interaction.user.name} - {interaction.guild.name if interaction.guild else 'DM'} - A demandé à ajouter la question \"{question}\"")
     original_question = question.lower()
     question_pattern = re.compile(r"^qui d\'entre nous ([a-z0-9,'\"€$()éèàêûüë -]+) \?$")
     if not original_question.startswith("qui d'entre nous "):
