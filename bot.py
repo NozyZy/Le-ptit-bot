@@ -1,6 +1,7 @@
 # Standard library imports
 import argparse
 import asyncio
+import io
 import json
 import logging
 import math
@@ -34,7 +35,7 @@ from fonctions import (
     verifAlphabet,
 )
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger()
 
@@ -160,6 +161,7 @@ def load_sexe_stats():
 
 # Save sexe stats to file
 def save_sexe_stats(stats):
+    os.makedirs("data", exist_ok=True)
     with open("data/sexe_stats.txt", "w") as f:
         for user_id, entries in stats.items():
             for entry in entries:
@@ -171,12 +173,76 @@ def save_sexe_stats(stats):
 sexe_stats = load_sexe_stats()
 
 
+# ── Pokémon starter system ────────────────────────────────────────────────────
+# Each starter: list of (name, evo_level) tuples. evo_level=None = final form.
+def _to_poke_tuple(entry: list) -> tuple[str | int | None, ...]:
+    return tuple(entry)  # type: ignore[return-value]
+
+with open("database/pokemon/starters.json", "r", encoding="utf-8") as _f:
+    _raw = json.load(_f)
+STARTERS: dict[str, list[list[tuple[str | int | None, ...]]]] = {
+    gen: [[_to_poke_tuple(entry) for entry in chain] for chain in chains]
+    for gen, chains in _raw.items()
+}
+
+# Flat lookup: starter_name → full evolution chain
+STARTER_CHAINS: dict[str, list] = {}
+STARTER_BASE_NAMES: list[str] = []
+for gen_chains in STARTERS.values():
+    for chain in gen_chains:
+        base = str(chain[0][0])
+        STARTER_BASE_NAMES.append(base)
+        for form, *_ in chain:
+            STARTER_CHAINS[str(form).lower()] = chain
+
+POKEMON_DATA_FILE = "data/pokemon_starters.json"
+
+# Load Pokémon data 
+def load_pokemon_data() -> dict:
+    os.makedirs("data", exist_ok=True)
+    try:
+        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+# Save Pokémon data
+def save_pokemon_data(data: dict):
+    os.makedirs("data", exist_ok=True)
+    with open(POKEMON_DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+# calculate XP needed to level up
+def xp_to_next_level(level: int) -> int:
+    """XP needed to go from `level` to `level + 1`."""
+    return level * 50
+
+
+def get_pokemon_entry(data: dict, guild_id: str, user_id: str) -> dict | None:
+    return data.get(guild_id, {}).get(user_id)
+
+
+def pokemon_artwork_url(pokemon_id: int) -> str:
+    return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
+
+
+def make_silhouette(image_bytes: bytes, color: tuple) -> io.BytesIO:
+    """Return a BytesIO PNG where every non-transparent pixel is replaced by `color`."""
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+    r, g, b, a = img.split()
+    colored = Image.new("RGBA", img.size, color + (255,))
+    colored.putalpha(a)
+    buf = io.BytesIO()
+    colored.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
 # French month names
 FRENCH_MONTHS = [
     "janvier", "février", "mars", "avril", "mai", "juin",
     "juillet", "août", "septembre", "octobre", "novembre", "décembre"
 ]
-
 
 GUILD_IDS = [
     410766134569074691,
@@ -185,40 +251,42 @@ GUILD_IDS = [
     826575187721322546
 ]
 
+# server → user → {"starter": str, "pokemon": str, "level": int, "xp": int}
+bot.pokemon_data: dict = load_pokemon_data()
 
 # On ready message
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game(
         name=f"insulter {nbtg} personnes"))
-    logger.debug("Logged in as")
+    logger.info("Logged in as")
     if bot.user:
-        logger.debug(bot.user.name)
-        logger.debug(bot.user.id)
+        logger.info(bot.user.name)
+        logger.info(bot.user.id)
 
     if args.dev:
-        logger.debug("Synchronizing slash commands for guilds :")
+        logger.info("Synchronizing slash commands for guilds :")
         for guild_id in GUILD_IDS:
             guild = discord.Object(id=guild_id)
             try:
                 await bot.tree.sync(guild=guild)
-                logger.debug(f"\t- {guild_id}")
+                logger.info(f"\t- {guild_id}")
             except Exception as e:
-                logger.debug(f"\t- Failed for {guild_id}, reason : {e}")
+                logger.info(f"\t- Failed for {guild_id}, reason : {e}")
     else:
-        logger.debug("Synchronizing slash commands...")
+        logger.info("Synchronizing slash commands...")
         try:
             await bot.tree.sync()
         except Exception as e:
-            logger.debug(f"Failed syncing, reason : {e}")
-    logger.debug("------")
+            logger.warning(f"Failed syncing, reason : {e}")
+    logger.info("------")
 
     # Apply saved names to servers
     for guild in bot.guilds:
         if str(guild.id) in server_names:
             try:
                 await guild.me.edit(nick=server_names[str(guild.id)])
-                logger.debug(f"Applied saved name '{server_names[str(guild.id)]}' to server {guild.name}")
+                logger.info(f"Applied saved name '{server_names[str(guild.id)]}' to server {guild.name}")
             except discord.Forbidden:
                 logger.warning(f"No permission to change nickname in server {guild.name}")
 
@@ -267,13 +335,13 @@ async def on_message(message):
         return
 
     # open and stock the dico, with a lot of words
-    with open("txt/dico.txt", "r+") as dicoFile:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dicoFile:
         dicoLines = dicoFile.readlines()
     dicoSize = len(dicoLines)
 
     # expansion of the dico, with words of every messages (stock only words, never complete message)
     # we don't want a specific bot (from a friend) to expand the dico => don't know who but it's ok ^^
-    if message.author.id != 696099307706777610:
+    if message.author.id != 696099307706777610 and not MESSAGE.startswith("--"):
 
         # Split message into words
         words = MESSAGE.split()
@@ -286,7 +354,6 @@ async def on_message(message):
             # Filter valid words: length < 27
             # Note: verifAlphabet will reject words with apostrophes, so we skip it for words with apostrophes
             if clean_word and len(clean_word) < 27:
-                # If word contains apostrophe, accept it without verifAlphabet check
                 if verifAlphabet(clean_word):
                     word_with_newline = clean_word + "\n"
                     if word_with_newline not in dicoLines:
@@ -482,8 +549,90 @@ async def on_message(message):
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
+        # Pokémon XP gain
+        guild_id = str(message.guild.id)
+        user_id_str = str(user.id)
+        entry = get_pokemon_entry(bot.pokemon_data, guild_id, user_id_str)
+        if entry:
+            xp_gain = random.randint(10 ** 3, 10 ** 3)
+            entry["xp"] += xp_gain
+            leveled_up = False
+            while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:
+                entry["xp"] -= xp_to_next_level(entry["level"])
+                entry["level"] += 1
+                leveled_up = True
+
+            if leveled_up:
+                chain = STARTER_CHAINS.get(entry["pokemon"].lower())
+                evolved = False
+                if chain:
+                    for i, (name, evo_level, *_) in enumerate(chain):
+                        if name.lower() == entry["pokemon"].lower() and evo_level is not None and entry["level"] >= evo_level:
+                            next_name = chain[i + 1][0]
+                            old_name = entry["pokemon"]
+                            entry["pokemon"] = next_name
+                            evolved = True
+
+                            old_id = chain[i][2] if len(chain[i]) > 2 else None
+                            new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
+
+                            # Fetch old artwork
+                            old_bytes = None
+                            if old_id:
+                                try:
+                                    old_bytes = requests.get(pokemon_artwork_url(old_id), timeout=5).content
+                                except Exception:
+                                    pass
+
+                            # 1. Show old Pokémon
+                            caption = f"Quoi ?! **{old_name}** de {user.mention} se transforme..."
+                            if old_bytes:
+                                msg = await channel.send(caption, file=discord.File(io.BytesIO(old_bytes), filename="poke.png"))
+                            else:
+                                msg = await channel.send(caption)
+
+                            # 2. Alternate black/white silhouettes
+                            if old_bytes:
+                                for color in [(0, 0, 0), (255, 255, 255), (0, 0, 0), (255, 255, 255)]:
+                                    await asyncio.sleep(0.6)
+                                    await msg.delete()
+                                    msg = await channel.send(caption, file=discord.File(make_silhouette(old_bytes, color), filename="poke.png"))
+                            else:
+                                await asyncio.sleep(2)
+
+                            # 3. Show new Pokémon
+                            await asyncio.sleep(0.6)
+                            await msg.delete()
+                            final_caption = f"🎉 {user.mention} **{old_name}** a évolué en **{next_name}** !"
+                            if new_id:
+                                try:
+                                    new_bytes = requests.get(pokemon_artwork_url(new_id), timeout=5).content
+                                    await channel.send(final_caption, file=discord.File(io.BytesIO(new_bytes), filename="poke_new.png"))
+                                except Exception:
+                                    await channel.send(final_caption)
+                            else:
+                                await channel.send(final_caption)
+                                logger.info(
+                                    f"{user.name} - {message.guild.name} - {old_name} évolue en {next_name} ({entry['level']})")
+                            break
+
+                if not evolved:
+                    evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{entry['level']}** !"
+                    if entry["level"] == 50:
+                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** a atteint la moitié de ses niveaux, en passant niveau **50** !"
+                    elif entry["level"] == 75:
+                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** devient super puissant, en atteignant le niveau **75** !"
+                    elif entry["level"] == 90:
+                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** deviendra bientôt légendaire, plus que 10 niveaux avec le niveau final !\n## Niveau 90 atteint"
+                    elif entry["level"] == 100:
+                        evolv_msg = f"@everyone\n# 🔥 NIVEAU 100 ATTEINT 🔥\n 🆙🆙🆙 Le **{entry['pokemon']}** de **{user.name}** a atteint le **100e et dernier** !\n{user.name} est un dresseur légendaire !"
+                    await channel.send(evolv_msg)
+                    logger.info(f"{user.name} - {message.guild.name} - {entry['pokemon']} level up -> {entry['level']}")
+
+            save_pokemon_data(bot.pokemon_data)
+
         # Random response for the TQ user with the image allez.png
-        if user.id == 756178270830985286:
+        if user.id == 756178270830985286 and message.guild.id == 1382722391117135904:
             tq_rand = random.randint(1, 100)
             if tq_rand <= 3:  # ~3% ≈ 1/31
                 logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
@@ -1516,36 +1665,38 @@ async def on_message(message):
     if MESSAGE == "--help":
         logger.info(f"{user.name} - {message.guild.name} - A demandé de l'aide")
         await channel.send(
-            "Commandes : \n"
-            " **F** to pay respect\n"
-            " **--addBranlette** pour ajouter une expression de branlette et **branle** pour en avoir une\n"
-            " **--addInsult** pour ajouter des insultes et **tg** pour te faire insulter\n"
-            " **--amongus** pour lancer une partie Among Us\n"
-            " **--appel** puis le pseudo de ton pote pour l'appeler (admin only)\n"
-            " **--calcul** *nb1* (+, -, /, *, ^, !) *nb2* pour avoir un calcul adéquat \n"
-            " **--clear** *nb* pour supprimer *nb* messages\n"
-            " **--crypt** pour chiffrer/déchiffrer un message César (décalage)\n"
-            " **--dhcp** *range* pour une activité d'attribution d'IPs\n"
-            " **--dico** pour connaître le nombre de mots dans mon dictionnaire\n"
-            " **--game** pour jouer au jeu du **clap**\n"
-            " **--invite** pour savoir comment m'inviter\n"
-            " **--isPrime** *nb* pour tester si *nb* est premier\n"
-            " **--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
-            " **--p4** pour jouer au Puissance 4 en **versus**\n"
-            "\t - **--p4 pve** pour jouer contre le bot (difficulté normale)\n"
-            "\t - **--p4 pve [facile,moyen,difficile]** pour jouer contre le bot avec une difficulté spéciale\n"
-            "\t - **--p4 pve [offensif,equilibre,defensif]** pour jouer contre le bot avec une configuration spécial\n"
-            " **--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
-            " **--presentation** et **--master** pour créer des memes\n"
-            " **--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
-            " **--randint** *nb1*, *nb2* pour avoir un nombre aléatoire entre ***nb1*** et ***nb2***\n"
-            " **--random** pour écrire 5 mots aléatoires\n"
-            " **--rename** *nouveau_nom* pour changer mon nom sur ce serveur (admin only)\n"
-            " **--repeat** pour que je répète ce qui vient après l'espace\n"
-            " **--resetname** pour remettre mon nom par défaut (admin only)\n"
-            " **--serverInfo** pour connaître les infos du server\n"
-            " **--sexe** pour voir la liste des mots déclencheurs\n"
-            " **--sexestats** pour voir tes statistiques 🍆\n"
+            "**F** to pay respect\n"
+            "**--addBranlette** pour ajouter une expression de branlette et **branle** pour en avoir une\n"
+            "**--addInsult** pour ajouter des insultes et **tg** pour te faire insulter\n"
+            "**--amongus** pour lancer une partie Among Us\n"
+            "**--appel** puis le pseudo de ton pote pour l'appeler (admin only)\n"
+            "**--calcul** *nb1* (+, -, /, *, ^, !) *nb2* pour avoir un calcul adéquat\n"
+            "**--clear** *nb* pour supprimer *nb* messages\n"
+            "**--crypt** pour chiffrer/déchiffrer un message César (décalage)\n"
+            "**--deletestarter** pour supprimer ton starter\n"
+            "**--dhcp** *range* pour une activité d'attribution d'IPs\n"
+            "**--dico** pour connaître le nombre de mots dans mon dictionnaire\n"
+            "**--game** pour jouer au jeu du **clap**\n"
+            "**--invite** pour savoir comment m'inviter\n"
+            "**--isPrime** *nb* pour tester si *nb* est premier\n"
+            "**--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
+            "**--p4** pour jouer au Puissance 4 en **versus**\n"
+            "**--p4 pve** pour jouer contre le bot (difficulté normale)\n"
+            "**--p4 pve [facile,moyen,difficile]** pour choisir la difficulté\n"
+            "**--p4 pve [offensif,equilibre,defensif]** pour choisir la configuration\n"
+        )
+        await channel.send(
+            "**--poll** ***question***, *prop1*, *prop2*,..., *prop10* pour avoir un sondage de max 10 propositions\n"
+            "**--presentation** et **--master** pour créer des memes\n"
+            "**--prime** *nb* pour avoir la liste de tous les nombres premiers jusqu'a *nb* au minimum\n"
+            "**--randint** *nb1*, *nb2* pour avoir un nombre aléatoire entre ***nb1*** et ***nb2***\n"
+            "**--random** pour écrire 5 mots aléatoires\n"
+            "**--rename** *nouveau_nom* pour changer mon nom sur ce serveur (admin only)\n"
+            "**--repeat** pour que je répète ce qui vient après l'espace\n"
+            "**--resetname** pour remettre mon nom par défaut (admin only)\n"
+            "**--serverInfo** pour connaître les infos du server\n"
+            "**--sexe** pour voir la liste des mots déclencheurs\n"
+            "**--sexestats** pour voir tes statistiques 🍆\n"
             "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈"
         )
             
@@ -1579,39 +1730,148 @@ async def sexe(ctx):
     await ctx.send(f"Mots déclencheurs : {', '.join(sexe_words)}")
 
 
-@bot.command()  # show sexe statistics for the user
-async def sexestats(ctx):
-    logger.info(f"{ctx.author.name} - A demandé ses stats sexe")
-    user_id = str(ctx.author.id)
+@bot.tree.command(
+    name="sexestats",
+    description="Afficher tes statistiques sexe 📊"
+)
+async def sexestats(interaction: discord.Interaction):
+    logger.info(f"{interaction.user.name} - A demandé ses stats sexe")
+    user_id = str(interaction.user.id)
 
     if user_id not in sexe_stats or not sexe_stats[user_id]:
-        await ctx.send("Aucune statistique disponible. Dis un mot sexe pour commencer !")
+        await interaction.response.send_message(
+            "Aucune statistique disponible. Dis un mot sexe pour commencer !",
+            ephemeral=True
+        )
         return
 
     entries = sexe_stats[user_id]
-    sizes = [entry["size"] for entry in entries]
+    total_days = len(entries)
 
-    # Calculate stats
-    total_days = len(sizes)
-    max_size = max(sizes)
-    min_size = min(sizes)
-    avg_size = sum(sizes) / total_days
-    zero_count = sizes.count(0)
-    max31_count = sizes.count(31)
+    # ─── Calculs ───
+    max_size = min_size = entries[0]["size"]
+    total = zero_count = max31_count = 0
+    max_dates = []
 
-    # Find max date(s)
-    max_dates = [entry["date"] for entry in entries if entry["size"] == max_size]
+    for entry in entries:
+        s = entry["size"]
+        total += s
 
-    # Build response
-    response = f"**Statistiques de {ctx.author.name}** 🍆\n"
-    response += f"- Jours enregistrés : {total_days}\n"
-    response += f"- Taille max : {max_size} (le {', '.join(max_dates[:3])}{'...' if len(max_dates) > 3 else ''})\n"
-    response += f"- Taille min : {min_size}\n"
-    response += f"- Moyenne : {avg_size:.1f}\n"
-    response += f"- Nombre de 0 : {zero_count} ({zero_count/total_days*100:.1f}%)\n"
-    response += f"- Nombre de 31 : {max31_count} ({max31_count/total_days*100:.1f}%)\n"
+        if s > max_size:
+            max_size = s
+            max_dates = [entry["date"]]
+        elif s == max_size:
+            max_dates.append(entry["date"])
 
-    await ctx.send(response)
+        if s < min_size:
+            min_size = s
+        if s == 0:
+            zero_count += 1
+        if s == 31:
+            max31_count += 1
+
+    avg_size = total / total_days
+    dates_str = ", ".join(max_dates[:3]) + ("..." if len(max_dates) > 3 else "")
+
+    lines = [
+        f"**Statistiques de {interaction.user.name}** 🍆",
+        f"- Jours enregistrés : {total_days}",
+        f"- Taille max : {max_size} (le {dates_str})",
+        f"- Taille min : {min_size}",
+        f"- Moyenne : {avg_size:.1f}",
+        f"- Nombre de 0 : {zero_count} ({zero_count / total_days * 100:.1f}%)",
+        f"- Nombre de 31 : {max31_count} ({max31_count / total_days * 100:.1f}%)",
+    ]
+
+    # ─── Génération du graphique ───
+    W, H = 800, 400
+    PAD_L, PAD_R, PAD_T, PAD_B = 60, 30, 30, 50
+    graph_w = W - PAD_L - PAD_R
+    graph_h = H - PAD_T - PAD_B
+    MAX_VAL = 31
+
+    img = Image.new("RGB", (W, H), (30, 30, 30))
+    draw = ImageDraw.Draw(img)
+    font_small = ImageFont.truetype("fonts/Impact.ttf", 14)
+    font_title = ImageFont.truetype("fonts/Impact.ttf", 18)
+
+    draw.text(
+        (W // 2, 8),
+        f"Évolution de {interaction.user.name}",
+        fill=(255, 255, 255),
+        font=font_title,
+        anchor="mt"
+    )
+
+    # Grille Y
+    for val in range(0, MAX_VAL + 1, 5):
+        y = PAD_T + graph_h - int(val / MAX_VAL * graph_h)
+        draw.line([(PAD_L, y), (W - PAD_R, y)], fill=(60, 60, 60), width=1)
+        draw.text((PAD_L - 5, y), str(val),
+                  fill=(180, 180, 180), font=font_small, anchor="rm")
+
+    # Moyenne
+    avg_y = PAD_T + graph_h - int(avg_size / MAX_VAL * graph_h)
+    draw.line([(PAD_L, avg_y), (W - PAD_R, avg_y)],
+              fill=(255, 200, 0), width=1)
+    draw.text((W - PAD_R + 2, avg_y), "moy",
+              fill=(255, 200, 0), font=font_small, anchor="lm")
+
+    sizes_list = [e["size"] for e in entries]
+    step = graph_w / max(total_days - 1, 1)
+
+    def to_xy(i, s):
+        x = PAD_L + int(i * step)
+        y = PAD_T + graph_h - int(s / MAX_VAL * graph_h)
+        return x, y
+
+    # Courbe
+    for i in range(total_days - 1):
+        draw.line(
+            [to_xy(i, sizes_list[i]), to_xy(i + 1, sizes_list[i + 1])],
+            fill=(100, 180, 255),
+            width=2
+        )
+
+    # Points
+    for i, s in enumerate(sizes_list):
+        x, y = to_xy(i, s)
+        draw.ellipse([(x - 3, y - 3), (x + 3, y + 3)],
+                     fill=(100, 180, 255))
+
+    # Labels X
+    label_indices = {0, total_days - 1}
+    if total_days > 4:
+        label_indices |= {
+            total_days // 4,
+            total_days // 2,
+            3 * total_days // 4
+        }
+
+    for i in sorted(label_indices):
+        x, _ = to_xy(i, 0)
+        draw.text(
+            (x, H - PAD_B + 5),
+            entries[i]["date"],
+            fill=(180, 180, 180),
+            font=font_small,
+            anchor="mt"
+        )
+
+    # Axes
+    draw.line([(PAD_L, PAD_T), (PAD_L, PAD_T + graph_h)],
+              fill=(200, 200, 200), width=2)
+    draw.line([(PAD_L, PAD_T + graph_h), (W - PAD_R, PAD_T + graph_h)],
+              fill=(200, 200, 200), width=2)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    await interaction.response.send_message(
+        "\n".join(lines),
+        file=discord.File(buf, filename="sexestats.png")
+    )
 
 
 @bot.command()  # repeat the 'text', and delete the original message
@@ -1634,6 +1894,10 @@ async def serverinfo(ctx):
 
 @bot.command()  # send the 26 possibilites of a ceasar un/decryption
 async def crypt(ctx, *text):
+    if len(text) == 0:
+        await ctx.send("Rentre un message à crypter/décrypter")
+        logger.info(f"{ctx.author.name} - A demandé de crypter sans rentrer de message")
+        return
     mot = " ".join(text)
     messages = [message async for message in ctx.channel.history(limit=1)]
     for message in messages:
@@ -1682,7 +1946,7 @@ async def randint(ctx, *text):
 @bot.command()  # send a random word from the dico, the first to write it wins
 async def game(ctx):
     logger.info(f"{ctx.author.name} - ")
-    with open("txt/dico.txt", "r+") as dicoFile:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dicoFile:
         dicoLines = dicoFile.readlines()
 
     mot = random.choice(dicoLines)
@@ -1952,7 +2216,7 @@ async def randomWord(ctx, nb: int):
     logger.info(
         f"{ctx.author.name} - A demandé {nb} mots aléatoires dans le dico : ",
     )
-    with open("txt/dico.txt", "r+") as dicoFile:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dicoFile:
         dicoLines = dicoFile.readlines()
 
     text = ""
@@ -3252,7 +3516,7 @@ async def activity(ctx: discord.Interaction, participants: int):
 
 @bot.tree.command(name="search", description="Cherche un mot dans mon dictionnaire")
 async def search(ctx: discord.Interaction, mot: str):
-    with open("txt/dico.txt", "r+") as dico:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dico:
         lines = dico.read().split('\n')
     guild_name = ctx.guild.name if ctx.guild else "DM"
     if mot.lower() in lines:
@@ -3276,9 +3540,9 @@ def add_questions(question):
         f.write("\n".join(questions))
 
 class QuiDeNousGame:
-    def __init__(self, host: discord.Member):
+    def __init__(self, host: discord.User | discord.Member):
         self.host = host
-        self.players: list[discord.Member] = []
+        self.players: list[discord.User | discord.Member] = []
         self.round = 0
         self.started = False
         self.ended = False
@@ -3411,7 +3675,7 @@ class QuiDeNousView(discord.ui.View):
             return
 
         voter_id = interaction.user.id
-        new_vote_id = int(interaction.data['values'][0])
+        new_vote_id = int(interaction.data['values'][0])  # type: ignore[index]
 
         if interaction.user not in self.game.players:
             await interaction.response.send_message("Inscrit-toi pour jouer !", ephemeral=True)
@@ -3484,7 +3748,8 @@ class QuiDeNousView(discord.ui.View):
             description=self.build_embed_description(),
             color=discord.Color.green()
         )
-        self.current_message = await interaction.channel.send(embed=embed, view=self)
+        assert interaction.channel is not None and hasattr(interaction.channel, 'send')
+        self.current_message = await interaction.channel.send(embed=embed, view=self)  # type: ignore[union-attr]
         await self.start_timer_on_message(self.current_message, self.game.turn_duration)
 
     # ---------------- Créer boutons + Select ----------------
@@ -3533,7 +3798,7 @@ class QuiDeNousView(discord.ui.View):
         async def timer():
             try:
                 while True:
-                    elapsed = int(time.time() - self.game.phase_start_time)
+                    elapsed = int(time.time() - (self.game.phase_start_time or 0.0))
                     if elapsed >= duration:
                         await self.timeout_turn_on_message(message)
                         break
@@ -3560,7 +3825,7 @@ class QuiDeNousView(discord.ui.View):
     # ---------------- Utilitaires ----------------
     async def disable_all_buttons(self):
         for item in self.children:
-            item.disabled = True
+            item.disabled = True  # type: ignore[attr-defined]
         await self.update_embed_on_current_message(color = discord.Color.greyple())
 
 
@@ -3574,7 +3839,7 @@ class QuiDeNousView(discord.ui.View):
 
 @bot.tree.command(name="quidenous", description="Lance une partie de 'Qui d'entre nous ?'")
 async def quidenous(interaction: discord.Interaction):
-    logger.info(f"{interaction.user.name} - {interaction.guild.name} - A lancé une partie de \"Qui d'entre nous ?\"")
+    logger.info(f"{interaction.user.name} - {interaction.guild.name if interaction.guild else 'DM'} - A lancé une partie de \"Qui d'entre nous ?\"")
 
     game = QuiDeNousGame(interaction.user)
     view = QuiDeNousView(game)
@@ -3611,7 +3876,7 @@ async def quidenous(interaction: discord.Interaction):
 
 @bot.tree.command(name="addquidenous", description="Ajoute une question au 'Qui d'entre nous ?'")
 async def addquidenous(interaction: discord.Interaction, question: str):
-    logger.info(f"{interaction.user.name} - {interaction.guild.name} - A demandé à ajouter la question \"{question}\"")
+    logger.info(f"{interaction.user.name} - {interaction.guild.name if interaction.guild else 'DM'} - A demandé à ajouter la question \"{question}\"")
     original_question = question.lower()
     question_pattern = re.compile(r"^qui d\'entre nous ([a-z0-9,'\"€$()éèàêûüë -]+) \?$")
     if not original_question.startswith("qui d'entre nous "):
@@ -3644,9 +3909,18 @@ async def sync(ctx):
         await ctx.send('You must be the owner to use this command!')
 
 
-logger.debug(
+logger.info(
     "\n############\nDEV MODE\n############\n" if args.dev else "\n############\n/!\\ PRODUCTION MODE /!\\\n############\n")
 TOKEN = os.getenv('DEVELOPMENT_TOKEN') if args.dev else os.getenv('PRODUCTION_TOKEN')
 if not TOKEN:
     raise ValueError("TOKEN non défini dans les variables d'environnement")
-bot.run(TOKEN)
+
+
+async def main():
+    async with bot:
+        await bot.load_extension("cogs.pokemon_starter")
+        await bot.start(TOKEN)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
