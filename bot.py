@@ -35,7 +35,7 @@ from fonctions import (
     verifAlphabet,
 )
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger()
 
@@ -238,17 +238,11 @@ def make_silhouette(image_bytes: bytes, color: tuple) -> io.BytesIO:
     return buf
 
 
-# server → user → {"starter": str, "pokemon": str, "level": int, "xp": int}
-pokemon_data: dict = load_pokemon_data()
-
-
-
 # French month names
 FRENCH_MONTHS = [
     "janvier", "février", "mars", "avril", "mai", "juin",
     "juillet", "août", "septembre", "octobre", "novembre", "décembre"
 ]
-
 
 GUILD_IDS = [
     410766134569074691,
@@ -257,40 +251,42 @@ GUILD_IDS = [
     826575187721322546
 ]
 
+# server → user → {"starter": str, "pokemon": str, "level": int, "xp": int}
+bot.pokemon_data: dict = load_pokemon_data()
 
 # On ready message
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game(
         name=f"insulter {nbtg} personnes"))
-    logger.debug("Logged in as")
+    logger.info("Logged in as")
     if bot.user:
-        logger.debug(bot.user.name)
-        logger.debug(bot.user.id)
+        logger.info(bot.user.name)
+        logger.info(bot.user.id)
 
     if args.dev:
-        logger.debug("Synchronizing slash commands for guilds :")
+        logger.info("Synchronizing slash commands for guilds :")
         for guild_id in GUILD_IDS:
             guild = discord.Object(id=guild_id)
             try:
                 await bot.tree.sync(guild=guild)
-                logger.debug(f"\t- {guild_id}")
+                logger.info(f"\t- {guild_id}")
             except Exception as e:
-                logger.debug(f"\t- Failed for {guild_id}, reason : {e}")
+                logger.info(f"\t- Failed for {guild_id}, reason : {e}")
     else:
-        logger.debug("Synchronizing slash commands...")
+        logger.info("Synchronizing slash commands...")
         try:
             await bot.tree.sync()
         except Exception as e:
-            logger.debug(f"Failed syncing, reason : {e}")
-    logger.debug("------")
+            logger.warning(f"Failed syncing, reason : {e}")
+    logger.info("------")
 
     # Apply saved names to servers
     for guild in bot.guilds:
         if str(guild.id) in server_names:
             try:
                 await guild.me.edit(nick=server_names[str(guild.id)])
-                logger.debug(f"Applied saved name '{server_names[str(guild.id)]}' to server {guild.name}")
+                logger.info(f"Applied saved name '{server_names[str(guild.id)]}' to server {guild.name}")
             except discord.Forbidden:
                 logger.warning(f"No permission to change nickname in server {guild.name}")
 
@@ -339,7 +335,7 @@ async def on_message(message):
         return
 
     # open and stock the dico, with a lot of words
-    with open("txt/dico.txt", "r+") as dicoFile:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dicoFile:
         dicoLines = dicoFile.readlines()
     dicoSize = len(dicoLines)
 
@@ -358,7 +354,7 @@ async def on_message(message):
             # Filter valid words: length < 27
             # Note: verifAlphabet will reject words with apostrophes, so we skip it for words with apostrophes
             if clean_word and len(clean_word) < 27:
-                if "'" in clean_word or verifAlphabet(clean_word):
+                if verifAlphabet(clean_word):
                     word_with_newline = clean_word + "\n"
                     if word_with_newline not in dicoLines:
                         logger.info(f"{user.name} - {message.guild.name} - nouveau mot : {clean_word}")
@@ -556,12 +552,12 @@ async def on_message(message):
         # Pokémon XP gain
         guild_id = str(message.guild.id)
         user_id_str = str(user.id)
-        entry = get_pokemon_entry(pokemon_data, guild_id, user_id_str)
-        if entry and not MESSAGE.startswith("--"):
-            xp_gain = random.randint(10, 25)
+        entry = get_pokemon_entry(bot.pokemon_data, guild_id, user_id_str)
+        if entry:
+            xp_gain = random.randint(10 ** 3, 10 ** 3)
             entry["xp"] += xp_gain
             leveled_up = False
-            while entry["xp"] >= xp_to_next_level(entry["level"]):
+            while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:
                 entry["xp"] -= xp_to_next_level(entry["level"])
                 entry["level"] += 1
                 leveled_up = True
@@ -616,12 +612,24 @@ async def on_message(message):
                                     await channel.send(final_caption)
                             else:
                                 await channel.send(final_caption)
+                                logger.info(
+                                    f"{user.name} - {message.guild.name} - {old_name} évolue en {next_name} ({entry['level']})")
                             break
 
                 if not evolved:
-                    await channel.send(f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{entry['level']}** !")
+                    evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{entry['level']}** !"
+                    if entry["level"] == 50:
+                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** a atteint la moitié de ses niveaux, en passant niveau **50** !"
+                    elif entry["level"] == 75:
+                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** devient super puissant, en atteignant le niveau **75** !"
+                    elif entry["level"] == 90:
+                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** deviendra bientôt légendaire, plus que 10 niveaux avec le niveau final !\n## Niveau 90 atteint"
+                    elif entry["level"] == 100:
+                        evolv_msg = f"@everyone\n# 🔥 NIVEAU 100 ATTEINT 🔥\n 🆙🆙🆙 Le **{entry['pokemon']}** de **{user.name}** a atteint le **100e et dernier** !\n{user.name} est un dresseur légendaire !"
+                    await channel.send(evolv_msg)
+                    logger.info(f"{user.name} - {message.guild.name} - {entry['pokemon']} level up -> {entry['level']}")
 
-            save_pokemon_data(pokemon_data)
+            save_pokemon_data(bot.pokemon_data)
 
         # Random response for the TQ user with the image allez.png
         if user.id == 756178270830985286 and message.guild.id == 1382722391117135904:
@@ -1672,7 +1680,6 @@ async def on_message(message):
             "**--invite** pour savoir comment m'inviter\n"
             "**--isPrime** *nb* pour tester si *nb* est premier\n"
             "**--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
-            "**--monstarter** pour afficher ton Pokémon actuel, niveau, barre XP et évolution\n"
             "**--p4** pour jouer au Puissance 4 en **versus**\n"
             "**--p4 pve** pour jouer contre le bot (difficulté normale)\n"
             "**--p4 pve [facile,moyen,difficile]** pour choisir la difficulté\n"
@@ -1690,8 +1697,6 @@ async def on_message(message):
             "**--serverInfo** pour connaître les infos du server\n"
             "**--sexe** pour voir la liste des mots déclencheurs\n"
             "**--sexestats** pour voir tes statistiques 🍆\n"
-            "**--starter** affiche la liste des starters Pokémon disponibles\n"
-            "**--starter [nom]** pour choisir ton starter (une fois pour toutes par serveur)\n"
             "Et je risque de réagir à tes messages, parfois de manière... **Inattendue** 😈"
         )
             
@@ -1725,30 +1730,39 @@ async def sexe(ctx):
     await ctx.send(f"Mots déclencheurs : {', '.join(sexe_words)}")
 
 
-@bot.command()  # show sexe statistics for the user
-async def sexestats(ctx):
-    logger.info(f"{ctx.author.name} - A demandé ses stats sexe")
-    user_id = str(ctx.author.id)
+@bot.tree.command(
+    name="sexestats",
+    description="Afficher tes statistiques sexe 📊"
+)
+async def sexestats(interaction: discord.Interaction):
+    logger.info(f"{interaction.user.name} - A demandé ses stats sexe")
+    user_id = str(interaction.user.id)
 
     if user_id not in sexe_stats or not sexe_stats[user_id]:
-        await ctx.send("Aucune statistique disponible. Dis un mot sexe pour commencer !")
+        await interaction.response.send_message(
+            "Aucune statistique disponible. Dis un mot sexe pour commencer !",
+            ephemeral=True
+        )
         return
 
     entries = sexe_stats[user_id]
     total_days = len(entries)
 
-    # Single pass over entries
+    # ─── Calculs ───
     max_size = min_size = entries[0]["size"]
     total = zero_count = max31_count = 0
     max_dates = []
+
     for entry in entries:
         s = entry["size"]
         total += s
+
         if s > max_size:
             max_size = s
             max_dates = [entry["date"]]
         elif s == max_size:
             max_dates.append(entry["date"])
+
         if s < min_size:
             min_size = s
         if s == 0:
@@ -1760,16 +1774,16 @@ async def sexestats(ctx):
     dates_str = ", ".join(max_dates[:3]) + ("..." if len(max_dates) > 3 else "")
 
     lines = [
-        f"**Statistiques de {ctx.author.name}** 🍆",
+        f"**Statistiques de {interaction.user.name}** 🍆",
         f"- Jours enregistrés : {total_days}",
         f"- Taille max : {max_size} (le {dates_str})",
         f"- Taille min : {min_size}",
         f"- Moyenne : {avg_size:.1f}",
-        f"- Nombre de 0 : {zero_count} ({zero_count/total_days*100:.1f}%)",
-        f"- Nombre de 31 : {max31_count} ({max31_count/total_days*100:.1f}%)",
+        f"- Nombre de 0 : {zero_count} ({zero_count / total_days * 100:.1f}%)",
+        f"- Nombre de 31 : {max31_count} ({max31_count / total_days * 100:.1f}%)",
     ]
 
-    # Generate graph
+    # ─── Génération du graphique ───
     W, H = 800, 400
     PAD_L, PAD_R, PAD_T, PAD_B = 60, 30, 30, 50
     graph_w = W - PAD_L - PAD_R
@@ -1781,21 +1795,28 @@ async def sexestats(ctx):
     font_small = ImageFont.truetype("fonts/Impact.ttf", 14)
     font_title = ImageFont.truetype("fonts/Impact.ttf", 18)
 
-    # Title
-    draw.text((W // 2, 8), f"Évolution de {ctx.author.name}", fill=(255, 255, 255), font=font_title, anchor="mt")
+    draw.text(
+        (W // 2, 8),
+        f"Évolution de {interaction.user.name}",
+        fill=(255, 255, 255),
+        font=font_title,
+        anchor="mt"
+    )
 
-    # Grid lines & Y labels (0, 5, 10, 15, 20, 25, 31)
+    # Grille Y
     for val in range(0, MAX_VAL + 1, 5):
         y = PAD_T + graph_h - int(val / MAX_VAL * graph_h)
         draw.line([(PAD_L, y), (W - PAD_R, y)], fill=(60, 60, 60), width=1)
-        draw.text((PAD_L - 5, y), str(val), fill=(180, 180, 180), font=font_small, anchor="rm")
+        draw.text((PAD_L - 5, y), str(val),
+                  fill=(180, 180, 180), font=font_small, anchor="rm")
 
-    # Average line
+    # Moyenne
     avg_y = PAD_T + graph_h - int(avg_size / MAX_VAL * graph_h)
-    draw.line([(PAD_L, avg_y), (W - PAD_R, avg_y)], fill=(255, 200, 0), width=1)
-    draw.text((W - PAD_R + 2, avg_y), f"moy", fill=(255, 200, 0), font=font_small, anchor="lm")
+    draw.line([(PAD_L, avg_y), (W - PAD_R, avg_y)],
+              fill=(255, 200, 0), width=1)
+    draw.text((W - PAD_R + 2, avg_y), "moy",
+              fill=(255, 200, 0), font=font_small, anchor="lm")
 
-    # Data points & lines
     sizes_list = [e["size"] for e in entries]
     step = graph_w / max(total_days - 1, 1)
 
@@ -1804,187 +1825,53 @@ async def sexestats(ctx):
         y = PAD_T + graph_h - int(s / MAX_VAL * graph_h)
         return x, y
 
+    # Courbe
     for i in range(total_days - 1):
-        x1, y1 = to_xy(i, sizes_list[i])
-        x2, y2 = to_xy(i + 1, sizes_list[i + 1])
-        draw.line([(x1, y1), (x2, y2)], fill=(100, 180, 255), width=2)
+        draw.line(
+            [to_xy(i, sizes_list[i]), to_xy(i + 1, sizes_list[i + 1])],
+            fill=(100, 180, 255),
+            width=2
+        )
 
+    # Points
     for i, s in enumerate(sizes_list):
         x, y = to_xy(i, s)
-        draw.ellipse([(x - 3, y - 3), (x + 3, y + 3)], fill=(100, 180, 255))
+        draw.ellipse([(x - 3, y - 3), (x + 3, y + 3)],
+                     fill=(100, 180, 255))
 
-    # X axis labels (first, last, and a few in between)
-    label_indices = [0, total_days - 1]
+    # Labels X
+    label_indices = {0, total_days - 1}
     if total_days > 4:
-        label_indices += [total_days // 4, total_days // 2, 3 * total_days // 4]
-    for i in sorted(set(label_indices)):
+        label_indices |= {
+            total_days // 4,
+            total_days // 2,
+            3 * total_days // 4
+        }
+
+    for i in sorted(label_indices):
         x, _ = to_xy(i, 0)
-        draw.text((x, H - PAD_B + 5), entries[i]["date"], fill=(180, 180, 180), font=font_small, anchor="mt")
+        draw.text(
+            (x, H - PAD_B + 5),
+            entries[i]["date"],
+            fill=(180, 180, 180),
+            font=font_small,
+            anchor="mt"
+        )
 
     # Axes
-    draw.line([(PAD_L, PAD_T), (PAD_L, PAD_T + graph_h)], fill=(200, 200, 200), width=2)
-    draw.line([(PAD_L, PAD_T + graph_h), (W - PAD_R, PAD_T + graph_h)], fill=(200, 200, 200), width=2)
+    draw.line([(PAD_L, PAD_T), (PAD_L, PAD_T + graph_h)],
+              fill=(200, 200, 200), width=2)
+    draw.line([(PAD_L, PAD_T + graph_h), (W - PAD_R, PAD_T + graph_h)],
+              fill=(200, 200, 200), width=2)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
 
-    await ctx.send("\n".join(lines), file=discord.File(buf, filename="sexestats.png"))
-
-
-@bot.command()  # choose or display your starter Pokémon
-async def starter(ctx, *, choix: str | None = None):
-    guild_id = str(ctx.guild.id)
-    user_id = str(ctx.author.id)
-    entry = get_pokemon_entry(pokemon_data, guild_id, user_id)
-
-    # No argument: show the list 
-    if choix is None:
-        if entry:
-            chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
-            cur_idx = next((i for i, (n, *_) in enumerate(chain) if n.lower() == entry["pokemon"].lower()), -1)
-            xp_needed = xp_to_next_level(entry["level"])
-            bar_filled = int(entry["xp"] / xp_needed * 10)
-            bar = "█" * bar_filled + "░" * (10 - bar_filled)
-            if cur_idx >= 0 and chain[cur_idx][1] is not None:
-                next_name = chain[cur_idx + 1][0]
-                next_level = chain[cur_idx][1]
-                next_evo_str = f"Prochaine évolution : **{next_name}** au niveau {next_level}"
-            else:
-                next_evo_str = "Forme finale atteinte !"
-            poke_id = chain[cur_idx][2] if cur_idx >= 0 and len(chain[cur_idx]) > 2 else None
-            embed = discord.Embed(
-                title=entry["pokemon"],
-                description=(
-                    f"Starter d'origine : {entry['starter']}\n"
-                    f"Niveau : **{entry['level']}** | XP : {entry['xp']}/{xp_needed} [{bar}]\n"
-                    f"{next_evo_str}"
-                ),
-                color=discord.Color.green()
-            )
-            if poke_id:
-                embed.set_thumbnail(url=pokemon_artwork_url(poke_id))
-            embed.set_footer(text="Utilise --monstarter pour plus de détails.")
-            await ctx.send(embed=embed)
-            return
-        # or current Pokémon
-        lines = ["**Choisis ton starter ! Utilise `--starter <nom>`**\n"]
-        for gen, chains in STARTERS.items():
-            names = " · ".join(str(chain[0][0]) for chain in chains)
-            lines.append(f"**{gen}** : {names}")
-        await ctx.send("\n".join(lines))
-        return
-
-    # Choose a starter
-    if entry:
-        await ctx.send(f"Tu as déjà **{entry['pokemon']}** ! Tu ne peux pas changer de starter.")
-        return
-
-    choix_clean = choix.strip().lower()
-    found_chain: list[tuple[str | int | None, ...]] | None = None
-    for chain in (c for chains in STARTERS.values() for c in chains):
-        if str(chain[0][0]).lower() == choix_clean:
-            found_chain = chain
-            break
-
-    if not found_chain:
-        await ctx.send(f"**{choix}** n'est pas un starter valide. Utilise `--starter` pour voir la liste.")
-        return
-
-    if guild_id not in pokemon_data:
-        pokemon_data[guild_id] = {}
-
-    pokemon_data[guild_id][user_id] = {
-        "starter": found_chain[0][0],
-        "pokemon": found_chain[0][0],
-        "level": 1,
-        "xp": 0,
-    }
-    save_pokemon_data(pokemon_data)
-    logger.info(f"{ctx.author.name} - {ctx.guild.name} - A choisi {found_chain[0][0]} comme starter")
-    poke_id = found_chain[0][2] if len(found_chain[0]) > 2 else None
-    starter_name = str(found_chain[0][0])  # type: ignore[index]
-    embed = discord.Embed(
-        title=f"🎉 {starter_name}",
-        description=f"{ctx.author.mention} a choisi **{starter_name}** comme starter ! Bonne aventure !",
-        color=discord.Color.gold()
+    await interaction.response.send_message(
+        "\n".join(lines),
+        file=discord.File(buf, filename="sexestats.png")
     )
-    if poke_id:
-        embed.set_image(url=pokemon_artwork_url(int(poke_id)))
-    await ctx.send(embed=embed)
-
-
-@bot.command()  # delete your starter Pokémon after reaction confirmation
-async def deletestarter(ctx):
-    guild_id = str(ctx.guild.id)
-    user_id = str(ctx.author.id)
-    entry = get_pokemon_entry(pokemon_data, guild_id, user_id)
-
-    if not entry:
-        await ctx.send("Tu n'as pas de Pokémon à supprimer.")
-        return
-
-    msg = await ctx.send(
-        f"⚠️ Tu es sur le point de supprimer **{entry['pokemon']}** (niv. {entry['level']}).\n"
-        f"Réagis avec ✅ pour confirmer ou ❌ pour annuler. *(30 secondes)*"
-    )
-    await msg.add_reaction("✅")
-    await msg.add_reaction("❌")
-
-    def check(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ("✅", "❌") and reaction.message.id == msg.id
-
-    try:
-        reaction, _ = await bot.wait_for("reaction_add", timeout=30.0, check=check)
-    except asyncio.TimeoutError:
-        await msg.edit(content=f"Temps écoulé, suppression annulée.")
-        return
-
-    if str(reaction.emoji) == "✅":
-        pokemon_data[guild_id].pop(user_id)
-        save_pokemon_data(pokemon_data)
-        logger.info(f"{ctx.author.name} - {ctx.guild.name} - A supprimé son starter {entry['pokemon']}")
-        await msg.edit(content=f"🗑️ **{entry['pokemon']}** a été supprimé. Tu peux choisir un nouveau starter avec `--starter`.")
-    else:
-        await msg.edit(content=f"Suppression annulée, **{entry['pokemon']}** est en sécurité.")
-
-
-@bot.command()  # show your starter Pokémon details
-async def monstarter(ctx):
-    guild_id = str(ctx.guild.id)
-    user_id = str(ctx.author.id)
-    entry = get_pokemon_entry(pokemon_data, guild_id, user_id)
-
-    if not entry:
-        await ctx.send("Tu n'as pas encore de starter ! Utilise `--starter` pour en choisir un.")
-        return
-
-    chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
-    xp_needed = xp_to_next_level(entry["level"])
-    bar_filled = int(entry["xp"] / xp_needed * 10)
-    bar = "█" * bar_filled + "░" * (10 - bar_filled)
-
-    cur_idx = next((i for i, (n, *_) in enumerate(chain) if n.lower() == entry["pokemon"].lower()), -1)
-    poke_id = chain[cur_idx][2] if cur_idx >= 0 and len(chain[cur_idx]) > 2 else None
-
-    evo_line = ""
-    for name, evo_level, *_ in chain:
-        marker = "▶ " if name.lower() == entry["pokemon"].lower() else "    "
-        evo_line += f"\n{marker}**{name}**" + (f" *(évolue niv. {evo_level})*" if evo_level else " *(forme finale)*")
-
-    embed = discord.Embed(
-        title=f"{entry['pokemon']} — Niv. {entry['level']}",
-        description=(
-            f"Starter d'origine : {entry['starter']}\n"
-            f"XP : {entry['xp']}/{xp_needed} [{bar}]\n"
-            f"\n**Chaîne d'évolution :**{evo_line}"
-        ),
-        color=discord.Color.blue()
-    )
-    if poke_id:
-        embed.set_image(url=pokemon_artwork_url(poke_id))
-    embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
-    await ctx.send(embed=embed)
 
 
 @bot.command()  # repeat the 'text', and delete the original message
@@ -2059,7 +1946,7 @@ async def randint(ctx, *text):
 @bot.command()  # send a random word from the dico, the first to write it wins
 async def game(ctx):
     logger.info(f"{ctx.author.name} - ")
-    with open("txt/dico.txt", "r+") as dicoFile:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dicoFile:
         dicoLines = dicoFile.readlines()
 
     mot = random.choice(dicoLines)
@@ -2329,7 +2216,7 @@ async def randomWord(ctx, nb: int):
     logger.info(
         f"{ctx.author.name} - A demandé {nb} mots aléatoires dans le dico : ",
     )
-    with open("txt/dico.txt", "r+") as dicoFile:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dicoFile:
         dicoLines = dicoFile.readlines()
 
     text = ""
@@ -3629,7 +3516,7 @@ async def activity(ctx: discord.Interaction, participants: int):
 
 @bot.tree.command(name="search", description="Cherche un mot dans mon dictionnaire")
 async def search(ctx: discord.Interaction, mot: str):
-    with open("txt/dico.txt", "r+") as dico:
+    with open("txt/dico.txt", "r+", encoding="utf-8") as dico:
         lines = dico.read().split('\n')
     guild_name = ctx.guild.name if ctx.guild else "DM"
     if mot.lower() in lines:
@@ -4022,9 +3909,18 @@ async def sync(ctx):
         await ctx.send('You must be the owner to use this command!')
 
 
-logger.debug(
+logger.info(
     "\n############\nDEV MODE\n############\n" if args.dev else "\n############\n/!\\ PRODUCTION MODE /!\\\n############\n")
 TOKEN = os.getenv('DEVELOPMENT_TOKEN') if args.dev else os.getenv('PRODUCTION_TOKEN')
 if not TOKEN:
     raise ValueError("TOKEN non défini dans les variables d'environnement")
-bot.run(TOKEN)
+
+
+async def main():
+    async with bot:
+        await bot.load_extension("cogs.pokemon_starter")
+        await bot.start(TOKEN)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
