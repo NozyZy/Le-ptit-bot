@@ -207,7 +207,7 @@ class PokemonStarterCog(commands.Cog):
                 power = power_emoji_for_level(entry["level"])
 
                 embed = discord.Embed(
-                    title=f"{entry["pokemon"]} {power}",
+                    title=f"{entry['pokemon']} {power}",
                     description=(
                         f"Starter d'origine : {entry['starter']}\n"
                         f"Niveau : **{entry['level']}** | XP : {entry['xp']}/{xp_needed} [{bar}]\n"
