@@ -87,6 +87,8 @@ god_requests = {}
 # Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
 sexe_requests = {}
 
+XP_MIN, XP_MAX = 15, 55
+
 def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
     """
     Checks whether a user can perform an action.
@@ -554,7 +556,7 @@ async def on_message(message):
         user_id_str = str(user.id)
         entry = get_pokemon_entry(bot.pokemon_data, guild_id, user_id_str)
         if entry:
-            xp_gain = random.randint(10 ** 3, 10 ** 3)
+            xp_gain = random.randint(XP_MIN, XP_MAX)
             entry["xp"] += xp_gain
             leveled_up = False
             while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:

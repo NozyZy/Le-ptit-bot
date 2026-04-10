@@ -143,7 +143,7 @@ class DeleteStarterView(discord.ui.View):
 
         await interaction.response.edit_message(
             content=f"🗑️ **{self.entry['pokemon']}** a été supprimé. "
-                    f"Tu peux choisir un nouveau starter avec `/starter`.",
+                    f"Tu peux choisir un nouveau starter avec `/choose_starter`.",
             view=None
         )
 
@@ -174,7 +174,7 @@ class PokemonStarterCog(commands.Cog):
             if current in s.lower()
         ][:25]
 
-    # ───────── /starter ─────────
+    # ───────── /choose_starter ─────────
     @app_commands.command(name="choose_starter", description="Choisir ou afficher ton starter Pokémon")
     @app_commands.describe(choix="Nom du Pokémon starter")
     @app_commands.autocomplete(choix=starter_autocomplete)
@@ -223,7 +223,7 @@ class PokemonStarterCog(commands.Cog):
                 await interaction.response.send_message(embed=embed)
                 return
 
-            lines = ["**Choisis ton starter ! Utilise `/starter <nom>`**\n"]
+            lines = ["**Choisis ton starter ! Utilise `/choose_starter <nom>`**\n"]
             for gen, chains in STARTERS.items():
                 names = " · ".join(chain[0][0] for chain in chains)
                 lines.append(f"**{gen}** : {names}")
@@ -326,7 +326,7 @@ class PokemonStarterCog(commands.Cog):
         if not entry:
             if joueur is None:
                 await interaction.response.send_message(
-                    "Tu n'as pas encore de starter.",
+                    "Tu n'as pas encore de starter. Utilise `/choose_start <nom>`",
                     ephemeral=True
                 )
             else:
