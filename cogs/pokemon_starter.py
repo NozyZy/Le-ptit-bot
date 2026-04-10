@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import os
+import urllib.parse
 
 # Third-party imports
 import discord
@@ -72,6 +73,11 @@ POWER_EMOJIS: list[tuple[int, str]] = [
     (100, "🔥💥👑💥🔥"),
 ]
 
+
+def pokepedia_url(name: str) -> str:
+    # remplace espaces par underscore + encode safe URL
+    formatted = name.replace(" ", "_")
+    return f"https://www.pokepedia.fr/{urllib.parse.quote(formatted)}"
 
 # Load Pokémon data
 def load_pokemon_data() -> dict:
@@ -224,9 +230,28 @@ class PokemonStarterCog(commands.Cog):
                 return
 
             lines = ["**Choisis ton starter ! Utilise `/choose_starter <nom>`**\n"]
+
+            all_chains = [chain for chains in STARTERS.values() for chain in chains]
+            all_names = [chain[0][0] for chain in all_chains]
+
+            max_len = max(len(name) for name in all_names)
+
             for gen, chains in STARTERS.items():
-                names = " · ".join(chain[0][0] for chain in chains)
-                lines.append(f"**{gen}** : {names}")
+                row_parts = []
+
+                for i, chain in enumerate(chains):
+                    name = chain[0][0]
+                    url = pokepedia_url(name)
+                    emoji = ["🌿", "🔥", "💧"][i % 3]
+
+                    padded = name.ljust(max_len)
+
+                    row_parts.append(f"[{emoji} {padded}](<{url}>)")
+
+                # 3 colonnes fixes
+                row = "   ".join(row_parts)
+
+                lines.append(f"**{gen}** : {row}")
 
             await interaction.response.send_message("\n".join(lines))
             return
