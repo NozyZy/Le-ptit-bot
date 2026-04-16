@@ -555,7 +555,7 @@ async def on_message(message):
         guild_id = str(message.guild.id)
         user_id_str = str(user.id)
         entry = get_pokemon_entry(bot.pokemon_data, guild_id, user_id_str)
-        if entry and entry["last_time"] + 60 < time.time():
+        if entry and entry.get("last_time", 0) + 60 < time.time():
             xp_gain = random.randint(XP_MIN, XP_MAX)
             entry["xp"] += xp_gain
             leveled_up = False
