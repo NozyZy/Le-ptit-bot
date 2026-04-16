@@ -284,6 +284,7 @@ class PokemonStarterCog(commands.Cog):
             "pokemon": found_chain[0][0],
             "level": 1,
             "xp": 0,
+            "last_time": 0
         }
 
         save_pokemon_data(self.pokemon_data)
