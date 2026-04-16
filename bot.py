@@ -555,7 +555,7 @@ async def on_message(message):
         guild_id = str(message.guild.id)
         user_id_str = str(user.id)
         entry = get_pokemon_entry(bot.pokemon_data, guild_id, user_id_str)
-        if entry:
+        if entry and entry["last_time"] + 60 < time.time():
             xp_gain = random.randint(XP_MIN, XP_MAX)
             entry["xp"] += xp_gain
             leveled_up = False
@@ -630,6 +630,8 @@ async def on_message(message):
                         evolv_msg = f"@everyone\n# 🔥 NIVEAU 100 ATTEINT 🔥\n 🆙🆙🆙 Le **{entry['pokemon']}** de **{user.name}** a atteint le **100e et dernier** !\n{user.name} est un dresseur légendaire !"
                     await channel.send(evolv_msg)
                     logger.info(f"{user.name} - {message.guild.name} - {entry['pokemon']} level up -> {entry['level']}")
+
+            entry["last_time"] = time.time()
 
             save_pokemon_data(bot.pokemon_data)
 
