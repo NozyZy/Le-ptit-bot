@@ -106,6 +106,13 @@ CRIT_MULTIPLIER = 1.5
 
 XP_MIN, XP_MAX = 15, 55
 
+DEFAULT = {
+    "HP": 15,
+    "wins": 0,
+    "losses": 0,
+    "last_combat": 0
+}
+
 def pokepedia_url(name: str) -> str:
     # remplace espaces par underscore + encode safe URL
     formatted = name.replace(" ", "_")
@@ -119,7 +126,6 @@ def save_pokemon_data(data: dict):
 def xp_to_next_level(level: int) -> int:
     """XP needed to go from `level` to `level + 1`."""
     return level * 50
-
 
 def get_pokemon_id_from_entry(entry: dict) -> int | None:
     chain = STARTER_CHAINS.get(entry["pokemon"].lower())
@@ -422,6 +428,8 @@ class PokemonStarterCog(commands.Cog):
         message = None
         leveled_up = False
 
+        entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
+
         while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:
             entry["xp"] -= xp_to_next_level(entry["level"])
             entry["level"] += 1
@@ -484,6 +492,8 @@ class PokemonStarterCog(commands.Cog):
                 old_name = entry["pokemon"]
                 next_name = chain[i + 1][0]
                 entry["pokemon"] = next_name
+                entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
+                entry["HP"] += random.randint(5, 10)
 
                 old_id = chain[i][2] if len(chain[i]) > 2 else None
                 new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
@@ -658,11 +668,11 @@ class PokemonStarterCog(commands.Cog):
             "pokemon": found_chain[0][0],
             "level": 1,
             "xp": 0,
-            "last_time": 0,
-            "HP": 15,
+            "last_time": DEFAULT.get("last_time"),
+            "HP": DEFAULT.get("HP"),
             "type": starter_type,
-            "wins": 0,
-            "losses": 0,
+            "wins": DEFAULT.get("wins"),
+            "losses": DEFAULT.get("wins"),
             "begin_date": datetime.datetime.now().replace(microsecond=0).isoformat()
         }
 
@@ -722,11 +732,12 @@ class PokemonStarterCog(commands.Cog):
     ):
         guild_id = str(interaction.guild.id)
 
-        # Par défaut → soi-même
         target = joueur or interaction.user
         user_id = str(target.id)
 
         entry = get_pokemon_entry(self.pokemon_data, guild_id, user_id)
+        entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
+        entry.setdefault("type", DEFAULT.get("HP") + round(1.5 * entry["level"]))
 
         if not entry:
             if joueur is None:
@@ -869,8 +880,8 @@ class PokemonStarterCog(commands.Cog):
         max_hp2 = hp2 = p2["HP"]
 
         for p in (p1, p2):
-            p.setdefault("wins", 0)
-            p.setdefault("losses", 0)
+            p.setdefault("wins", DEFAULT.get("wins"))
+            p.setdefault("losses", DEFAULT.get("losses"))
 
         # Qui commence
         if p1["level"] > p2["level"]:
