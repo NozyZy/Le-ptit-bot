@@ -1,3 +1,4 @@
+numpy
 discord.py~=2.6.4
 requests~=2.33.1
 beautifulsoup4~=4.14.3

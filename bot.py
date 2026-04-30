@@ -87,7 +87,6 @@ god_requests = {}
 # Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
 sexe_requests = {}
 
-XP_MIN, XP_MAX = 15, 55
 
 def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
     """
@@ -175,28 +174,6 @@ def save_sexe_stats(stats):
 sexe_stats = load_sexe_stats()
 
 
-# ── Pokémon starter system ────────────────────────────────────────────────────
-# Each starter: list of (name, evo_level) tuples. evo_level=None = final form.
-def _to_poke_tuple(entry: list) -> tuple[str | int | None, ...]:
-    return tuple(entry)  # type: ignore[return-value]
-
-with open("database/pokemon/starters.json", "r", encoding="utf-8") as _f:
-    _raw = json.load(_f)
-STARTERS: dict[str, list[list[tuple[str | int | None, ...]]]] = {
-    gen: [[_to_poke_tuple(entry) for entry in chain] for chain in chains]
-    for gen, chains in _raw.items()
-}
-
-# Flat lookup: starter_name → full evolution chain
-STARTER_CHAINS: dict[str, list] = {}
-STARTER_BASE_NAMES: list[str] = []
-for gen_chains in STARTERS.values():
-    for chain in gen_chains:
-        base = str(chain[0][0])
-        STARTER_BASE_NAMES.append(base)
-        for form, *_ in chain:
-            STARTER_CHAINS[str(form).lower()] = chain
-
 POKEMON_DATA_FILE = "data/pokemon_starters.json"
 
 # Load Pokémon data 
@@ -207,38 +184,6 @@ def load_pokemon_data() -> dict:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
-
-# Save Pokémon data
-def save_pokemon_data(data: dict):
-    os.makedirs("data", exist_ok=True)
-    with open(POKEMON_DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-# calculate XP needed to level up
-def xp_to_next_level(level: int) -> int:
-    """XP needed to go from `level` to `level + 1`."""
-    return level * 50
-
-
-def get_pokemon_entry(data: dict, guild_id: str, user_id: str) -> dict | None:
-    return data.get(guild_id, {}).get(user_id)
-
-
-def pokemon_artwork_url(pokemon_id: int) -> str:
-    return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
-
-
-def make_silhouette(image_bytes: bytes, color: tuple) -> io.BytesIO:
-    """Return a BytesIO PNG where every non-transparent pixel is replaced by `color`."""
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
-    r, g, b, a = img.split()
-    colored = Image.new("RGBA", img.size, color + (255,))
-    colored.putalpha(a)
-    buf = io.BytesIO()
-    colored.save(buf, format="PNG")
-    buf.seek(0)
-    return buf
-
 
 # French month names
 FRENCH_MONTHS = [
@@ -328,6 +273,8 @@ async def on_message(message):
 
     if message.author == bot.user:  # we don't want the bot to repeat itself
         return
+
+    if message.author.bot: return
 
     with open("txt/bans.txt", "r+") as bansFile:
         bansLines = bansFile.read().split('\n')
@@ -551,90 +498,6 @@ async def on_message(message):
     # begginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
-        # Pokémon XP gain
-        guild_id = str(message.guild.id)
-        user_id_str = str(user.id)
-        entry = get_pokemon_entry(bot.pokemon_data, guild_id, user_id_str)
-        if entry and entry.get("last_time", 0) + 60 < time.time():
-            xp_gain = random.randint(XP_MIN, XP_MAX)
-            entry["xp"] += xp_gain
-            leveled_up = False
-            while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:
-                entry["xp"] -= xp_to_next_level(entry["level"])
-                entry["level"] += 1
-                leveled_up = True
-
-            if leveled_up:
-                chain = STARTER_CHAINS.get(entry["pokemon"].lower())
-                evolved = False
-                if chain:
-                    for i, (name, evo_level, *_) in enumerate(chain):
-                        if name.lower() == entry["pokemon"].lower() and evo_level is not None and entry["level"] >= evo_level:
-                            next_name = chain[i + 1][0]
-                            old_name = entry["pokemon"]
-                            entry["pokemon"] = next_name
-                            evolved = True
-
-                            old_id = chain[i][2] if len(chain[i]) > 2 else None
-                            new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
-
-                            # Fetch old artwork
-                            old_bytes = None
-                            if old_id:
-                                try:
-                                    old_bytes = requests.get(pokemon_artwork_url(old_id), timeout=5).content
-                                except Exception:
-                                    pass
-
-                            # 1. Show old Pokémon
-                            caption = f"Quoi ?! **{old_name}** de {user.mention} se transforme..."
-                            if old_bytes:
-                                msg = await channel.send(caption, file=discord.File(io.BytesIO(old_bytes), filename="poke.png"))
-                            else:
-                                msg = await channel.send(caption)
-
-                            # 2. Alternate black/white silhouettes
-                            if old_bytes:
-                                for color in [(0, 0, 0), (255, 255, 255), (0, 0, 0), (255, 255, 255)]:
-                                    await asyncio.sleep(0.6)
-                                    await msg.delete()
-                                    msg = await channel.send(caption, file=discord.File(make_silhouette(old_bytes, color), filename="poke.png"))
-                            else:
-                                await asyncio.sleep(2)
-
-                            # 3. Show new Pokémon
-                            await asyncio.sleep(0.6)
-                            await msg.delete()
-                            final_caption = f"🎉 {user.mention} **{old_name}** a évolué en **{next_name}** !"
-                            if new_id:
-                                try:
-                                    new_bytes = requests.get(pokemon_artwork_url(new_id), timeout=5).content
-                                    await channel.send(final_caption, file=discord.File(io.BytesIO(new_bytes), filename="poke_new.png"))
-                                except Exception:
-                                    await channel.send(final_caption)
-                            else:
-                                await channel.send(final_caption)
-                                logger.info(
-                                    f"{user.name} - {message.guild.name} - {old_name} évolue en {next_name} ({entry['level']})")
-                            break
-
-                if not evolved:
-                    evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{entry['level']}** !"
-                    if entry["level"] == 50:
-                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** a atteint la moitié de ses niveaux, en passant niveau **50** !"
-                    elif entry["level"] == 75:
-                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** devient super puissant, en atteignant le niveau **75** !"
-                    elif entry["level"] == 90:
-                        evolv_msg = f"🆙 Le **{entry['pokemon']}** de **{user.name}** deviendra bientôt légendaire, plus que 10 niveaux avec le niveau final !\n## Niveau 90 atteint"
-                    elif entry["level"] == 100:
-                        evolv_msg = f"@everyone\n# 🔥 NIVEAU 100 ATTEINT 🔥\n 🆙🆙🆙 Le **{entry['pokemon']}** de **{user.name}** a atteint le **100e et dernier** !\n{user.name} est un dresseur légendaire !"
-                    await channel.send(evolv_msg)
-                    logger.info(f"{user.name} - {message.guild.name} - {entry['pokemon']} level up -> {entry['level']}")
-
-            entry["last_time"] = time.time()
-
-            save_pokemon_data(bot.pokemon_data)
-
         # Random response for the TQ user with the image allez.png
         if user.id == 756178270830985286 and message.guild.id == 1382722391117135904:
             tq_rand = random.randint(1, 100)
@@ -787,7 +650,7 @@ async def on_message(message):
 
             await channel.send(text, file=file)
 
-        if "pokémon" in MESSAGE.split() or "pokemon" in MESSAGE.split():
+        if MESSAGE.startswith("pokemon") or MESSAGE.startswith("pokémon"):
             # Save
             author = user
 
@@ -3541,6 +3404,8 @@ def add_questions(question):
     with open("txt/nous.txt", "a+", encoding="utf-8") as f:
         questions = f.read().split("\n")
         questions.append(question)
+        print(questions)
+
         f.write("\n".join(questions))
 
 class QuiDeNousGame:
@@ -3878,21 +3743,16 @@ async def quidenous(interaction: discord.Interaction):
     await asyncio.sleep(game.open_duration)
     await open_phase_timeout()
 
-@bot.tree.command(name="addquidenous", description="Ajoute une question au 'Qui d'entre nous ?'")
+
+@bot.tree.command(name="addquidenous", description="Ajoute une question au jeu \"Qui d'entre nous ?\"")
 async def addquidenous(interaction: discord.Interaction, question: str):
     logger.info(f"{interaction.user.name} - {interaction.guild.name if interaction.guild else 'DM'} - A demandé à ajouter la question \"{question}\"")
-    original_question = question.lower()
-    question_pattern = re.compile(r"^qui d\'entre nous ([a-z0-9,'\"€$()éèàêûüë -]+) \?$")
-    if not original_question.startswith("qui d'entre nous "):
-        await interaction.response.send_message("T'as pas compris le principe du jeu je crois... La question doit commencer par 'Qui d'entre nous ' (ouais c'est chiant à écrire, pas mon problème)", ephemeral=True)
-        return
+    original_question = question.lower().strip()
+    final_question = re.sub(r"^qui d[‘’']entre nous ", "", original_question)
+    print(final_question)
     if not original_question.endswith("?"):
         await interaction.response.send_message("Sans point d'interrogation, c'est pas une question andouille !", ephemeral=True)
         return
-    if not (question_match := re.match(question_pattern, original_question)):
-        await interaction.response.send_message("Je sais pas ce que t'as essayer de m'envoyer, mais ca correspond pas au format attendu. C'est balo !", ephemeral=True)
-        return
-    final_question = question_match.groups()[0]
 
     questions = load_questions()
     if final_question in questions:
@@ -3900,7 +3760,9 @@ async def addquidenous(interaction: discord.Interaction, question: str):
         return
 
     add_questions(final_question)
-    await interaction.response.send_message(f"La question suivante a bien été ajoutée : {question}\n\nJ'espère qu'elle vaut le coup...", ephemeral=True)
+    await interaction.response.send_message(
+        f"La question suivante a bien été ajoutée : Qui d'entre nous {final_question}\n\nJ'espère qu'elle vaut le coup...",
+        ephemeral=True)
 
 
 @bot.command()
