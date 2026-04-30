@@ -352,6 +352,15 @@ class CombatAcceptView(discord.ui.View):
 
     @discord.ui.button(label="⚔️ Accepter", style=discord.ButtonStyle.success)
     async def accept(self, interaction: discord.Interaction, _):
+        if self.adversary.bot:
+            self.accepted = True
+            self.stop()
+            await interaction.message.edit(
+                content="⚔️ Combat accepté !",
+                view=None
+            )
+            return
+
         if interaction.user.id != self.adversary.id:
             await interaction.response.send_message("Tu n'es pas l'adversaire ciblé !", ephemeral=True)
             return
