@@ -401,6 +401,7 @@ class PokemonStarterCog(commands.Cog):
         if not entry:
             return
 
+        entry.setdefault("last_time", DEFAULT.get("last_time"))
         now = time.time()
         if entry.get("last_time", 0) + XP_COOLDOWN > now:
             return
@@ -745,8 +746,6 @@ class PokemonStarterCog(commands.Cog):
         user_id = str(target.id)
 
         entry = get_pokemon_entry(self.pokemon_data, guild_id, user_id)
-        entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
-        entry.setdefault("type", DEFAULT.get("HP") + round(1.5 * entry["level"]))
 
         if not entry:
             if joueur is None:
@@ -760,6 +759,8 @@ class PokemonStarterCog(commands.Cog):
                     ephemeral=True
                 )
             return
+
+        entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
 
         chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
         xp_needed = xp_to_next_level(entry["level"])
@@ -850,6 +851,9 @@ class PokemonStarterCog(commands.Cog):
         if not view.accepted:
             await interaction.followup.send("Combat annulé !")
             return
+
+        p1.setdefault("last_combat", now)
+        p2.setdefault("last_combat", now)
 
         p1["last_combat"] = now
         p2["last_combat"] = now
@@ -969,10 +973,6 @@ class PokemonStarterCog(commands.Cog):
         xp_gain = max(5, base_xp + bonus)
 
         winner["xp"] += xp_gain
-
-        # ───── Stats combat ─────
-        winner.setdefault("wins", 0)
-        loser.setdefault("losses", 0)
 
         winner["wins"] += 1
         loser["losses"] += 1
