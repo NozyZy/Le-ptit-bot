@@ -432,7 +432,7 @@ class PokemonStarterCog(commands.Cog):
             return message
 
         lvl = entry["level"]
-        logger.info(f"{user.name} - {entry["pokemon"]} - Est passé level {entry['level']}")
+        logger.info(f"{user.name} - {entry['pokemon']} - Est passé level {entry['level']}")
 
         # ───────── messages EXACTS restaurés ─────────
         if lvl == 50:
@@ -1012,7 +1012,7 @@ class PokemonStarterCog(commands.Cog):
                 f"💀 Défaites : **{losses}**\n"
                 f"📈 Ratio victoire : **{ratio:.1f}%**\n"
                 "\n"
-                f"Niveau : {entry["level"]} {power_emoji_for_level(entry['level'])}\n"
+                f"Niveau : {entry['level']} {power_emoji_for_level(entry['level'])}\n"
             ),
             color=discord.Color.purple()
         )
