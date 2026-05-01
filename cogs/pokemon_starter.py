@@ -127,7 +127,7 @@ def load_pokemon_data() -> dict:
         with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        logger.error("File not found:", e)
+        logger.error(f"Error reading file: {e}")
         return {}
 
 def save_pokemon_data(data: dict):
