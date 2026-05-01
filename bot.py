@@ -173,18 +173,6 @@ def save_sexe_stats(stats):
 # Format: {user_id: [{"date": "YYYY-MM-DD", "size": int}, ...]}
 sexe_stats = load_sexe_stats()
 
-
-POKEMON_DATA_FILE = "data/pokemon_starters.json"
-
-# Load Pokémon data 
-def load_pokemon_data() -> dict:
-    os.makedirs("data", exist_ok=True)
-    try:
-        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
-
 # French month names
 FRENCH_MONTHS = [
     "janvier", "février", "mars", "avril", "mai", "juin",
@@ -197,9 +185,6 @@ GUILD_IDS = [
     1420660433722802188,
     826575187721322546
 ]
-
-# server → user → {"starter": str, "pokemon": str, "level": int, "xp": int}
-bot.pokemon_data: dict = load_pokemon_data()
 
 # On ready message
 @bot.event

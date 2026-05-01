@@ -113,10 +113,22 @@ DEFAULT = {
     "last_combat": 0
 }
 
+POKEMON_DATA_FILE = "data/pokemon_starters.json"
+
+
 def pokepedia_url(name: str) -> str:
     # remplace espaces par underscore + encode safe URL
     formatted = name.replace(" ", "_")
     return f"https://www.pokepedia.fr/{urllib.parse.quote(formatted)}"
+
+
+def load_pokemon_data() -> dict:
+    os.makedirs("data", exist_ok=True)
+    try:
+        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
 
 def save_pokemon_data(data: dict):
     os.makedirs("data", exist_ok=True)
@@ -155,7 +167,6 @@ def make_silhouette(image_bytes: bytes, color: tuple) -> io.BytesIO:
     buf.seek(0)
     return buf
 
-
 def detect_facing_direction(img: Image.Image) -> str:
     """
     Détecte la direction du sprite en analysant la densité de pixels
@@ -189,7 +200,6 @@ def detect_facing_direction(img: Image.Image) -> str:
         return "left"
     else:
         return "right"
-
 
 def generate_versus_image(p1: dict, p2: dict) -> io.BytesIO:
     base_size = (300, 300)
@@ -268,7 +278,6 @@ def power_emoji_for_level(level: int) -> str:
             return emoji
     return POWER_EMOJIS[-1][1]
 
-
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
     damage_base = attacker["level"] * 0.55 * random.uniform(0.85, 1.35)
 
@@ -283,7 +292,6 @@ def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
 
     dmg = round(damage_base * multiplier)
     return max(1, dmg), crit
-
 
 def health_bar(current: int, max_hp: int, size: int = 10) -> str:
     ratio = current / max_hp if max_hp > 0 else 0
@@ -386,7 +394,7 @@ class CombatAcceptView(discord.ui.View):
 class PokemonStarterCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.pokemon_data = bot.pokemon_data
+        self.pokemon_data = load_pokemon_data()
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
