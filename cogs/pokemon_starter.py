@@ -121,13 +121,13 @@ def pokepedia_url(name: str) -> str:
     formatted = name.replace(" ", "_")
     return f"https://www.pokepedia.fr/{urllib.parse.quote(formatted)}"
 
-
 def load_pokemon_data() -> dict:
     os.makedirs("data", exist_ok=True)
     try:
         with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logger.error("File not found:", e)
         return {}
 
 def save_pokemon_data(data: dict):
