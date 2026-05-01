@@ -192,9 +192,6 @@ def detect_facing_direction(img: Image.Image) -> str:
     left_score = np.sum(left_region > 0)
     right_score = np.sum(right_region > 0)
 
-    # debug optionnel:
-    # print(left_score, right_score)
-
     # si plus de détails à gauche → sprite regarde probablement à gauche
     if left_score > right_score:
         return "left"

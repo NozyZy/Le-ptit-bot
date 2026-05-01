@@ -2432,7 +2432,6 @@ async def puissance4(interaction):
     import copy
 
     message_commands = interaction.message.content.replace("é", "e").split()
-    print(message_commands)
     mode = "pve" if "pve" in message_commands else "pvp"
 
     if mode == "pve":
@@ -3389,7 +3388,6 @@ def add_questions(question):
     with open("txt/nous.txt", "a+", encoding="utf-8") as f:
         questions = f.read().split("\n")
         questions.append(question)
-        print(questions)
 
         f.write("\n".join(questions))
 
@@ -3734,7 +3732,7 @@ async def addquidenous(interaction: discord.Interaction, question: str):
     logger.info(f"{interaction.user.name} - {interaction.guild.name if interaction.guild else 'DM'} - A demandé à ajouter la question \"{question}\"")
     original_question = question.lower().strip()
     final_question = re.sub(r"^qui d[‘’']entre nous ", "", original_question)
-    print(final_question)
+
     if not original_question.endswith("?"):
         await interaction.response.send_message("Sans point d'interrogation, c'est pas une question andouille !", ephemeral=True)
         return
