@@ -83,13 +83,13 @@ POWER_EMOJIS: list[tuple[int, str]] = [
 POKEMON_TYPES = ["🌿", "🔥", "💧"]
 
 TYPE_MULTIPLIER = {
-    ("🔥", "🌿"): 1.4,
-    ("🌿", "💧"): 1.4,
-    ("💧", "🔥"): 1.4,
+    ("🔥", "🌿"): 1.25,
+    ("🌿", "💧"): 1.25,
+    ("💧", "🔥"): 1.25,
 
-    ("🌿", "🔥"): 0.6,
-    ("💧", "🌿"): 0.6,
-    ("🔥", "💧"): 0.6,
+    ("🌿", "🔥"): 0.8,
+    ("💧", "🌿"): 0.8,
+    ("🔥", "💧"): 0.8,
 }
 
 COLORS = {
@@ -101,20 +101,48 @@ COLORS = {
 COMBAT_COOLDOWN = 60 * 5
 XP_COOLDOWN = 60
 
-CRIT_CHANCE = 0.07
+BASE_HP = 15
+HP_PER_LEVEL = 1.8
+
+CRIT_CHANCE = 0.06
 CRIT_MULTIPLIER = 1.5
 
 XP_MIN, XP_MAX = 15, 55
 
-DEFAULT = {
-    "HP": 15,
+POKEMON_ENTRY_DEFAULTS = {
+    "starter": None,
+    "pokemon": None,
+    "level": 1,
+    "xp": 0,
+    "last_time": None,
+    "HP": BASE_HP,
+    "type": None,
     "wins": 0,
     "losses": 0,
-    "last_combat": 0
+    "begin_date": None,
 }
 
-POKEMON_DATA_FILE = "data/pokemon_starters.json"
+import logging
 
+log = logging.getLogger(__name__)
+
+
+def normalize_pokemon_entry(entry):
+    if not isinstance(entry, dict):
+        log.warning(
+            "Entrée Pokémon ignorée (type invalide): %r (%s)",
+            entry, type(entry).__name__
+        )
+        return None
+
+    for key, default in POKEMON_ENTRY_DEFAULTS.items():
+        if key not in entry or entry[key] is None:
+            if key == "begin_date":
+                entry[key] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            else:
+                entry[key] = default
+
+    return entry
 
 def pokepedia_url(name: str) -> str:
     # remplace espaces par underscore + encode safe URL
@@ -125,7 +153,23 @@ def load_pokemon_data() -> dict:
     os.makedirs("data", exist_ok=True)
     try:
         with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            for guild_id, users in list(data.items()):
+                if not isinstance(users, dict):
+                    log.error("Guild %s a une structure invalide: %r", guild_id, users)
+                    data[guild_id] = {}
+                    continue
+
+                for user_id, entry in list(users.items()):
+                    fixed = normalize_pokemon_entry(entry)
+                    if fixed is None:
+                        log.warning(
+                            "Suppression entrée Pokémon invalide | guild=%s user=%s",
+                            guild_id, user_id
+                        )
+                        del users[user_id]
+            save_pokemon_data(data)
+            return data
     except (FileNotFoundError, json.JSONDecodeError) as e:
         logger.error(f"Error reading file: {e}")
         return {}
@@ -275,8 +319,14 @@ def power_emoji_for_level(level: int) -> str:
             return emoji
     return POWER_EMOJIS[-1][1]
 
+
+def ensure_hp_field(entry: dict) -> None:
+    if "HP" not in entry or not isinstance(entry["HP"], int):
+        entry["HP"] = 0
+
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
-    damage_base = attacker["level"] * 0.55 * random.uniform(0.85, 1.35)
+    damage_base = attacker["level"] * 0.78
+    rng = random.uniform(0.9, 1.3)
 
     multiplier = TYPE_MULTIPLIER.get(
         (attacker["type"], defender["type"]),
@@ -287,8 +337,14 @@ def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
     if crit:
         multiplier *= CRIT_MULTIPLIER
 
-    dmg = round(damage_base * multiplier)
-    return max(1, dmg), crit
+    damage = round(damage_base * rng * multiplier)
+
+    return max(1, damage), crit
+
+
+def compute_max_hp(entry: dict) -> int:
+    ensure_hp_field(entry)
+    return BASE_HP + int(entry["level"] * HP_PER_LEVEL) + entry["HP"]
 
 def health_bar(current: int, max_hp: int, size: int = 10) -> str:
     ratio = current / max_hp if max_hp > 0 else 0
@@ -406,7 +462,6 @@ class PokemonStarterCog(commands.Cog):
         if not entry:
             return
 
-        entry.setdefault("last_time", DEFAULT.get("last_time"))
         now = time.time()
         if entry.get("last_time", 0) + XP_COOLDOWN > now:
             return
@@ -442,8 +497,6 @@ class PokemonStarterCog(commands.Cog):
     async def level_up(self, entry: dict, user: discord.Member) -> str | None:
         message = None
         leveled_up = False
-
-        entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
 
         while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:
             entry["xp"] -= xp_to_next_level(entry["level"])
@@ -507,8 +560,7 @@ class PokemonStarterCog(commands.Cog):
                 old_name = entry["pokemon"]
                 next_name = chain[i + 1][0]
                 entry["pokemon"] = next_name
-                entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
-                entry["HP"] += random.randint(5, 10)
+                compute_max_hp(entry)
 
                 old_id = chain[i][2] if len(chain[i]) > 2 else None
                 new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
@@ -678,18 +730,7 @@ class PokemonStarterCog(commands.Cog):
             )
             return
 
-        self.pokemon_data.setdefault(guild_id, {})[user_id] = {
-            "starter": found_chain[0][0],
-            "pokemon": found_chain[0][0],
-            "level": 1,
-            "xp": 0,
-            "last_time": DEFAULT.get("last_time"),
-            "HP": DEFAULT.get("HP"),
-            "type": starter_type,
-            "wins": DEFAULT.get("wins"),
-            "losses": DEFAULT.get("wins"),
-            "begin_date": datetime.datetime.now().replace(microsecond=0).isoformat()
-        }
+        self.pokemon_data.setdefault(guild_id, {})[user_id] = POKEMON_ENTRY_DEFAULTS
 
         save_pokemon_data(self.pokemon_data)
 
@@ -765,7 +806,7 @@ class PokemonStarterCog(commands.Cog):
                 )
             return
 
-        entry.setdefault("HP", DEFAULT.get("HP") + round(1.5 * entry["level"]))
+        compute_max_hp(entry)
 
         chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
         xp_needed = xp_to_next_level(entry["level"])
@@ -857,9 +898,6 @@ class PokemonStarterCog(commands.Cog):
             await interaction.followup.send("Combat annulé !")
             return
 
-        p1.setdefault("last_combat", now)
-        p2.setdefault("last_combat", now)
-
         p1["last_combat"] = now
         p2["last_combat"] = now
 
@@ -894,12 +932,9 @@ class PokemonStarterCog(commands.Cog):
             p2: dict,
             thread: discord.Thread
     ):
+
         max_hp1 = hp1 = p1["HP"]
         max_hp2 = hp2 = p2["HP"]
-
-        for p in (p1, p2):
-            p.setdefault("wins", DEFAULT.get("wins"))
-            p.setdefault("losses", DEFAULT.get("losses"))
 
         # Qui commence
         if p1["level"] > p2["level"]:
@@ -961,8 +996,8 @@ class PokemonStarterCog(commands.Cog):
                 msg += "\n# ⚡ **COUP CRITIQUE !**"
 
             msg += (
-                f"\n\n❤️ **{def_label_1}** : {hp1}/{max_hp1}HP HP\n{bar1}"
-                f"\n\n❤️ **{def_label_2}** : {hp2}/{max_hp2}HP HP\n{bar2}"
+                f"\n\n❤️ **{def_label_1}** : {hp1}/{max_hp1}HP\n{bar1}"
+                f"\n\n❤️ **{def_label_2}** : {hp2}/{max_hp2}HP\n{bar2}"
             )
 
             await thread.send(msg)
