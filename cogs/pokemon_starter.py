@@ -170,8 +170,11 @@ def load_pokemon_data() -> dict:
                         del users[user_id]
             save_pokemon_data(data)
             return data
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        logger.error(f"Error reading file: {e}")
+    except FileNotFoundError:
+        logger.info(f"{POKEMON_DATA_FILE} not found, starting with empty data.")
+        return {}
+    except json.JSONDecodeError as e:
+        logger.error(f"{POKEMON_DATA_FILE} is corrupted: {e}")
         return {}
 
 def save_pokemon_data(data: dict):

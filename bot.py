@@ -87,6 +87,9 @@ god_requests = {}
 # Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
 sexe_requests = {}
 
+# List of all Pokémon names
+ALL_POKEMONS = []
+POKEMON_CACHE_FILE = "data/pokemon_cache.json"
 
 def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
     """
@@ -122,7 +125,6 @@ def save_server_names(server_names):
     with open("txt/server_names.txt", "w") as f:
         for server_id, name in server_names.items():
             f.write(f"{server_id}:{name}\n")
-
 
 server_names = load_server_names()
 
@@ -173,6 +175,44 @@ def save_sexe_stats(stats):
 # Format: {user_id: [{"date": "YYYY-MM-DD", "size": int}, ...]}
 sexe_stats = load_sexe_stats()
 
+# Load Pokémon cache from file
+def load_pokemon_cache():
+    try:
+        with open(POKEMON_CACHE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return []
+
+# Save Pokémon cache to file
+def save_pokemon_cache(data):
+    os.makedirs("data", exist_ok=True)
+    with open(POKEMON_CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f)
+
+SPECIAL_NAMES = {
+    "mr-mime": "Mr._Mime",
+    "mr-rime": "Mr._Rime",
+    "mime-jr": "Mime_Jr.",
+    "farfetchd": "Farfetch'd",
+    "sirfetchd": "Sirfetch'd",
+}
+
+# Build Bulbapedia URL for a given Pokémon name + mega + forms handling
+def build_bulbapedia_url(pokemon_name: str) -> str:
+    base_name = pokemon_name.lower()
+
+    # mega case
+    if base_name.endswith("-mega"):
+        base_name = base_name.replace("-mega", "")
+    # others forms case
+    formatted = SPECIAL_NAMES.get(base_name)
+    if not formatted:
+        # fallback nettoyage léger seulement
+        formatted = base_name.replace("-", "_").title()
+
+    return f"https://bulbapedia.bulbagarden.net/wiki/{quote(formatted)}_(Pok%C3%A9mon)"
+
+
 # French month names
 FRENCH_MONTHS = [
     "janvier", "février", "mars", "avril", "mai", "juin",
@@ -183,7 +223,8 @@ GUILD_IDS = [
     410766134569074691,
     1193546302970146846,
     1420660433722802188,
-    826575187721322546
+    826575187721322546,
+    1457146663331303568
 ]
 
 # On ready message
@@ -222,6 +263,40 @@ async def on_ready():
             except discord.Forbidden:
                 logger.warning(f"No permission to change nickname in server {guild.name}")
 
+    global ALL_POKEMONS
+
+    try:
+        # Get total count of pokemons from API
+        meta = requests.get("https://pokeapi.co/api/v2/pokemon?limit=1", timeout=5).json()
+        api_count = meta["count"]
+
+        cached_pokemons = load_pokemon_cache()
+
+        # Check if cache is outdated => don't have the last pokemons
+        if len(cached_pokemons) != api_count:
+            logger.info(f"Cache Pokémon obsolète → mise à jour ({len(cached_pokemons)} => {api_count})")
+
+            url = f"https://pokeapi.co/api/v2/pokemon?limit={api_count}"
+            data = requests.get(url, timeout=10).json()
+
+            ALL_POKEMONS = [p["name"].capitalize() for p in data["results"]]
+
+            save_pokemon_cache(ALL_POKEMONS)
+
+            logger.info(f"Cache mis à jour ({len(ALL_POKEMONS)} pokémons)")
+
+        else:
+            logger.info("Cache Pokémon à jour.")
+            ALL_POKEMONS = cached_pokemons
+
+    except Exception as e:
+        logger.error(f"Erreur preload : {e}")
+
+        # fallback sécurité
+        ALL_POKEMONS = load_pokemon_cache()
+
+        if not ALL_POKEMONS:
+            logger.critical("Aucun cache Pokémon disponible !")
 
 # Error handler for command cooldowns
 @bot.event
@@ -635,7 +710,7 @@ async def on_message(message):
 
             await channel.send(text, file=file)
 
-        if MESSAGE.startswith("pokemon") or MESSAGE.startswith("pokémon"):
+        if re.fullmatch(r"pok[eé]mon[?!\.\s]*", MESSAGE.strip()):
             # Save
             author = user
 
@@ -645,10 +720,10 @@ async def on_message(message):
 
             day_of_year = today.timetuple().tm_yday
             seed = hash((user.id, day_of_year, today.year))
-            random.seed(seed)
-            pokemon_id = random.randint(1, 1025)
+            rng = random.Random(seed)
+            pokemon_name = rng.choice(ALL_POKEMONS)
 
-            text = random.choice([
+            text = rng.choice([
                 "En vrai, pas dingue",
                 "Stylé en sah",
                 "J'aurai préféré être une barbie à ta place",
@@ -657,86 +732,104 @@ async def on_message(message):
                 "J'espère pour toi que ce sera mieux demain",
                 "T'es accro avoue ?"
             ])
-            random.seed(None)
 
             colors = {
-                "acier": 0x60A2B9,
-                "combat": 0xFF8100,
+                "steel": 0x60A2B9,
+                "fighting": 0xFF8100,
                 "dragon": 0x4F60E2,
-                "eau": 0x2481EF,
-                "feu": 0xE72324,
-                "glace": 0x3DD9FF,
-                "insecte": 0x92A212,
+                "water": 0x2481EF,
+                "fire": 0xE72324,
+                "ice": 0x3DD9FF,
+                "bug": 0x92A212,
                 "normal": 0xA0A2A0,
-                "obscur": 0x000000,
-                "plante": 0x3DA224,
+                "dark": 0x4F3F3D,
+                "grass": 0x3DA224,
                 "poison": 0x923FCC,
-                "psy": 0xEF3F7A,
-                "ténèbres": 0x4F3F3D,
-                "roche": 0xB0AA82,
-                "sol": 0x92501B,
-                "spectre": 0x703F70,
-                "vol": 0x82BAEF
+                "psychic": 0xEF3F7A,
+                "rock": 0xB0AA82,
+                "ground": 0x92501B,
+                "ghost": 0x703F70,
+                "flying": 0x82BAEF,
+                "electric": 0xF4D03F,
+                "fairy": 0xF4A7B9,
             }
 
             try:
-                url = f"https://www.pokepedia.fr/Pokémon_n°{pokemon_id}"
-                response = requests.get(url, timeout=15)
-                if response.status_code == 200:
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    title = soup.find('title')
-                    if title:
-                        # extract Pokemon name from title (format: "Name — Poképédia")
-                        pokemon_name = title.text.split('—')[0].strip()
-
-                        # Extract Pokemon type for color
-                        pokemon_type = None
-                        ficheinfo = soup.select_one('table.ficheinfo')
-                        if ficheinfo and ficheinfo.get('class'):
-                            pokemon_type = ficheinfo['class'][-1]
-
-                        image_url = f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
-
-                        pokepedia_url = f"https://www.pokepedia.fr/{quote(pokemon_name)}"
-
-                        # Adapt message based on whether it's for the author or someone else
-                        if user == author:
-                            title = "Ton Pokémon du jour !"
-                            description = f"Aujourd'hui, tu es **[{pokemon_name}]({pokepedia_url})** !"
-                        else:
-                            title = f"Pokémon du jour de {user.display_name}"
-                            description = f"Aujourd'hui, {user.mention} est **[{pokemon_name}]({pokepedia_url})** !"
-
-                        embed = discord.Embed(
-                            title=title,
-                            description=description,
-                            color=colors.get(pokemon_type, 0xFCFCFC) if pokemon_type else 0xFF0000
-                        )
-                        embed.set_author(
-                            name=message.guild.me.display_name,
-                            url="https://github.com/NozyZy/Le-ptit-bot",
-                            icon_url=message.guild.me.display_avatar.url,
-                        )
-                        embed.set_thumbnail(url=user.avatar.url)
-                        embed.set_image(url=image_url)
-                        embed.set_footer(
-                            text=f"Pokémon n°{pokemon_id} | Reviens demain pour découvrir un nouveau Pokémon !")
-
-                        await channel.send(text, embed=embed)
-                        logger.info(
-                            f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon_name} : {pokemon_id}")
-                else:
+                if not ALL_POKEMONS:
+                    logger.error(f"Pokemon cache is empty, cannot load pokemon for user {user.name} ({user.id})")
                     error_file = discord.File("images/failled.jpg")
                     await channel.send(file=error_file)
-                    await channel.send("C'est un flop, appelez-moi un admin immédiatement")
-                    logger.warning(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour, mais mauvaise nouvelle")
-                    logger.warning(f"Pokepedia response status code: {response.status_code}")
-                    logger.warning(f"Pokepedia URL: {url}")
+                    await channel.send("C'est un soucis de cache, appelez-moi un admin immédiatement !")
+                    raise Exception("Pokemon cache not loaded")
+
+                # Really ? All the pokemon ????
+                try:
+                    url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name.lower()}"
+                    response = requests.get(url, timeout=3)
+
+                    if response.status_code != 200:
+                        raise Exception(f"HTTP {response.status_code}")
+
+                    data = response.json()
+                    
+                    pokemon_id = data.get("id", "?")
+                    sprites = data.get("sprites", {})
+                    other = sprites.get("other", {})
+                    official = other.get("official-artwork", {})
+
+                    image_url = official.get("front_default") or sprites.get("front_default")
+
+                    if not image_url:
+                        raise Exception("No image found")
+
+                    primary_type = data.get("types", [{}])[0].get("type", {}).get("name", "")
+                    embed_color = colors.get(primary_type, 0xFCFCFC)
+
+                except Exception as img_error:
+                    logger.warning(f"Erreur image Pokémon {pokemon_name}: {img_error}")
+
+                    image_url = None
+                    embed_color = 0xFCFCFC
+
+                bulbapedia_url = build_bulbapedia_url(pokemon_name)
+
+                if user == author:
+                    title = "Ton Pokémon du jour !"
+                    description = f"Aujourd'hui, tu es **[{pokemon_name}]({bulbapedia_url})** !"
+                else:
+                    title = f"Pokémon du jour de {user.display_name}"
+                    description = f"Aujourd'hui, {user.mention} est **[{pokemon_name}]({bulbapedia_url})** !"
+
+                embed = discord.Embed(
+                    title=title,
+                    description=description,
+                    color=embed_color
+                )
+
+                embed.set_author(
+                    name=message.guild.me.display_name,
+                    url="https://github.com/NozyZy/Le-ptit-bot",
+                    icon_url=message.guild.me.display_avatar.url,
+                )
+
+                embed.set_thumbnail(url=user.avatar.url)
+                embed.set_image(url=image_url)
+                embed.set_footer(
+                    text=f"Pokémon n°{pokemon_id} | Reviens demain pour découvrir un nouveau Pokémon !"
+                )
+
+                await channel.send(text, embed=embed)
+                logger.info(f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon_name} : {pokemon_id}")
+
             except Exception as e:
-                logger.error(f"Error fetching Pokemon name: {e}")
+                logger.error(f"Pokemon error occurred : {e}")
                 error_file = discord.File("images/failled.jpg")
                 await channel.send(file=error_file)
-                await channel.send("C'est un flop, appelez-moi un admin immédiatement")
+                await channel.send("C'est un flop, appelez-moi un admin immédiatement!")
+                await channel.send(
+                    f"Type: {type(e).__name__}\n"
+                    f"Détail: {str(e)[:100]}"
+                )
 
 
         if MESSAGE == "pouet":
