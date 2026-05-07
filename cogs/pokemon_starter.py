@@ -114,12 +114,13 @@ POKEMON_ENTRY_DEFAULTS = {
     "pokemon": None,
     "level": 1,
     "xp": 0,
-    "last_time": None,
+    "last_time": 0,
     "HP": BASE_HP,
     "type": None,
     "wins": 0,
     "losses": 0,
     "begin_date": None,
+    "does_not_evolve": False
 }
 
 import logging
@@ -386,6 +387,10 @@ class DeleteStarterView(discord.ui.View):
 
     @discord.ui.button(label="Supprimer", style=discord.ButtonStyle.danger, emoji="🗑️")
     async def confirm(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
         self.cog.pokemon_data[self.guild_id].pop(self.user_id)
         save_pokemon_data(self.cog.pokemon_data)
 
@@ -402,11 +407,73 @@ class DeleteStarterView(discord.ui.View):
 
     @discord.ui.button(label="Annuler", style=discord.ButtonStyle.secondary, emoji="❌")
     async def cancel(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
         await interaction.response.edit_message(
             content=f"Suppression annulée. **{self.entry['pokemon']}** est en sécurité.",
             view=None
         )
 
+
+class StarterView(discord.ui.View):
+    def __init__(self, cog, guild_id, user_id, entry):
+        super().__init__(timeout=30)
+        self.cog = cog
+        self.guild_id = guild_id
+        self.user_id = user_id
+        self.entry = entry
+
+    @discord.ui.button(label="Ne plus évoluer", style=discord.ButtonStyle.secondary, emoji="🛑")
+    async def stop_evolve(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
+        if self.entry["does_not_evolve"]:
+            await interaction.response.send_message("Il n'évolue déjà plus, tu n'as plus rien à faire !",
+                                                    ephemeral=True)
+            return
+
+        self.entry["does_not_evolve"] = True
+        save_pokemon_data(self.cog.pokemon_data)
+
+        logger.info(
+            f"{interaction.user.name} - {interaction.guild.name} - "
+            f"A décidé de ne plus faire évoluer son starter {self.entry['pokemon']}"
+        )
+
+        await interaction.response.edit_message(
+            content=f"Ton starter {self.entry['pokemon']} n'évoluera plus",
+            view=None,
+            embed=None
+        )
+
+    @discord.ui.button(label="Faire évoluer à nouveau", style=discord.ButtonStyle.primary, emoji="✅")
+    async def start_evolve(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
+        if not self.entry["does_not_evolve"]:
+            await interaction.response.send_message("il est déjà parti pour évoluer, suffit d'attendre le bon niveau",
+                                                    ephemeral=True)
+            return
+
+        self.entry["does_not_evolve"] = False
+        save_pokemon_data(self.cog.pokemon_data)
+
+        logger.info(
+            f"{interaction.user.name} - {interaction.guild.name} - "
+            f"A décidé faire évoluer de nouveau son starter {self.entry['pokemon']}"
+        )
+
+        await interaction.response.edit_message(
+            content=f"Ton starter {self.entry['pokemon']} évoluera à nouveau désormais",
+            view=None,
+            embed=None
+        )
 
 class CombatAcceptView(discord.ui.View):
     def __init__(self, adversary: discord.Member) -> None:
@@ -513,7 +580,6 @@ class PokemonStarterCog(commands.Cog):
         lvl = entry["level"]
         logger.info(f"{user.name} - {entry['pokemon']} - Est passé level {entry['level']}")
 
-        # ───────── messages EXACTS restaurés ─────────
         if lvl == 50:
             message = (
                 f"🆙 Le **{entry['pokemon']}** de **{user.name}** "
@@ -547,12 +613,10 @@ class PokemonStarterCog(commands.Cog):
 
         return message
 
-    async def evolve(self, entry: dict, user: discord.Member, channel: discord.TextChannel) -> str | None:
-        message = None
-
+    async def evolve(self, entry: dict, user: discord.Member, channel: discord.TextChannel) -> None:
         chain = STARTER_CHAINS.get(entry["pokemon"].lower())
         if not chain:
-            return message
+            return
 
         for i, (name, evo_level, *_) in enumerate(chain):
             if (
@@ -560,15 +624,17 @@ class PokemonStarterCog(commands.Cog):
                     and evo_level is not None
                     and entry["level"] >= evo_level
             ):
+
+                if entry["does_not_evolve"]:
+                    return
+
                 old_name = entry["pokemon"]
                 next_name = chain[i + 1][0]
                 entry["pokemon"] = next_name
-                compute_max_hp(entry)
 
                 old_id = chain[i][2] if len(chain[i]) > 2 else None
                 new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
 
-                message = f"🎉 **{user.mention} {old_name} a évolué en {next_name} !**"
                 logger.info(f"{user.name} - {channel.guild.name} - {old_name} a évolué en {next_name}")
 
                 # ───── ANIMATION RESTAURÉE ─────
@@ -627,8 +693,6 @@ class PokemonStarterCog(commands.Cog):
                     await channel.send(final_caption)
 
                 break
-
-        return message
 
     # ───────── /choose_starter ─────────
     @app_commands.command(name="choose_starter", description="Choisir ou afficher ton starter Pokémon")
@@ -733,12 +797,19 @@ class PokemonStarterCog(commands.Cog):
             )
             return
 
+        poke_id = found_chain[0][2] if len(found_chain[0]) > 2 else None
+        name = str(found_chain[0][0])
+
         self.pokemon_data.setdefault(guild_id, {})[user_id] = POKEMON_ENTRY_DEFAULTS
+        new_entry = self.pokemon_data[guild_id][user_id]
+
+        normalize_pokemon_entry(new_entry)
+        new_entry["starter"] = choix_clean
+        new_entry["pokemon"] = choix_clean
+        new_entry["type"] = starter_type
 
         save_pokemon_data(self.pokemon_data)
 
-        poke_id = found_chain[0][2] if len(found_chain[0]) > 2 else None
-        name = str(found_chain[0][0])
 
         embed = discord.Embed(
             title=f"🎉 {name}",
@@ -839,6 +910,7 @@ class PokemonStarterCog(commands.Cog):
                 f"Starter d'origine : {entry['starter']}\n"
                 f"XP : {entry['xp']}/{xp_needed} [{bar}]\n"
                 f"HP : {entry['HP']}\n"
+                f"Evolution arrêtée : {'✅' if entry['does_not_evolve'] else '❌'}\n"
                 f"\n**Chaîne d'évolution :**{evo_line}"
             ),
             color=COLORS.get(entry["type"])
@@ -852,7 +924,9 @@ class PokemonStarterCog(commands.Cog):
             icon_url=target.display_avatar.url
         )
 
-        await interaction.response.send_message(embed=embed)
+        view = StarterView(self, guild_id, user_id, entry)
+
+        await interaction.response.send_message(embed=embed, view=view)
 
     @app_commands.command(name="combat", description="Lancer un combat Pokémon")
     @app_commands.describe(adversaire="Joueur à défier")
