@@ -102,7 +102,7 @@ COMBAT_COOLDOWN = 60 * 5
 XP_COOLDOWN = 60
 
 BASE_HP = 15
-HP_PER_LEVEL = 1.8
+HP_PER_LEVEL = 1.3
 
 CRIT_CHANCE = 0.06
 CRIT_MULTIPLIER = 1.5
@@ -348,7 +348,7 @@ def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
 
 def compute_max_hp(entry: dict) -> int:
     ensure_hp_field(entry)
-    return BASE_HP + int(entry["level"] * HP_PER_LEVEL) + entry["HP"]
+    return BASE_HP + int(entry["level"] * HP_PER_LEVEL)
 
 def health_bar(current: int, max_hp: int, size: int = 10) -> str:
     ratio = current / max_hp if max_hp > 0 else 0
@@ -879,8 +879,6 @@ class PokemonStarterCog(commands.Cog):
                     ephemeral=True
                 )
             return
-
-        compute_max_hp(entry)
 
         chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
         xp_needed = xp_to_next_level(entry["level"])

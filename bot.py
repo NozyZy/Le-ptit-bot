@@ -767,7 +767,7 @@ async def on_message(message):
 
                 if user == author:
                     title = f"Ton Pokémon du jour {'✨' if shiny else ''} !"
-                    description = f"Aujourd'hui, tu es **[{pokemon["name"]}]({build_pokepedia_url(pokemon["name"])})** {'\n✨ ***SHINY*** ✨' if shiny else ''} !"
+                    description = f"Aujourd'hui, tu es **[{pokemon['name']}]({build_pokepedia_url(pokemon['name'])})** {'\n✨ ***SHINY*** ✨' if shiny else ''} !"
                 else:
                     title = f"Pokémon du jour de {user.display_name}"
                     description = f"Aujourd'hui, {user.mention} est **[{pokemon['name']}]({build_pokepedia_url(pokemon['name'])})** !"
