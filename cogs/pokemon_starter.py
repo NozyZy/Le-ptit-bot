@@ -171,8 +171,11 @@ def load_pokemon_data() -> dict:
                         del users[user_id]
             save_pokemon_data(data)
             return data
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        logger.error(f"Error reading file: {e}")
+    except FileNotFoundError:
+        logger.info(f"{POKEMON_DATA_FILE} not found, starting with empty data.")
+        return {}
+    except json.JSONDecodeError as e:
+        logger.error(f"{POKEMON_DATA_FILE} is corrupted: {e}")
         return {}
 
 def save_pokemon_data(data: dict):
@@ -634,7 +637,7 @@ class PokemonStarterCog(commands.Cog):
 
                 logger.info(f"{user.name} - {channel.guild.name} - {old_name} a évolué en {next_name}")
 
-                # ───── ANIMATION RESTAURÉE ─────
+                # ───── ANIMATION ─────
                 old_bytes = None
                 if old_id:
                     try:
@@ -907,7 +910,7 @@ class PokemonStarterCog(commands.Cog):
                 f"Starter d'origine : {entry['starter']}\n"
                 f"XP : {entry['xp']}/{xp_needed} [{bar}]\n"
                 f"HP : {entry['HP']}\n"
-                f"Evolution arrêtée : {'✅' if entry['does_not_evolve'] else '❌'}\n"
+                f"Peutr évoluer : {'❌' if entry['does_not_evolve'] else '✅'}\n"
                 f"\n**Chaîne d'évolution :**{evo_line}"
             ),
             color=COLORS.get(entry["type"])
