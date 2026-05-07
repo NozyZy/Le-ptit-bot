@@ -637,7 +637,7 @@ class PokemonStarterCog(commands.Cog):
 
                 logger.info(f"{user.name} - {channel.guild.name} - {old_name} a évolué en {next_name}")
 
-                # ───── ANIMATION RESTAURÉE ─────
+                # ───── ANIMATION ─────
                 old_bytes = None
                 if old_id:
                     try:
@@ -910,7 +910,7 @@ class PokemonStarterCog(commands.Cog):
                 f"Starter d'origine : {entry['starter']}\n"
                 f"XP : {entry['xp']}/{xp_needed} [{bar}]\n"
                 f"HP : {entry['HP']}\n"
-                f"Evolution arrêtée : {'✅' if entry['does_not_evolve'] else '❌'}\n"
+                f"Peutr évoluer : {'❌' if entry['does_not_evolve'] else '✅'}\n"
                 f"\n**Chaîne d'évolution :**{evo_line}"
             ),
             color=COLORS.get(entry["type"])
