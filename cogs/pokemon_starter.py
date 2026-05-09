@@ -330,7 +330,7 @@ def ensure_hp_field(entry: dict) -> None:
         entry["HP"] = 0
 
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
-    damage_base = attacker["level"] * 0.66
+    damage_base = attacker["level"] * 0.45
     rng = random.uniform(0.9, 1.3)
 
     multiplier = TYPE_MULTIPLIER.get(
