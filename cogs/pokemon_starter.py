@@ -330,7 +330,7 @@ def ensure_hp_field(entry: dict) -> None:
         entry["HP"] = 0
 
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
-    damage_base = attacker["level"] * 0.45
+    damage_base = attacker["level"] * 0.55
     rng = random.uniform(0.9, 1.3)
 
     multiplier = TYPE_MULTIPLIER.get(
@@ -520,7 +520,7 @@ class DodgeView(discord.ui.View):
         self.start_time = None
         self.reaction_time = None
 
-    @discord.ui.button(label="🌀 ESQUIVE !", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="🌀 ESQUIVE !", style=discord.ButtonStyle.secondary)
     async def dodge(self, interaction: discord.Interaction, _):
         if interaction.user.id != self.defender.id:
             await interaction.response.send_message(
@@ -1037,10 +1037,13 @@ class PokemonStarterCog(commands.Cog):
         # Qui commence
         if p1["level"] > p2["level"]:
             turn = 1
+            combat_round = 1
         elif p2["level"] > p1["level"]:
             turn = 2
+            combat_round = 0
         else:
             turn = random.choice([1, 2])
+            combat_round = 1 if turn == 1 else 0
 
         embed = discord.Embed(
             title="⚔️ Combat Pokémon",
@@ -1064,61 +1067,57 @@ class PokemonStarterCog(commands.Cog):
         await asyncio.sleep(3)
 
         while hp1 > 0 and hp2 > 0:
+            await thread.send(f"\n\n# ------------- TOUR {max(1, combat_round)} -------------\n\n")
+
             attacker, defender = (p1, p2) if turn == 1 else (p2, p1)
             atk_user, def_user = (user1, user2) if turn == 1 else (user2, user1)
 
             # ───── Calcul des dégâts de base ─────
             dmg, crit = compute_damage(attacker, defender)
-            final_dmg = dmg
-            
+
             # ───── Système d'esquive ─────
             reaction_time = None
             dodge_reduction = 0.0
             dodge_prompt = None
 
-            # Chance qu'une opportunité d'esquive apparaisse
             if random.random() < DODGE_CHANCE:
-                # Petit délai de suspense pour surprendre le joueur
-                await asyncio.sleep(random.uniform(0.5, 2.0))
                 
                 defender_user = def_user
                 dodge_view = DodgeView(defender_user)
 
                 dodge_prompt = await thread.send(
-                    f"⚠️ **{defender_user.display_name}**, attention ! Prépare-toi à esquiver !",
+                    f"⚠️ **{defender_user.mention}**, attention ! Esquive vite !",
                     view=dodge_view
                 )
                 
-                # On lance le chrono EXACTEMENT quand le message part
                 dodge_view.start_time = time.time()
                 await dodge_view.wait()
                 
                 reaction_time = dodge_view.reaction_time
-                await dodge_prompt.edit(view=None) # On retire le bouton
+                await dodge_prompt.edit(view=None)
 
                 # ───── Équilibrage : Paliers de vitesse ─────
                 if reaction_time is not None:
-                    if reaction_time <= 0.8:     # Réflexe éclair
+                    if reaction_time <= 0.9:  # Réflexe éclair
                         dodge_reduction = 1.0    # -100% dégâts
-                    elif reaction_time <= 1.5:   # Très Rapide
+                    elif reaction_time <= 1.4:  # Très Rapide
                         dodge_reduction = 0.8    # -80% dégâts
-                    elif reaction_time <= 2.2:   # Moyen
+                    elif reaction_time <= 2.0:  # Moyen
                         dodge_reduction = 0.5    # -50% dégâts
-                    elif reaction_time <= 3.0:   # Lent
+                    elif reaction_time <= 2.8:  # Lent
                         dodge_reduction = 0.2    # -20% dégâts
-                    else:                       # Trop lent
+                    else:  # Trop lent
                         dodge_reduction = 0.0    # 0% dégâts
             
-            # Application de la réduction de l'esquive
             final_dmg = round(dmg * (1 - dodge_reduction))
             
-            # ───── Appliquer dégâts AVANT affichage ─────
             if turn == 1:
                 hp2 -= final_dmg
                 hp2 = max(0, hp2)
             else:
                 hp1 -= final_dmg
                 hp1 = max(0, hp1)
+                combat_round += 1
 
             # ───── Barres de vie ─────
             bar1 = health_bar(hp1, p1["HP"])
@@ -1137,9 +1136,9 @@ class PokemonStarterCog(commands.Cog):
             if dodge_prompt is not None:
                 if reaction_time is not None:
                     if dodge_reduction == 1.0:
-                        msg += f"\n# 🌀 **ESQUIVE PARFAITE !** ({reaction_time:.2f}s)\n**{def_user.display_name}** a réagi à la vitesse de l'éclair et annule tous les dégâts !"
+                        msg += f"\n# 🌀 **ESQUIVE PARFAITE !** ({reaction_time:.2f}s)\n**{def_user.display_name}** a réagi à la vitesse de l'éclair et esquive entièrement l'attaque !"
                     else:
-                        msg += f"\n🌀 **Esquive réussie !** ({reaction_time:.2f}s)\nLes dégâts sont réduits de **{int(dodge_reduction*100)}%**."
+                        msg += f"\n🌀 **Esquive réussie !** ({reaction_time:.2f}s)\nLes dégâts sont réduits de **{int(dodge_reduction * 100)}%**."
                 else:
                     msg += f"\n❌ **Esquive ratée !** Tu as été trop lent !"
 
@@ -1156,8 +1155,7 @@ class PokemonStarterCog(commands.Cog):
             await thread.send(msg)
 
             turn = 2 if turn == 1 else 1
-            await asyncio.sleep(3)
-            await thread.send("\n\n# ------------------------------------\n\n")
+            await asyncio.sleep(4)
 
         winner, loser, winner_user, loser_user = (p1, p2, user1, user2) if hp1 > 0 else (p2, p1, user2, user1)
 
