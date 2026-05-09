@@ -107,7 +107,8 @@ HP_PER_LEVEL = 1.3
 CRIT_CHANCE = 0.06
 CRIT_MULTIPLIER = 1.5
 DODGE_CHANCE = 0.10
-DODGE_TIMEOUT = 2
+DODGE_CHANCE = 0.25
+DODGE_TIMEOUT = 3.0
 
 XP_MIN, XP_MAX = 15, 55
 
@@ -517,9 +518,10 @@ class DodgeView(discord.ui.View):
     def __init__(self, defender: discord.Member):
         super().__init__(timeout=DODGE_TIMEOUT)
         self.defender = defender
-        self.clicked = False
+        self.start_time = None
+        self.reaction_time = None
 
-    @discord.ui.button(label="🌀 Esquiver", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="🌀 ESQUIVE !", style=discord.ButtonStyle.primary)
     async def dodge(self, interaction: discord.Interaction, _):
         if interaction.user.id != self.defender.id:
             await interaction.response.send_message(
@@ -528,7 +530,10 @@ class DodgeView(discord.ui.View):
             )
             return
 
-        self.clicked = True
+        # On calcule le temps de réaction par rapport au moment d'affichage
+        if self.start_time is not None:
+            self.reaction_time = time.time() - self.start_time
+            
         self.stop()
         await interaction.response.defer()
 
@@ -889,7 +894,7 @@ class PokemonStarterCog(commands.Cog):
         if not entry:
             if joueur is None:
                 await interaction.response.send_message(
-                    "Tu n'as pas encore de starter. Utilise `/choose_start <nom>`",
+                    "Tu n'as pas encore de starter. Utilise `/choose_starter <nom>`",
                     ephemeral=True
                 )
             else:
@@ -1063,37 +1068,60 @@ class PokemonStarterCog(commands.Cog):
             attacker, defender = (p1, p2) if turn == 1 else (p2, p1)
             atk_user, def_user = (user1, user2) if turn == 1 else (user2, user1)
 
-            # ───── Phase d'esquive ─────
-            defender_user = def_user
-            dodge_view = DodgeView(defender_user)
+            # ───── Calcul des dégâts de base ─────
+            dmg, crit = compute_damage(attacker, defender)
+            final_dmg = dmg
+            
+            # ───── Système d'esquive ─────
+            reaction_time = None
+            dodge_reduction = 0.0
+            dodge_prompt = None
 
-            prompt = await thread.send(
-                f"🌀 **{defender_user.display_name}**, tente une esquive !",
-                view=dodge_view
-            )
+            # Chance qu'une opportunité d'esquive apparaisse
+            if random.random() < DODGE_CHANCE:
+                # Petit délai de suspense pour surprendre le joueur
+                await asyncio.sleep(random.uniform(0.5, 2.0))
+                
+                defender_user = def_user
+                dodge_view = DodgeView(defender_user)
 
-            await dodge_view.wait()
-            await prompt.edit(view=None)
+                dodge_prompt = await thread.send(
+                    f"⚠️ **{defender_user.display_name}**, attention ! Prépare-toi à esquiver !",
+                    view=dodge_view
+                )
+                
+                # On lance le chrono EXACTEMENT quand le message part
+                dodge_view.start_time = time.time()
+                await dodge_view.wait()
+                
+                reaction_time = dodge_view.reaction_time
+                await dodge_prompt.edit(view=None) # On retire le bouton
 
-            dodged = False
-            if dodge_view.clicked:
-                dodged = random.random() < DODGE_CHANCE
-
-            if dodged:
-                dmg = 0
-                crit = False
-            else:
-                dmg, crit = compute_damage(attacker, defender)
-
-            # ───── appliquer dégâts AVANT affichage ─────
+                # ───── Équilibrage : Paliers de vitesse ─────
+                if reaction_time is not None:
+                    if reaction_time <= 0.8:     # Réflexe éclair
+                        dodge_reduction = 1.0    # -100% dégâts
+                    elif reaction_time <= 1.5:   # Très Rapide
+                        dodge_reduction = 0.8    # -80% dégâts
+                    elif reaction_time <= 2.2:   # Moyen
+                        dodge_reduction = 0.5    # -50% dégâts
+                    elif reaction_time <= 3.0:   # Lent
+                        dodge_reduction = 0.2    # -20% dégâts
+                    else:                       # Trop lent
+                        dodge_reduction = 0.0    # 0% dégâts
+            
+            # Application de la réduction de l'esquive
+            final_dmg = round(dmg * (1 - dodge_reduction))
+            
+            # ───── Appliquer dégâts AVANT affichage ─────
             if turn == 1:
-                hp2 -= dmg
+                hp2 -= final_dmg
                 hp2 = max(0, hp2)
             else:
-                hp1 -= dmg
+                hp1 -= final_dmg
                 hp1 = max(0, hp1)
 
-            # ───── barres de vie ─────
+            # ───── Barres de vie ─────
             bar1 = health_bar(hp1, p1["HP"])
             bar2 = health_bar(hp2, p2["HP"])
 
@@ -1104,14 +1132,22 @@ class PokemonStarterCog(commands.Cog):
             def_label_1 = format_pokemon_label(p1["pokemon"], user1)
             def_label_2 = format_pokemon_label(p2["pokemon"], user2)
 
-            msg = f"## 💥 **{atk_label}** inflige **{dmg} dégâts**"
+            # ───── Message de combat détaillé ─────
+            msg = f"## 💥 **{atk_label}** attaque !"
 
-            if dodged:
-                msg += "\n#🌀 **ESQUIVE RÉUSSIE !** Aucun dégât subi."
-            else:
-                msg += f"\n➡️ **{dmg} dégâts infligés**"
-                if crit:
-                    msg += "\n# ⚡ **COUP CRITIQUE !**"
+            if dodge_prompt is not None:
+                if reaction_time is not None:
+                    if dodge_reduction == 1.0:
+                        msg += f"\n# 🌀 **ESQUIVE PARFAITE !** ({reaction_time:.2f}s)\n**{def_user.display_name}** a réagi à la vitesse de l'éclair et annule tous les dégâts !"
+                    else:
+                        msg += f"\n🌀 **Esquive réussie !** ({reaction_time:.2f}s)\nLes dégâts sont réduits de **{int(dodge_reduction*100)}%**."
+                else:
+                    msg += f"\n❌ **Esquive ratée !** Tu as été trop lent !"
+
+            msg += f"\n➡️ **{final_dmg} dégâts subis**"
+            
+            if crit and final_dmg > 0:
+                msg += "\n# ⚡ **COUP CRITIQUE !**"
 
             msg += (
                 f"\n\n❤️ **{def_label_1}** : {hp1}/{max_hp1}HP\n{bar1}"
