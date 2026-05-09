@@ -106,6 +106,8 @@ HP_PER_LEVEL = 1.3
 
 CRIT_CHANCE = 0.06
 CRIT_MULTIPLIER = 1.5
+DODGE_CHANCE = 0.10
+DODGE_TIMEOUT = 2
 
 XP_MIN, XP_MAX = 15, 55
 
@@ -323,13 +325,12 @@ def power_emoji_for_level(level: int) -> str:
             return emoji
     return POWER_EMOJIS[-1][1]
 
-
 def ensure_hp_field(entry: dict) -> None:
     if "HP" not in entry or not isinstance(entry["HP"], int):
         entry["HP"] = 0
 
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
-    damage_base = attacker["level"] * 0.78
+    damage_base = attacker["level"] * 0.66
     rng = random.uniform(0.9, 1.3)
 
     multiplier = TYPE_MULTIPLIER.get(
@@ -344,7 +345,6 @@ def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
     damage = round(damage_base * rng * multiplier)
 
     return max(1, damage), crit
-
 
 def compute_max_hp(entry: dict) -> int:
     ensure_hp_field(entry)
@@ -415,7 +415,6 @@ class DeleteStarterView(discord.ui.View):
             content=f"Suppression annulée. **{self.entry['pokemon']}** est en sécurité.",
             view=None
         )
-
 
 class StarterView(discord.ui.View):
     def __init__(self, cog, guild_id, user_id, entry):
@@ -512,6 +511,26 @@ class CombatAcceptView(discord.ui.View):
         self.accepted = False
         self.stop()
         await interaction.response.edit_message(content="Combat refusé.", view=None)
+
+
+class DodgeView(discord.ui.View):
+    def __init__(self, defender: discord.Member):
+        super().__init__(timeout=DODGE_TIMEOUT)
+        self.defender = defender
+        self.clicked = False
+
+    @discord.ui.button(label="🌀 Esquiver", style=discord.ButtonStyle.secondary)
+    async def dodge(self, interaction: discord.Interaction, _):
+        if interaction.user.id != self.defender.id:
+            await interaction.response.send_message(
+                "Ce n'est pas ton Pokémon, dégage !",
+                ephemeral=True
+            )
+            return
+
+        self.clicked = True
+        self.stop()
+        await interaction.response.defer()
 
 
 class PokemonStarterCog(commands.Cog):
@@ -1044,7 +1063,27 @@ class PokemonStarterCog(commands.Cog):
             attacker, defender = (p1, p2) if turn == 1 else (p2, p1)
             atk_user, def_user = (user1, user2) if turn == 1 else (user2, user1)
 
-            dmg, crit = compute_damage(attacker, defender)
+            # ───── Phase d'esquive ─────
+            defender_user = def_user
+            dodge_view = DodgeView(defender_user)
+
+            prompt = await thread.send(
+                f"🌀 **{defender_user.display_name}**, tente une esquive !",
+                view=dodge_view
+            )
+
+            await dodge_view.wait()
+            await prompt.edit(view=None)
+
+            dodged = False
+            if dodge_view.clicked:
+                dodged = random.random() < DODGE_CHANCE
+
+            if dodged:
+                dmg = 0
+                crit = False
+            else:
+                dmg, crit = compute_damage(attacker, defender)
 
             # ───── appliquer dégâts AVANT affichage ─────
             if turn == 1:
@@ -1067,8 +1106,12 @@ class PokemonStarterCog(commands.Cog):
 
             msg = f"## 💥 **{atk_label}** inflige **{dmg} dégâts**"
 
-            if crit:
-                msg += "\n# ⚡ **COUP CRITIQUE !**"
+            if dodged:
+                msg += "\n#🌀 **ESQUIVE RÉUSSIE !** Aucun dégât subi."
+            else:
+                msg += f"\n➡️ **{dmg} dégâts infligés**"
+                if crit:
+                    msg += "\n# ⚡ **COUP CRITIQUE !**"
 
             msg += (
                 f"\n\n❤️ **{def_label_1}** : {hp1}/{max_hp1}HP\n{bar1}"
@@ -1079,6 +1122,7 @@ class PokemonStarterCog(commands.Cog):
 
             turn = 2 if turn == 1 else 1
             await asyncio.sleep(3)
+            await thread.send("\n\n# ------------------------------------\n\n")
 
         winner, loser, winner_user, loser_user = (p1, p2, user1, user2) if hp1 > 0 else (p2, p1, user2, user1)
 
@@ -1116,7 +1160,7 @@ class PokemonStarterCog(commands.Cog):
 
         await thread.send(win_message)
         await thread.send(
-            f"🔒 Le combat est terminé. Ce thread sera archivé automatiquement dans {COMBAT_COOLDOWN / 60}min.")
+            f"🔒 Le combat est terminé. Ce thread sera archivé automatiquement dans {COMBAT_COOLDOWN // 60}min {COMBAT_COOLDOWN % 60}sec.")
         await asyncio.sleep(COMBAT_COOLDOWN)
         await thread.edit(archived=True, locked=True)
 
