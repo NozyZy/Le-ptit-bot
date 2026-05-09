@@ -908,7 +908,7 @@ class PokemonStarterCog(commands.Cog):
                 f"Starter d'origine : {entry['starter']}\n"
                 f"XP : {entry['xp']}/{xp_needed} [{bar}]\n"
                 f"HP : {entry['HP']}\n"
-                f"Peutr évoluer : {'❌' if entry['does_not_evolve'] else '✅'}\n"
+                f"Peut évoluer : {'❌' if entry['does_not_evolve'] else '✅'}\n"
                 f"\n**Chaîne d'évolution :**{evo_line}"
             ),
             color=COLORS.get(entry["type"])
