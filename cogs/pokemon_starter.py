@@ -7,6 +7,7 @@ import os
 import random
 import time
 import urllib.parse
+import copy
 
 # Third-party imports
 import discord
@@ -823,12 +824,12 @@ class PokemonStarterCog(commands.Cog):
         poke_id = found_chain[0][2] if len(found_chain[0]) > 2 else None
         name = str(found_chain[0][0])
 
-        self.pokemon_data.setdefault(guild_id, {})[user_id] = POKEMON_ENTRY_DEFAULTS
+        self.pokemon_data.setdefault(guild_id, {})[user_id] = copy.deepcopy(POKEMON_ENTRY_DEFAULTS)
         new_entry = self.pokemon_data[guild_id][user_id]
 
         normalize_pokemon_entry(new_entry)
-        new_entry["starter"] = choix_clean
-        new_entry["pokemon"] = choix_clean
+        new_entry["starter"] = name
+        new_entry["pokemon"] = name
         new_entry["type"] = starter_type
 
         save_pokemon_data(self.pokemon_data)
