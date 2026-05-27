@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import datetime
 import io
 import json
@@ -7,7 +8,6 @@ import os
 import random
 import time
 import urllib.parse
-import copy
 
 # Third-party imports
 import discord
@@ -417,7 +417,8 @@ class DeleteStarterView(discord.ui.View):
             view=None
         )
 
-class StarterView(discord.ui.View):
+
+class CanEvolveStarterView(discord.ui.View):
     def __init__(self, cog, guild_id, user_id, entry):
         super().__init__(timeout=30)
         self.cog = cog
@@ -425,7 +426,7 @@ class StarterView(discord.ui.View):
         self.user_id = user_id
         self.entry = entry
 
-    @discord.ui.button(label="Ne plus évoluer", style=discord.ButtonStyle.secondary, emoji="🛑")
+    @discord.ui.button(label="Refuser les évolutions", style=discord.ButtonStyle.secondary, emoji="🛑")
     async def stop_evolve(self, interaction: discord.Interaction, _):
         if str(interaction.user.id) != self.user_id:
             await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
@@ -450,7 +451,16 @@ class StarterView(discord.ui.View):
             embed=None
         )
 
-    @discord.ui.button(label="Faire évoluer à nouveau", style=discord.ButtonStyle.primary, emoji="✅")
+
+class CannotEvolveStarterView(discord.ui.View):
+    def __init__(self, cog, guild_id, user_id, entry):
+        super().__init__(timeout=30)
+        self.cog = cog
+        self.guild_id = guild_id
+        self.user_id = user_id
+        self.entry = entry
+
+    @discord.ui.button(label="Accepter les évolutions", style=discord.ButtonStyle.primary, emoji="✅")
     async def start_evolve(self, interaction: discord.Interaction, _):
         if str(interaction.user.id) != self.user_id:
             await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
@@ -480,6 +490,7 @@ class CombatAcceptView(discord.ui.View):
         super().__init__(timeout=60)
         self.accepted = False
         self.adversary = adversary
+        self.message: discord.Message | None = None
 
     @discord.ui.button(label="⚔️ Accepter", style=discord.ButtonStyle.success)
     async def accept(self, interaction: discord.Interaction, _):
@@ -511,7 +522,8 @@ class CombatAcceptView(discord.ui.View):
 
         self.accepted = False
         self.stop()
-        await interaction.response.edit_message(content="Combat refusé.", view=None)
+        await interaction.response.edit_message(
+            content=f"❌ {interaction.user.display_name} VS {self.adversary.display_name} : Combat refusé.", view=None)
 
 
 class DodgeView(discord.ui.View):
@@ -946,7 +958,8 @@ class PokemonStarterCog(commands.Cog):
             icon_url=target.display_avatar.url
         )
 
-        view = StarterView(self, guild_id, user_id, entry)
+        view = CannotEvolveStarterView(self, guild_id, user_id, entry) if entry[
+            'does_not_evolve'] else CanEvolveStarterView(self, guild_id, user_id, entry)
 
         await interaction.response.send_message(embed=embed, view=view)
 
@@ -986,15 +999,20 @@ class PokemonStarterCog(commands.Cog):
         view = CombatAcceptView(adversaire)
 
         await interaction.response.send_message(
-            f"{adversaire.mention}, **{interaction.user.display_name}** te défie en combat Pokémon ! ⚔️\n-# Tu as 60 secondes pour accepter",
+            f"{adversaire.mention}, **{interaction.user.display_name}** te défie en combat Pokémon ! ⚔️\n"
+            "-# Tu as 60 secondes pour accepter",
             view=view
         )
-        logger.info(f"{interaction.guild.name} - {interaction.user.name} a demandé un combat à {adversaire.name}")
+
+        combat_message = await interaction.original_response()
 
         await view.wait()
 
         if not view.accepted:
-            await interaction.followup.send("Combat annulé !")
+            await combat_message.edit(
+                content=f"❌ {interaction.user.display_name} VS {adversaire.display_name} : Combat annulé (temps écoulé).",
+                view=None
+            )
             return
 
         p1["last_combat"] = now
