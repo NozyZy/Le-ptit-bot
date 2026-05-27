@@ -3831,9 +3831,15 @@ async def sync(ctx):
         await ctx.send('You must be the owner to use this command!')
 
 
+if args.dev:
+    os.environ["RUN_MODE"] = "DEV"
+else:
+    os.environ["RUN_MODE"] = "PROD"
+
 logger.info(
-    "\n############\nDEV MODE\n############\n" if args.dev else "\n############\n/!\\ PRODUCTION MODE /!\\\n############\n")
-TOKEN = os.getenv('DEVELOPMENT_TOKEN') if args.dev else os.getenv('PRODUCTION_TOKEN')
+    "\n############\nDEV MODE\n############\n" if os.getenv(
+        "RUN_MODE") == "DEV" else "\n############\n/!\\ PRODUCTION MODE /!\\\n############\n")
+TOKEN = os.getenv('DEVELOPMENT_TOKEN') if os.getenv("RUN_MODE") == "DEV" else os.getenv('PRODUCTION_TOKEN')
 if not TOKEN:
     raise ValueError("TOKEN non défini dans les variables d'environnement")
 
