@@ -344,7 +344,7 @@ def ensure_hp_field(entry: dict) -> None:
 
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
     damage_base = (attacker["level"] ** 0.75) * 1.3
-    rng = random.uniform(0.8, 1.5)
+    rng = random.uniform(0.7, 1.4)
 
     multiplier = TYPE_MULTIPLIER.get(
         (attacker["type"], defender["type"]),
@@ -456,12 +456,13 @@ class CombatState:
             else:
                 atk_state["special_used"] = True
                 result["attack_multiplier"] = 1.5
-                result["message"] = "✨ Attaque spéciale !"
+                result["message"] = "✨ Attaque spéciale, dégâts augmentés !"
 
-        # Low HP bonus (centralisé ici)
+        # Low HP bonus
         hp_ratio = self.get_current_hp(attacker) / attacker["HP"]
-        if hp_ratio <= 0.25:
+        if int(hp_ratio * 100) <= 25:
             result["attack_multiplier"] += 0.3
+            result["message"] += f"\n🔥 **{attacker['pokemon']} est acculé ! Puissance déchaînée (+30%)**"
 
         return result
 
@@ -1212,16 +1213,16 @@ class PokemonStarterCog(commands.Cog):
 
         def dodge(reaction_time):
             if reaction_time is None:
-                return "🔴 **Raté**", 0.0
+                return "🔴 **Esquive ratée**", 0.0
             if reaction_time <= 0.9:
-                return "🌀 **ESQUIVE PARFAITE**", 1.0
+                return f"🌀 **ESQUIVE PARFAITE** ({reaction_time:.2f}s)", 1.0
             elif reaction_time <= 1.4:
-                return "🟢 **Excellente esquive**", 0.8
+                return f"🟢 **Excellente esquive** ({reaction_time:.2f}s)", 0.8
             elif reaction_time <= 2.0:
-                return "🟡 **Bonne esquive**", 0.5
+                return f"🟡 **Bonne esquive** ({reaction_time:.2f}s)", 0.5
             elif reaction_time <= 2.8:
-                return "🟠 **Esquive lente**", 0.2
-            return "🔴 **Raté**", 0.0
+                return f"🟠 **Esquive lente** ({reaction_time:.2f}s)", 0.2
+            return f"🔴 **Esquive ratée** ({reaction_time:.2f}s)", 0.0
 
         def finisher_text(winner, loser, crit, dodge_failed):
             if crit:
@@ -1259,10 +1260,14 @@ class PokemonStarterCog(commands.Cog):
 
         while not state.is_over():
 
-            await thread.send(f"\n\n# ------------- TOUR {max(1, state.round)} -------------\n\n")
-
             p_attacker, atk_user, atk_state = state.attacker()
             p_defender, def_user, def_state = state.defender()
+
+            await thread.send(
+                f"\n\n# ------------- TOUR {max(1, state.round)} -------------\n\n"
+                f"👤 Tour de **{atk_user.display_name}**\n"
+
+            )
 
             # ───── ACTION ─────
             action_view = CombatActionView(atk_user)
@@ -1333,7 +1338,7 @@ class PokemonStarterCog(commands.Cog):
 
             msg = (
                 f"## 💥 **{p_attacker['pokemon']} attaque !**\n"
-                f"➡️ **{final_dmg} dégâts**\n"
+                f"➡️ **{final_dmg} dégâts**"
             )
 
             if crit and final_dmg > 0:
