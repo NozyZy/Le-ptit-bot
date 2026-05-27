@@ -1380,7 +1380,10 @@ async def on_message(message):
                 ['https://legendaryladieshub.com/wp-content/uploads/2023/10/Venus_LLH.jpeg', 'Venus'],
                 ['https://tse2.mm.bing.net/th?id=OIP.BYG-Xfgo4To4PJaY32Gj0gHaKD&pid=Api', 'Poseidon'],
                 ['https://i.pinimg.com/736x/cd/79/9d/cd799dc51f48b1a88dddf5a8017d288f.jpg', 'Mara'],
-                ['https://static.wikia.nocookie.net/deities/images/c/ce/AnuByBrolken.jpg/revision/latest?cb=20210108190959','Anu']
+                ['https://static.wikia.nocookie.net/deities/images/c/ce/AnuByBrolken.jpg/revision/latest?cb=20210108190959',
+                 'Anu'],
+                ['https://static.wikia.nocookie.net/vsbattles/images/6/6d/Sea_Emperor_Concept_Artwork.jpg/revision/latest/scale-to-width-down/1200?cb=20200912072834',
+                 'Empereur des mers']
             ]
             embed = discord.Embed(
                 title="This is God",
