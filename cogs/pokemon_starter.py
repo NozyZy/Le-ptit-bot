@@ -1,25 +1,106 @@
+import asyncio
 import copy
+import datetime
+import io
 import json
 import logging
 import os
 import random
 import time
-from dataclasses import dataclass
-from typing import Optional
+import urllib.parse
 
-import aiohttp
+# Third-party imports
 import discord
+import numpy as np
+import requests
+from PIL import Image
 from discord import app_commands
 from discord.ext import commands
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger()
-log = logging.getLogger(__name__)
+# Local application imports
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("requests").setLevel(logging.WARNING)
+logger = logging.getLogger()
+
+# Disable debug logs from urllib3 and requests
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('requests').setLevel(logging.WARNING)
+
+
+# ── Pokémon starter system ────────────────────────────────────────────────────
+# Each starter: list of (name, evo_level) tuples. evo_level=None = final form.
+def _to_poke_tuple(entry: list) -> tuple[str | int | None, ...]:
+    return tuple(entry)  # type: ignore[return-value]
+
+
+with open("database/pokemon/starters.json", "r", encoding="utf-8") as _f:
+    _raw = json.load(_f)
+
+STARTERS: dict[str, list[list[tuple[str | int | None, ...]]]] = {
+    gen: [[_to_poke_tuple(entry) for entry in chain] for chain in chains]
+    for gen, chains in _raw.items()
+}
+
+# Flat lookup: starter_name → full evolution chain
+STARTER_CHAINS: dict[str, list] = {}
+STARTER_BASE_NAMES: list[str] = []
+for gen_chains in STARTERS.values():
+    for chain in gen_chains:
+        base = str(chain[0][0])
+        STARTER_BASE_NAMES.append(base)
+        for form, *_ in chain:
+            STARTER_CHAINS[str(form).lower()] = chain
 
 POKEMON_DATA_FILE = "data/pokemon_starters.json"
+
+POWER_EMOJIS: list[tuple[int, str]] = [
+    (1, "🌱"),
+    (4, "🐣"),
+    (8, "🗡️"),
+    (12, "🛡️"),
+    (16, "⚔️"),
+    (20, "🏹"),
+    (24, "⚡"),
+    (28, "⭐"),
+    (32, "🌟"),
+    (36, "💎"),
+    (40, "🔮"),
+    (44, "⚜️"),
+    (49, "👑"),
+    (54, "🔥🔥"),
+    (59, "⚡🔥"),
+    (64, "🌟🔥"),
+    (69, "🔥✨"),
+    (74, "🔥🔥✨"),
+    (79, "🔥🔥🔥"),
+    (84, "💥🔥"),
+    (89, "💥✨"),
+    (94, "💥💥"),
+    (97, "✨💥✨"),
+    (99, "💥👑💥"),
+    (100, "🔥💥👑💥🔥"),
+]
+
+POKEMON_TYPES = ["🌿", "🔥", "💧"]
+
+TYPE_MULTIPLIER = {
+    ("🔥", "🌿"): 1.25,
+    ("🌿", "💧"): 1.25,
+    ("💧", "🔥"): 1.25,
+
+    ("🌿", "🔥"): 0.8,
+    ("💧", "🌿"): 0.8,
+    ("🔥", "💧"): 0.8,
+}
+
+COLORS = {
+    "🔥": 0xE72324,
+    "🌿": 0x3DA224,
+    "💧": 0x2481EF
+}
+
+COMBAT_COOLDOWN = 60 * 5 if os.getenv("RUN_MODE") == "PROD" else 0
+XP_COOLDOWN = 60 if os.getenv("RUN_MODE") == "PROD" else 0
 
 BASE_HP = 15
 HP_PER_LEVEL = 1.3
@@ -30,24 +111,6 @@ DODGE_CHANCE = 0.25
 DODGE_TIMEOUT = 3.0
 
 XP_MIN, XP_MAX = 15, 55
-
-COMBAT_COOLDOWN = 60 * 5 if os.getenv("RUN_MODE") == "PROD" else 0
-XP_COOLDOWN = 60 if os.getenv("RUN_MODE") == "PROD" else 0
-
-TYPE_MULTIPLIER = {
-    ("🔥", "🌿"): 1.25,
-    ("🌿", "💧"): 1.25,
-    ("💧", "🔥"): 1.25,
-    ("🌿", "🔥"): 0.8,
-    ("💧", "🌿"): 0.8,
-    ("🔥", "💧"): 0.8,
-}
-
-COLORS = {
-    "🔥": 0xE72324,
-    "🌿": 0x3DA224,
-    "💧": 0x2481EF,
-}
 
 POKEMON_ENTRY_DEFAULTS = {
     "starter": None,
@@ -60,39 +123,211 @@ POKEMON_ENTRY_DEFAULTS = {
     "wins": 0,
     "losses": 0,
     "begin_date": None,
-    "does_not_evolve": False,
+    "does_not_evolve": False
 }
 
+import logging
 
-@dataclass
-class PokemonEntry:
-    starter: Optional[str] = None
-    pokemon: Optional[str] = None
-    level: int = 1
-    xp: int = 0
-    last_time: float = 0
-    HP: int = BASE_HP
-    type: Optional[str] = None
-    wins: int = 0
-    losses: int = 0
-    begin_date: Optional[str] = None
-    does_not_evolve: bool = False
+log = logging.getLogger(__name__)
 
 
-def is_owner(interaction: discord.Interaction, user_id: str) -> bool:
-    return str(interaction.user.id) == user_id
+def normalize_pokemon_entry(entry):
+    if not isinstance(entry, dict):
+        log.warning(
+            "Entrée Pokémon ignorée (type invalide): %r (%s)",
+            entry, type(entry).__name__
+        )
+        return None
+
+    for key, default in POKEMON_ENTRY_DEFAULTS.items():
+        if key not in entry or entry[key] is None:
+            if key == "begin_date":
+                entry[key] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            else:
+                entry[key] = default
+
+    return entry
+
+
+def pokepedia_url(name: str) -> str:
+    formatted = name.replace(" ", "_")
+    return f"https://www.pokepedia.fr/{urllib.parse.quote(formatted)}"
+
+
+def load_pokemon_data() -> dict:
+    os.makedirs("data", exist_ok=True)
+    try:
+        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            for guild_id, users in list(data.items()):
+                if not isinstance(users, dict):
+                    log.error("Guild %s a une structure invalide: %r", guild_id, users)
+                    data[guild_id] = {}
+                    continue
+
+                for user_id, entry in list(users.items()):
+                    fixed = normalize_pokemon_entry(entry)
+                    if fixed is None:
+                        log.warning(
+                            "Suppression entrée Pokémon invalide | guild=%s user=%s",
+                            guild_id, user_id
+                        )
+                        del users[user_id]
+            save_pokemon_data(data)
+            return data
+    except FileNotFoundError:
+        logger.info(f"{POKEMON_DATA_FILE} not found, starting with empty data.")
+        return {}
+    except json.JSONDecodeError as e:
+        logger.error(f"{POKEMON_DATA_FILE} is corrupted: {e}")
+        return {}
+
+
+def save_pokemon_data(data: dict):
+    os.makedirs("data", exist_ok=True)
+    with open(POKEMON_DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def xp_to_next_level(level: int) -> int:
+    """XP needed to go from `level` to `level + 1`."""
     return level * 50
 
 
-def health_bar(current: int, max_hp: int, size: int = 10) -> str:
-    ratio = current / max_hp if max_hp else 0
-    filled = min(max(int(ratio * size), 1 if ratio > 0 else 0), size)
-    empty = size - filled
-    color = "🟥" if ratio < 0.15 else "🟨" if ratio < 0.5 else "🟩"
-    return f"{color * filled}{'⬜' * empty} {int(ratio * 100)}%"
+def get_pokemon_id_from_entry(entry: dict) -> int | None:
+    chain = STARTER_CHAINS.get(entry["pokemon"].lower())
+    if not chain:
+        return None
+
+    for i, (name, *_) in enumerate(chain):
+        if name.lower() == entry["pokemon"].lower():
+            if len(chain[i]) > 2:
+                return chain[i][2]
+    return None
+
+
+def get_pokemon_entry(data: dict, guild_id: str, user_id: str) -> dict | None:
+    return data.get(guild_id, {}).get(user_id)
+
+
+def pokemon_artwork_url(pokemon_id: int) -> str:
+    return f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/{pokemon_id}.png"
+
+
+def make_silhouette(image_bytes: bytes, color: tuple) -> io.BytesIO:
+    """Return a BytesIO PNG where every non-transparent pixel is replaced by `color`."""
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGBA")
+    r, g, b, a = img.split()
+    colored = Image.new("RGBA", img.size, color + (255,))
+    colored.putalpha(a)
+    buf = io.BytesIO()
+    colored.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
+def detect_facing_direction(img: Image.Image) -> str:
+    """
+    Détecte la direction du sprite en analysant la densité de pixels
+    sur les bords gauche et droite (zone du visage souvent plus détaillée).
+    """
+
+    img = img.convert("RGBA")
+    arr = np.array(img)
+    alpha = arr[:, :, 3]
+
+    if np.sum(alpha) == 0:
+        return "right"
+
+    height, width = alpha.shape
+
+    # zones verticales des bords (focus sur "visage probable")
+    edge_width = max(5, width // 6)
+
+    left_region = alpha[:, :edge_width]
+    right_region = alpha[:, width - edge_width:]
+
+    # score = nombre de pixels non transparents (densité de détails)
+    left_score = np.sum(left_region > 0)
+    right_score = np.sum(right_region > 0)
+
+    # si plus de détails à gauche → sprite regarde probablement à gauche
+    if left_score > right_score:
+        return "left"
+    else:
+        return "right"
+
+
+def generate_versus_image(p1: dict, p2: dict) -> io.BytesIO:
+    base_size = (300, 300)
+
+    def fetch_pokemon_image(pokemon_id: int) -> Image.Image:
+        url = pokemon_artwork_url(pokemon_id)
+        logger.debug(f"Fetching Pokémon artwork ID={pokemon_id} → {url}")
+
+        resp = requests.get(url, timeout=5)
+        resp.raise_for_status()
+
+        img = Image.open(io.BytesIO(resp.content)).convert("RGBA")
+        return img.resize(base_size)
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; DiscordBot/1.0)"
+    }
+
+    vs_url = "https://upload.wikimedia.org/wikipedia/commons/7/70/Street_Fighter_VS_logo.png"
+
+    resp = requests.get(vs_url, headers=headers, timeout=5)
+    resp.raise_for_status()
+
+    vs_img = Image.open(io.BytesIO(resp.content)).convert("RGBA")
+    vs_img = vs_img.resize((220, 220))
+
+    p1_id = get_pokemon_id_from_entry(p1)
+    p2_id = get_pokemon_id_from_entry(p2)
+
+    if not p1_id or not p2_id:
+        raise ValueError("Impossible de générer l'image VS (IDs manquants)")
+
+    img1 = fetch_pokemon_image(p1_id)
+    img2 = fetch_pokemon_image(p2_id)
+
+    dir1 = detect_facing_direction(img1)
+    dir2 = detect_facing_direction(img2)
+
+    if dir1 == "left":
+        img1 = img1.transpose(Image.FLIP_LEFT_RIGHT)
+
+    if dir2 == "right":
+        img2 = img2.transpose(Image.FLIP_LEFT_RIGHT)
+
+    # ───── canvas plus large pour respiration visuelle ─────
+    final = Image.new("RGBA", (900, 380), (18, 18, 22, 255))
+
+    # ───── positions "combat stance" ─────
+    p1_pos = (40, 40)
+    p2_pos = (560, 30)
+    vs_pos = (340, 80)
+
+    # ───── SHADOW propre (alpha-safe) ─────
+    vs_alpha = vs_img.split()[3]
+
+    shadow = Image.new("RGBA", vs_img.size, (0, 0, 0, 120))
+    shadow.putalpha(vs_alpha)
+
+    # ───── paste ordre important ─────
+    final.paste(img1, p1_pos, img1)
+
+    # shadow légèrement décalé
+    final.paste(shadow, (vs_pos[0] + 6, vs_pos[1] + 6), shadow)
+
+    final.paste(vs_img, vs_pos, vs_img)
+    final.paste(img2, p2_pos, img2)
+
+    buf = io.BytesIO()
+    final.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
 
 
 def power_emoji_for_level(level: int) -> str:
@@ -103,52 +338,26 @@ def power_emoji_for_level(level: int) -> str:
 
 
 def ensure_hp_field(entry: dict) -> None:
-    entry.setdefault("HP", 0)
-
-
-def get_pokemon_entry(data: dict, guild_id: str, user_id: str):
-    return data.get(guild_id, {}).get(user_id)
-
-
-def save_pokemon_data(data: dict):
-    os.makedirs("data", exist_ok=True)
-    with open(POKEMON_DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def load_pokemon_data() -> dict:
-    os.makedirs("data", exist_ok=True)
-    try:
-        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
-
-
-async def fetch_bytes(url: str) -> bytes:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            return await resp.read()
-
-
-def pokemon_artwork_url(pokemon_id: int) -> str:
-    return (
-        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/"
-        f"official-artwork/{pokemon_id}.png"
-    )
+    if "HP" not in entry or not isinstance(entry["HP"], int):
+        entry["HP"] = 0
 
 
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
-    base = (attacker["level"] ** 0.75) * 1.3
+    damage_base = (attacker["level"] ** 0.75) * 1.3
     rng = random.uniform(0.8, 1.5)
 
-    mult = TYPE_MULTIPLIER.get((attacker["type"], defender["type"]), 1.0)
+    multiplier = TYPE_MULTIPLIER.get(
+        (attacker["type"], defender["type"]),
+        1.0
+    )
+
     crit = random.random() < CRIT_CHANCE
-
     if crit:
-        mult *= CRIT_MULTIPLIER
+        multiplier *= CRIT_MULTIPLIER
 
-    return max(1, round(base * rng * mult)), crit
+    damage = round(damage_base * rng * multiplier)
+
+    return max(1, damage), crit
 
 
 def compute_max_hp(entry: dict) -> int:
@@ -156,31 +365,450 @@ def compute_max_hp(entry: dict) -> int:
     return BASE_HP + int(entry["level"] * HP_PER_LEVEL)
 
 
+def health_bar(current: int, max_hp: int, size: int = 10) -> str:
+    ratio = current / max_hp if max_hp > 0 else 0
+
+    filled = int(ratio * size)
+
+    if ratio <= 0:
+        return "⬜" * size + " 0%"
+
+    if ratio < 0.15:
+        color = "🟥"
+    elif ratio < 0.5:
+        color = "🟨"
+    else:
+        color = "🟩"
+
+    empty = "⬜"
+
+    if filled == 0:
+        filled = 1
+
+    filled = min(filled, size)
+
+    bar = color * filled + empty * (size - filled)
+
+    return f"{bar} {int(ratio * 100)}%"
+
+
+class CombatState:
+    def __init__(self, p1, p2, user1, user2):
+        self.p1 = p1
+        self.p2 = p2
+        self.user1 = user1
+        self.user2 = user2
+
+        self.hp1 = p1["HP"]
+        self.hp2 = p2["HP"]
+
+        if p1["level"] > p2["level"]:
+            self.turn = 1
+            self.round = 1
+        elif p2["level"] > p1["level"]:
+            self.turn = 2
+            self.round = 0
+        else:
+            self.turn = random.choice([1, 2])
+            self.round = 1 if self.turn == 1 else 0
+
+        self.p1_state = {
+            "defending": False,
+            "special_used": False,
+            "dodge_fatigue": 0.0
+        }
+
+        self.p2_state = {
+            "defending": False,
+            "special_used": False,
+            "dodge_fatigue": 0.0
+        }
+
+    def attacker(self):
+        return (self.p1, self.user1, self.p1_state) if self.turn == 1 else (self.p2, self.user2, self.p2_state)
+
+    def defender(self):
+        return (self.p2, self.user2, self.p2_state) if self.turn == 1 else (self.p1, self.user1, self.p1_state)
+
+    def resolve_action(self, action: str, attacker: dict):
+        result = {
+            "message": "",
+            "attack_multiplier": 1.0,
+            "skip_turn": False
+        }
+
+        atk_state = self.p1_state if self.turn == 1 else self.p2_state
+
+        if action == "defend":
+            atk_state["defending"] = True
+            result["message"] = "🛡️ Défense activée !"
+            result["skip_turn"] = True
+            return result
+
+        atk_state["defending"] = False
+
+        if action == "attack":
+            result["message"] = "⚔️ À l'attaque !"
+
+        elif action == "special":
+            if atk_state["special_used"]:
+                result["message"] = "❌ Spécial déjà utilisé !"
+            else:
+                atk_state["special_used"] = True
+                result["attack_multiplier"] = 1.5
+                result["message"] = "✨ Attaque spéciale !"
+
+        # Low HP bonus (centralisé ici)
+        hp_ratio = self.get_current_hp(attacker) / attacker["HP"]
+        if hp_ratio <= 0.25:
+            result["attack_multiplier"] += 0.3
+
+        return result
+
+    def get_current_hp(self, pokemon: dict) -> int:
+        if pokemon is self.p1:
+            return self.hp1
+        return self.hp2
+
+    def compute_final_damage(self, base_damage, attack_multiplier, dodge_reduction, defender_state):
+        dmg = base_damage * attack_multiplier
+
+        if defender_state["defending"]:
+            dmg *= 0.5
+
+        dmg *= (1 - dodge_reduction)
+
+        return max(0, round(dmg))
+
+    def apply_damage(self, damage: int) -> None:
+        if self.turn == 1:
+            self.hp2 = max(0, self.hp2 - damage)
+        else:
+            self.hp1 = max(0, self.hp1 - damage)
+
+    def next_turn(self):
+        self.turn = 2 if self.turn == 1 else 1
+        if self.turn == 1:
+            self.round += 1
+
+    def is_over(self):
+        return self.hp1 <= 0 or self.hp2 <= 0
+
+
+class DeleteStarterView(discord.ui.View):
+    def __init__(self, cog, guild_id, user_id, entry):
+        super().__init__(timeout=30)
+        self.cog = cog
+        self.guild_id = guild_id
+        self.user_id = user_id
+        self.entry = entry
+
+    @discord.ui.button(label="Supprimer", style=discord.ButtonStyle.danger, emoji="🗑️")
+    async def confirm(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
+        self.cog.pokemon_data[self.guild_id].pop(self.user_id)
+        save_pokemon_data(self.cog.pokemon_data)
+
+        logger.info(
+            f"{interaction.user.name} - {interaction.guild.name} - "
+            f"A supprimé son starter {self.entry['pokemon']}"
+        )
+
+        await interaction.response.edit_message(
+            content=f"🗑️ **{self.entry['pokemon']}** a été supprimé. "
+                    f"Tu peux choisir un nouveau starter avec `/choose_starter`.",
+            view=None
+        )
+
+    @discord.ui.button(label="Annuler", style=discord.ButtonStyle.secondary, emoji="❌")
+    async def cancel(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
+        await interaction.response.edit_message(
+            content=f"Suppression annulée. **{self.entry['pokemon']}** est en sécurité.",
+            view=None
+        )
+
+
+class CanEvolveStarterView(discord.ui.View):
+    def __init__(self, cog, guild_id, user_id, entry):
+        super().__init__(timeout=30)
+        self.cog = cog
+        self.guild_id = guild_id
+        self.user_id = user_id
+        self.entry = entry
+
+    @discord.ui.button(label="Refuser les évolutions", style=discord.ButtonStyle.secondary, emoji="🛑")
+    async def stop_evolve(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
+        if self.entry["does_not_evolve"]:
+            await interaction.response.send_message("Il n'évolue déjà plus, tu n'as plus rien à faire !",
+                                                    ephemeral=True)
+            return
+
+        self.entry["does_not_evolve"] = True
+        save_pokemon_data(self.cog.pokemon_data)
+
+        logger.info(
+            f"{interaction.user.name} - {interaction.guild.name} - "
+            f"A décidé de ne plus faire évoluer son starter {self.entry['pokemon']}"
+        )
+
+        await interaction.response.edit_message(
+            content=f"Ton starter {self.entry['pokemon']} n'évoluera plus",
+            view=None,
+            embed=None
+        )
+
+
+class CannotEvolveStarterView(discord.ui.View):
+    def __init__(self, cog, guild_id, user_id, entry):
+        super().__init__(timeout=30)
+        self.cog = cog
+        self.guild_id = guild_id
+        self.user_id = user_id
+        self.entry = entry
+
+    @discord.ui.button(label="Accepter les évolutions", style=discord.ButtonStyle.primary, emoji="✅")
+    async def start_evolve(self, interaction: discord.Interaction, _):
+        if str(interaction.user.id) != self.user_id:
+            await interaction.response.send_message("Ce n'est pas ton pokémon, va voir ailleurs", ephemeral=True)
+            return
+
+        if not self.entry["does_not_evolve"]:
+            await interaction.response.send_message("il est déjà parti pour évoluer, suffit d'attendre le bon niveau",
+                                                    ephemeral=True)
+            return
+
+        self.entry["does_not_evolve"] = False
+        save_pokemon_data(self.cog.pokemon_data)
+
+        logger.info(
+            f"{interaction.user.name} - {interaction.guild.name} - "
+            f"A décidé faire évoluer de nouveau son starter {self.entry['pokemon']}"
+        )
+
+        await interaction.response.edit_message(
+            content=f"Ton starter {self.entry['pokemon']} évoluera à nouveau désormais",
+            view=None,
+            embed=None
+        )
+
+
+class CombatAcceptView(discord.ui.View):
+    def __init__(self, adversary: discord.Member) -> None:
+        super().__init__(timeout=60)
+        self.accepted = False
+        self.adversary = adversary
+        self.message: discord.Message | None = None
+
+    @discord.ui.button(label="⚔️ Accepter", style=discord.ButtonStyle.success)
+    async def accept(self, interaction: discord.Interaction, _):
+        if self.adversary.bot:
+            self.accepted = True
+            self.stop()
+            await interaction.message.edit(
+                content="⚔️ Combat accepté !",
+                view=None
+            )
+            return
+
+        if interaction.user.id != self.adversary.id:
+            await interaction.response.send_message("Tu n'es pas l'adversaire ciblé !", ephemeral=True)
+            return
+
+        self.accepted = True
+        self.stop()
+        await interaction.message.edit(
+            content="⚔️ Combat accepté !",
+            view=None
+        )
+
+    @discord.ui.button(label="❌ Refuser", style=discord.ButtonStyle.danger)
+    async def refuse(self, interaction: discord.Interaction, _):
+        if interaction.user.id != self.adversary.id:
+            await interaction.response.send_message("Tu n'es pas l'adversaire ciblé !", ephemeral=True)
+            return
+
+        self.accepted = False
+        self.stop()
+        await interaction.response.edit_message(
+            content=f"❌ {interaction.user.display_name} VS {self.adversary.display_name} : Combat refusé.", view=None)
+
+
+class CombatActionView(discord.ui.View):
+    def __init__(self, player: discord.Member) -> None:
+        super().__init__(timeout=10)
+        self.player = player
+        self.choice = None
+
+    @discord.ui.button(label="⚔️ Attaquer", style=discord.ButtonStyle.primary)
+    async def attack(self, interaction, _):
+        if interaction.user.id != self.player.id:
+            await interaction.response.send_message(
+                "Ce n'est pas ton Pokémon, dégage !",
+                ephemeral=True
+            )
+            return
+        self.choice = "attack"
+        self.stop()
+        await interaction.response.defer()
+
+    @discord.ui.button(label="🛡️ Défendre", style=discord.ButtonStyle.secondary)
+    async def defend(self, interaction, _):
+        if interaction.user.id != self.player.id:
+            await interaction.response.send_message(
+                "Ce n'est pas ton Pokémon, dégage !",
+                ephemeral=True
+            )
+            return
+        self.choice = "defend"
+        self.stop()
+        await interaction.response.defer()
+
+    @discord.ui.button(label="✨ Spécial", style=discord.ButtonStyle.success)
+    async def special(self, interaction, _):
+        if interaction.user.id != self.player.id:
+            await interaction.response.send_message(
+                "Ce n'est pas ton Pokémon, dégage !",
+                ephemeral=True
+            )
+            return
+        self.choice = "special"
+        self.stop()
+        await interaction.response.defer()
+
+
+class DodgeView(discord.ui.View):
+    def __init__(self, defender: discord.Member):
+        super().__init__(timeout=DODGE_TIMEOUT)
+        self.defender = defender
+        self.start_time = None
+        self.reaction_time = None
+
+    @discord.ui.button(label="🌀 ESQUIVE !", style=discord.ButtonStyle.secondary)
+    async def dodge(self, interaction: discord.Interaction, _):
+        if interaction.user.id != self.defender.id:
+            await interaction.response.send_message(
+                "Ce n'est pas ton Pokémon, dégage !",
+                ephemeral=True
+            )
+            return
+
+        # On calcule le temps de réaction par rapport au moment d'affichage
+        if self.start_time is not None:
+            self.reaction_time = time.time() - self.start_time
+
+        self.stop()
+        await interaction.response.defer()
+
+
 class PokemonStarterCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.pokemon_data = load_pokemon_data()
 
-    async def level_up(self, entry: dict, user: discord.Member) -> Optional[str]:
-        leveled = False
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot or not message.guild:
+            return
+
+        guild_id = str(message.guild.id)
+        user = message.author
+        user_id = str(user.id)
+
+        entry = get_pokemon_entry(self.pokemon_data, guild_id, user_id)
+        if not entry:
+            return
+
+        now = time.time()
+        if entry.get("last_time", 0) + XP_COOLDOWN > now:
+            return
+
+        xp_gain = random.randint(XP_MIN, XP_MAX)
+        entry["xp"] += xp_gain
+
+        lvl_message = await self.level_up(entry, user)
+
+        if lvl_message and len(lvl_message):
+            await message.reply(lvl_message)
+
+        await self.evolve(entry, user, message.channel)
+
+        entry["last_time"] = now
+        save_pokemon_data(self.pokemon_data)
+
+    # ───────── AUTOCOMPLETE ─────────
+    async def starter_autocomplete(self, interaction, current: str):
+        starters = [
+            str(chain[0][0])
+            for chains in STARTERS.values()
+            for chain in chains
+        ]
+        current = current.lower()
+        return [
+            app_commands.Choice(name=s, value=s)
+            for s in starters
+            if current in s.lower()
+        ][:25]
+
+    # ───────── XP & LEVEL UP ─────────
+    async def level_up(self, entry: dict, user: discord.Member) -> str | None:
+        message = None
+        leveled_up = False
 
         while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:
             entry["xp"] -= xp_to_next_level(entry["level"])
             entry["level"] += 1
             entry["HP"] += random.randint(0, 3)
-            leveled = True
+            leveled_up = True
 
-        if not leveled:
-            return None
+        if not leveled_up:
+            return message
 
         lvl = entry["level"]
+        logger.info(f"{user.name} - {entry['pokemon']} - Est passé level {entry['level']}")
 
-        if lvl == 100:
-            return f"🔥 LEVEL 100 {user.mention} {entry['pokemon']}"
-        if lvl in (50, 75, 90):
-            return f"🆙 {entry['pokemon']} atteint niveau {lvl}"
+        if lvl == 50:
+            message = (
+                f"🆙 Le **{entry['pokemon']}** de **{user.name}** "
+                f"a atteint le niveau **50** !"
+            )
 
-        return f"🆙 {entry['pokemon']} level {lvl}"
+        elif lvl == 75:
+            message = (
+                f"🆙 Le **{entry['pokemon']}** de **{user.name}** "
+                f"devient très puissant (niveau **75**) !"
+            )
+
+        elif lvl == 90:
+            message = (
+                f"🆙 Le **{entry['pokemon']}** de **{user.name}** "
+                f"frôle le légendaire !\n## Niveau 90 atteint"
+            )
+
+        elif lvl == 100:
+            message = (
+                "@everyone\n"
+                "# 🔥 NIVEAU 100 ATTEINT 🔥\n"
+                f"Le **{entry['pokemon']}** de **{user.name}** "
+                f"a atteint le niveau **100** !"
+            )
+
+        else:
+            message = (
+                f"🆙 Le **{entry['pokemon']}** de **{user.name}** est passé niveau **{lvl}** !"
+            )
+
+        return message
 
     async def evolve(self, entry: dict, user: discord.Member, channel: discord.TextChannel) -> None:
         chain = STARTER_CHAINS.get(entry["pokemon"].lower())
@@ -189,65 +817,621 @@ class PokemonStarterCog(commands.Cog):
 
         for i, (name, evo_level, *_) in enumerate(chain):
             if (
-                name.lower() == entry["pokemon"].lower()
-                and evo_level
-                and entry["level"] >= evo_level
+                    name.lower() == entry["pokemon"].lower()
+                    and evo_level is not None
+                    and entry["level"] >= evo_level
             ):
+
                 if entry["does_not_evolve"]:
                     return
 
-                old = entry["pokemon"]
-                nxt = chain[i + 1][0]
-                entry["pokemon"] = nxt
+                old_name = entry["pokemon"]
+                next_name = chain[i + 1][0]
+                entry["pokemon"] = next_name
 
-                await channel.send(f"{old} → {nxt}")
+                old_id = chain[i][2] if len(chain[i]) > 2 else None
+                new_id = chain[i + 1][2] if len(chain[i + 1]) > 2 else None
+
+                logger.info(f"{user.name} - {channel.guild.name} - {old_name} a évolué en {next_name}")
+
+                # ───── ANIMATION ─────
+                old_bytes = None
+                if old_id:
+                    try:
+                        old_bytes = requests.get(
+                            pokemon_artwork_url(old_id),
+                            timeout=5
+                        ).content
+                    except Exception:
+                        pass
+
+                caption = f"Quoi ?! **{old_name}** de {user.mention} se transforme..."
+
+                if old_bytes:
+                    msg = await channel.send(
+                        caption,
+                        file=discord.File(io.BytesIO(old_bytes), filename="poke.png")
+                    )
+                else:
+                    msg = await channel.send(caption)
+
+                if old_bytes:
+                    for color in [(0, 0, 0), (255, 255, 255), (0, 0, 0), (255, 255, 255)]:
+                        await asyncio.sleep(0.6)
+                        await msg.delete()
+                        msg = await channel.send(
+                            caption,
+                            file=discord.File(
+                                make_silhouette(old_bytes, color),
+                                filename="poke.png"
+                            )
+                        )
+                else:
+                    await asyncio.sleep(4)
+
+                await asyncio.sleep(0.8)
+                await msg.delete()
+
+                final_caption = f"🎉 {user.mention} **{old_name}** a évolué en **{next_name}** !"
+
+                if new_id:
+                    try:
+                        new_bytes = requests.get(
+                            pokemon_artwork_url(new_id),
+                            timeout=5
+                        ).content
+                        await channel.send(
+                            final_caption,
+                            file=discord.File(io.BytesIO(new_bytes), filename="poke_new.png")
+                        )
+                    except Exception:
+                        await channel.send(final_caption)
+                else:
+                    await channel.send(final_caption)
+
                 break
 
-    @app_commands.command(name="choose_starter")
+    # ───────── /choose_starter ─────────
+    @app_commands.command(name="choose_starter", description="Choisir ou afficher ton starter Pokémon")
+    @app_commands.describe(choix="Nom du Pokémon starter")
+    @app_commands.autocomplete(choix=starter_autocomplete)
     async def choose_starter(self, interaction: discord.Interaction, choix: str | None = None):
         guild_id = str(interaction.guild.id)
         user_id = str(interaction.user.id)
+        entry = get_pokemon_entry(self.pokemon_data, guild_id, user_id)
+
+        # ───── Affichage ─────
+        if choix is None:
+            if entry:
+                chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
+                cur_idx = next(
+                    (i for i, (n, *_) in enumerate(chain) if n.lower() == entry["pokemon"].lower()),
+                    -1
+                )
+
+                xp_needed = xp_to_next_level(entry["level"])
+                bar_filled = int(entry["xp"] / xp_needed * 10)
+                bar = "█" * bar_filled + "░" * (10 - bar_filled)
+
+                if cur_idx >= 0 and chain[cur_idx][1] is not None:
+                    next_name = chain[cur_idx + 1][0]
+                    next_level = chain[cur_idx][1]
+                    next_evo = f"Prochaine évolution : **{next_name}** au niveau {next_level}"
+                else:
+                    next_evo = "Forme finale atteinte !"
+
+                poke_id = chain[cur_idx][2] if cur_idx >= 0 and len(chain[cur_idx]) > 2 else None
+                power = power_emoji_for_level(entry["level"])
+
+                embed = discord.Embed(
+                    title=f"{entry['pokemon']} {power}",
+                    description=(
+                        f"Starter d'origine : {entry['starter']}\n"
+                        f"Niveau : **{entry['level']}** | XP : {entry['xp']}/{xp_needed} [{bar}]\n"
+                        f"{next_evo}"
+                    ),
+                    color=discord.Color.green()
+                )
+
+                if poke_id:
+                    embed.set_thumbnail(url=pokemon_artwork_url(poke_id))
+
+                embed.set_footer(text="Utilise /starter pour plus de détails.")
+                await interaction.response.send_message(embed=embed)
+                return
+
+            lines = ["**Choisis ton starter ! Utilise `/choose_starter <nom>`**\n"]
+
+            all_chains = [chain for chains in STARTERS.values() for chain in chains]
+            all_names = [chain[0][0] for chain in all_chains]
+
+            max_len = max(len(name) for name in all_names)
+
+            for gen, chains in STARTERS.items():
+                row_parts = []
+
+                for i, chain in enumerate(chains):
+                    name = chain[0][0]
+                    url = pokepedia_url(name)
+                    emoji = POKEMON_TYPES[i % 3]
+
+                    padded = name.ljust(max_len)
+
+                    row_parts.append(f"[{emoji} {padded}](<{url}>)")
+
+                row = "   ".join(row_parts)
+
+                lines.append(f"**{gen}** : {row}")
+
+            await interaction.response.send_message("\n".join(lines))
+            return
+
+        # ───── Choix ─────
+        if entry:
+            await interaction.response.send_message(
+                f"Tu as déjà **{entry['pokemon']}** !",
+                ephemeral=True
+            )
+            return
+
+        choix_clean = choix.strip().lower()
+        found_chain = None
+        starter_type = None
+
+        for gen in STARTERS.values():
+            for i, chain in enumerate(gen):
+                if str(chain[0][0]).strip().lower() == choix_clean:
+                    found_chain = chain
+                    starter_type = POKEMON_TYPES[i]
+                    break
+            if found_chain:
+                break
+
+        if not found_chain:
+            await interaction.response.send_message(
+                f"**{choix}** n'est pas un starter valide.",
+                ephemeral=True
+            )
+            return
+
+        poke_id = found_chain[0][2] if len(found_chain[0]) > 2 else None
+        name = str(found_chain[0][0])
+
+        self.pokemon_data.setdefault(guild_id, {})[user_id] = copy.deepcopy(POKEMON_ENTRY_DEFAULTS)
+        new_entry = self.pokemon_data[guild_id][user_id]
+
+        normalize_pokemon_entry(new_entry)
+        new_entry["starter"] = name
+        new_entry["pokemon"] = name
+        new_entry["type"] = starter_type
+
+        save_pokemon_data(self.pokemon_data)
+
+        embed = discord.Embed(
+            title=f"🎉 {name}",
+            description=f"{interaction.user.mention} a choisi **{name}** comme starter !",
+            color=discord.Color.gold()
+        )
+        logger.info(
+            f"{interaction.user.name} - {interaction.guild.name} - "
+            f"A choisi son starter : {name}"
+        )
+
+        if poke_id:
+            embed.set_image(url=pokemon_artwork_url(int(poke_id)))
+
+        await interaction.response.send_message(embed=embed)
+
+    # ───────── /delete_starter ─────────
+    @app_commands.command(name="delete_starter", description="Supprimer ton starter Pokémon")
+    async def delete_starter(self, interaction: discord.Interaction):
+        guild_id = str(interaction.guild.id)
+        user_id = str(interaction.user.id)
+        entry = get_pokemon_entry(self.pokemon_data, guild_id, user_id)
+
+        if not entry:
+            await interaction.response.send_message(
+                "Tu n'as pas de Pokémon à supprimer.",
+                ephemeral=True
+            )
+            return
+
+        view = DeleteStarterView(self, guild_id, user_id, entry)
+
+        await interaction.response.send_message(
+            f"⚠️ Tu es sur le point de supprimer **{entry['pokemon']}** "
+            f"(niv. {entry['level']}).",
+            view=view,
+            ephemeral=True
+        )
+
+    # ───────── /starter ─────────
+    @app_commands.command(
+        name="starter",
+        description="Afficher les détails de ton starter ou de celui d’un autre joueur"
+    )
+    @app_commands.describe(joueur="Joueur dont tu veux voir le starter")
+    async def starter(
+            self,
+            interaction: discord.Interaction,
+            joueur: discord.Member | None = None
+    ):
+        guild_id = str(interaction.guild.id)
+
+        target = joueur or interaction.user
+        user_id = str(target.id)
 
         entry = get_pokemon_entry(self.pokemon_data, guild_id, user_id)
 
-        if entry:
-            await interaction.response.send_message("Déjà un starter", ephemeral=True)
-            return
-
-        self.pokemon_data.setdefault(guild_id, {})[user_id] = copy.deepcopy(POKEMON_ENTRY_DEFAULTS)
-        e = self.pokemon_data[guild_id][user_id]
-
-        e["starter"] = choix
-        e["pokemon"] = choix
-
-        save_pokemon_data(self.pokemon_data)
-
-        await interaction.response.send_message(f"{choix} choisi")
-
-    async def on_message(self, message: discord.Message):
-        if message.author.bot:
-            return
-
-        entry = get_pokemon_entry(
-            self.pokemon_data,
-            str(message.guild.id),
-            str(message.author.id),
-        )
         if not entry:
+            if joueur is None:
+                await interaction.response.send_message(
+                    "Tu n'as pas encore de starter. Utilise `/choose_starter <nom>`",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    f"**{target.display_name}** n'a pas encore de starter.",
+                    ephemeral=True
+                )
             return
 
-        now = time.time()
-        if entry.get("last_time", 0) + XP_COOLDOWN > now:
+        chain = STARTER_CHAINS.get(entry["pokemon"].lower(), [])
+        xp_needed = xp_to_next_level(entry["level"])
+
+        bar_filled = int(entry["xp"] / xp_needed * 10)
+        bar = "█" * bar_filled + "░" * (10 - bar_filled)
+
+        cur_idx = next(
+            (i for i, (n, *_) in enumerate(chain) if n.lower() == entry["pokemon"].lower()),
+            -1
+        )
+
+        poke_id = chain[cur_idx][2] if cur_idx >= 0 and len(chain[cur_idx]) > 2 else None
+        power = power_emoji_for_level(entry["level"])
+
+        evo_line = ""
+        for name, evo_level, *_ in chain:
+            marker = "▶ " if name.lower() == entry["pokemon"].lower() else "    "
+            evo_line += (
+                    f"\n{marker}**{name}**"
+                    + (f" *(évolue niv. {evo_level})*" if evo_level else " *(forme finale)*")
+            )
+
+        embed = discord.Embed(
+            title=f"{entry['type']} {entry['pokemon']} — Niv. {entry['level']} — {power}",
+            description=(
+                f"Starter d'origine : {entry['starter']}\n"
+                f"XP : {entry['xp']}/{xp_needed} [{bar}]\n"
+                f"HP : {entry['HP']}\n"
+                f"Peut évoluer : {'❌' if entry['does_not_evolve'] else '✅'}\n"
+                f"\n**Chaîne d'évolution :**{evo_line}"
+            ),
+            color=COLORS.get(entry["type"])
+        )
+
+        if poke_id:
+            embed.set_image(url=pokemon_artwork_url(poke_id))
+
+        embed.set_author(
+            name=target.display_name,
+            icon_url=target.display_avatar.url
+        )
+
+        view = CannotEvolveStarterView(self, guild_id, user_id, entry) if entry[
+            'does_not_evolve'] else CanEvolveStarterView(self, guild_id, user_id, entry)
+
+        await interaction.response.send_message(embed=embed, view=view)
+
+    @app_commands.command(name="combat", description="Lancer un combat Pokémon")
+    @app_commands.describe(adversaire="Joueur à défier")
+    async def combat(self, interaction: discord.Interaction, adversaire: discord.Member):
+        guild_id = str(interaction.guild.id)
+
+        if adversaire.id == interaction.user.id:
+            await interaction.response.send_message("Tu ne peux pas te battre contre toi-même, crétin.", ephemeral=True)
             return
 
-        entry["xp"] += random.randint(XP_MIN, XP_MAX)
+        p1 = get_pokemon_entry(self.pokemon_data, guild_id, str(interaction.user.id))
+        p2 = get_pokemon_entry(self.pokemon_data, guild_id, str(adversaire.id))
 
-        msg = await self.level_up(entry, message.author)
-        if msg:
-            await message.reply(msg)
+        if not p1:
+            await interaction.response.send_message("Tu n'as même pas de starter, de quoi tu me parles ??",
+                                                    ephemeral=True)
+            return
 
-        entry["last_time"] = now
+        if not p2:
+            await interaction.response.send_message(
+                f"Choisi quelqu'un d'autre, {adversaire.mention} n'a pas de starter.", ephemeral=True)
+            return
+
+        now = int(time.time())
+
+        last = p1.get("last_combat", 0)
+        if now - last < COMBAT_COOLDOWN:
+            remaining = COMBAT_COOLDOWN - (now - last)
+            await interaction.response.send_message(
+                f"⏳ Tu dois encore attendre **{remaining // 60} min {remaining % 60}s** avant un nouveau combat.",
+                ephemeral=True
+            )
+            return
+
+        view = CombatAcceptView(adversaire)
+
+        await interaction.response.send_message(
+            f"{adversaire.mention}, **{interaction.user.display_name}** te défie en combat Pokémon ! ⚔️\n"
+            "-# Tu as 60 secondes pour accepter",
+            view=view
+        )
+
+        combat_message = await interaction.original_response()
+
+        await view.wait()
+
+        if not view.accepted:
+            await combat_message.edit(
+                content=f"❌ {interaction.user.display_name} VS {adversaire.display_name} : Combat annulé (temps écoulé).",
+                view=None
+            )
+            return
+
+        p1["last_combat"] = now
+        p2["last_combat"] = now
+
+        # Création du thread de combat
+        thread = await interaction.channel.create_thread(
+            name=f"⚔️ Combat — {interaction.user.display_name} vs {adversaire.display_name}",
+            type=discord.ChannelType.public_thread,
+            auto_archive_duration=60
+        )
+
+        await thread.send(
+            f"## ⚔️ **Combat Pokémon**\n"
+            f"{interaction.user.mention} vs {adversaire.mention}"
+        )
+        logger.info(f"{interaction.guild.name} - ⚔️ {interaction.user.name} vs {adversaire.name}")
+
+        await self.start_combat(
+            interaction=interaction,
+            user1=interaction.user,
+            user2=adversaire,
+            p1=p1,
+            p2=p2,
+            thread=thread
+        )
+
+    async def start_combat(
+            self,
+            interaction: discord.Interaction,
+            user1: discord.Member,
+            user2: discord.Member,
+            p1: dict,
+            p2: dict,
+            thread: discord.Thread
+    ):
+
+        def dodge(reaction_time):
+            if reaction_time is None:
+                return "🔴 **Raté**", 0.0
+            if reaction_time <= 0.9:
+                return "🌀 **ESQUIVE PARFAITE**", 1.0
+            elif reaction_time <= 1.4:
+                return "🟢 **Excellente esquive**", 0.8
+            elif reaction_time <= 2.0:
+                return "🟡 **Bonne esquive**", 0.5
+            elif reaction_time <= 2.8:
+                return "🟠 **Esquive lente**", 0.2
+            return "🔴 **Raté**", 0.0
+
+        def finisher_text(winner, loser, crit, dodge_failed):
+            if crit:
+                return "## ⚡ **COUP CRITIQUE FINAL ! Le Pokémon s'effondre net !**"
+            if dodge_failed:
+                return "## 🌀 L'esquive échoue… le coup est fatal !"
+            if winner["type"] == "🔥" and loser["type"] == "🌿":
+                return "## 🔥 Les flammes transforment l'adversaire en feuille morte"
+            if winner["type"] == "🌿" and loser["type"] == "💧":
+                return "## 🌿 La nature reprend ses droits, et coule l'adversaire"
+            if winner["type"] == "💧" and loser["type"] == "🔥":
+                return "## 💧 L'adversaire boit la tasse, et se fait éteindre"
+            return None
+
+        state = CombatState(p1, p2, user1, user2)
+
+        max_hp1 = state.hp1
+        max_hp2 = state.hp2
+
+        embed = discord.Embed(
+            title="⚔️ Combat Pokémon",
+            description=(
+                f"**{user1.display_name}** vs **{user2.display_name}**\n\n"
+                f"{p1['type']} {p1['pokemon']} (Niv. {p1['level']}) — HP {p1['HP']}\n"
+                f"{p2['type']} {p2['pokemon']} (Niv. {p2['level']}) — HP {p2['HP']}"
+            ),
+            color=discord.Color.red()
+        )
+
+        vs_image = generate_versus_image(p1, p2)
+        embed.set_image(url="attachment://vs.png")
+
+        await thread.send(embed=embed, file=discord.File(vs_image, filename="vs.png"))
+        await asyncio.sleep(3)
+
+        while not state.is_over():
+
+            await thread.send(f"\n\n# ------------- TOUR {max(1, state.round)} -------------\n\n")
+
+            p_attacker, atk_user, atk_state = state.attacker()
+            p_defender, def_user, def_state = state.defender()
+
+            # ───── ACTION ─────
+            action_view = CombatActionView(atk_user)
+
+            if atk_state["special_used"]:
+                action_view.special.disabled = True
+
+            prompt = await thread.send(
+                f"🎯 **{atk_user.mention}**, choisis ton action !",
+                view=action_view
+            )
+
+            await action_view.wait()
+            await prompt.edit(view=None)
+
+            result = state.resolve_action(action_view.choice or "attack", p_attacker)
+
+            if result["skip_turn"]:
+                await thread.send(result["message"])
+                state.next_turn()
+                continue
+
+            await thread.send(result["message"])
+
+            attack_multiplier = result["attack_multiplier"]
+
+            # ───── BASE DAMAGE ─────
+            base_dmg, crit = compute_damage(p_attacker, p_defender)
+
+            # ───── ESQUIVE ─────
+            reaction_time = None
+            dodge_reduction = 0.0
+            did_attempt_dodge = False
+
+            if random.random() < DODGE_CHANCE:
+                did_attempt_dodge = True
+
+                dodge_view = DodgeView(def_user)
+
+                dodge_prompt = await thread.send(
+                    f"⚠️ **{def_user.mention}**, attention ! Esquive vite !",
+                    view=dodge_view
+                )
+
+                dodge_view.start_time = time.time()
+                await dodge_view.wait()
+
+                reaction_time = dodge_view.reaction_time
+                label, dodge_reduction = dodge(reaction_time)
+
+                msg = f"{label}\n➡️ Réduction dégâts : **{int(dodge_reduction * 100)}%**"
+
+                await dodge_prompt.edit(content=msg, view=None)
+
+            # ───── FINAL DAMAGE (centralisé) ─────
+            final_dmg = state.compute_final_damage(
+                base_dmg,
+                attack_multiplier,
+                dodge_reduction,
+                def_state
+            )
+
+            state.apply_damage(final_dmg)
+
+            # ───── UI ─────
+            bar1 = health_bar(state.hp1, max_hp1)
+            bar2 = health_bar(state.hp2, max_hp2)
+
+            msg = (
+                f"## 💥 **{p_attacker['pokemon']} attaque !**\n"
+                f"➡️ **{final_dmg} dégâts**\n"
+            )
+
+            if crit and final_dmg > 0:
+                msg += "\n# ⚡ COUP CRITIQUE !"
+
+            msg += (
+                f"\n\n❤️ {p1['pokemon']} : {state.hp1}/{max_hp1} HP\n{bar1}\n-# {user1.display_name}"
+                f"\n\n❤️ {p2['pokemon']} : {state.hp2}/{max_hp2} HP\n{bar2}\n-# {user2.display_name}"
+            )
+
+            await thread.send(msg)
+
+            state.next_turn()
+            await asyncio.sleep(4)
+
+        # ───── FIN COMBAT ─────
+        winner, loser, winner_user, loser_user = (
+            (state.p1, state.p2, state.user1, state.user2)
+            if state.hp1 > 0 else
+            (state.p2, state.p1, state.user2, state.user1)
+        )
+
+        if finishing := finisher_text(
+                winner,
+                loser,
+                crit,
+                did_attempt_dodge and (reaction_time is None or reaction_time > 2.8)
+        ):
+            await thread.send(finishing)
+
+        base_xp = loser["level"] * 10
+        xp_gain = max(5, base_xp + random.randint(-5, 5))
+
+        winner["xp"] += xp_gain
+        winner["wins"] += 1
+        loser["losses"] += 1
+
         save_pokemon_data(self.pokemon_data)
+
+        win_message = (
+            f"🏆 **Combat terminé !**\n"
+            f"🎉 Victoire du **{winner['pokemon']}** (+{xp_gain} XP) de {winner_user.mention}"
+        )
+
+        await interaction.followup.send(win_message)
+
+        message = await self.level_up(winner, winner_user)
+        if message:
+            await thread.send(message)
+
+        await self.evolve(winner, winner_user, interaction.channel)
+
+        await thread.send(win_message)
+        await thread.send(
+            f"🔒 Combat terminé. Archive dans {COMBAT_COOLDOWN // 60} min."
+        )
+
+        await asyncio.sleep(COMBAT_COOLDOWN)
+        await thread.edit(archived=True, locked=True)
+
+    @app_commands.command(name="combatstats", description="Statistiques de combat de ton starter")
+    @app_commands.describe(joueur="Voir les stats d’un autre joueur")
+    async def combatstats(
+            self,
+            interaction: discord.Interaction,
+            joueur: discord.Member | None = None
+    ):
+        guild_id = str(interaction.guild.id)
+        target = joueur or interaction.user
+
+        entry = get_pokemon_entry(self.pokemon_data, guild_id, str(target.id))
+        if not entry:
+            await interaction.response.send_message("Ce joueur n'a pas de starter.", ephemeral=True)
+            return
+
+        wins = entry.get("wins", 0)
+        losses = entry.get("losses", 0)
+        total = wins + losses
+        ratio = (wins / total * 100) if total else 0
+
+        embed = discord.Embed(
+            title=f"📊 Stats de combat — {entry['pokemon']} {power_emoji_for_level(entry['level'])}",
+            description=(
+                f"🏆 Victoires : **{wins}**\n"
+                f"💀 Défaites : **{losses}**\n"
+                f"📈 Ratio victoire : **{ratio:.1f}%**\n"
+                "\n"
+                f"Niveau : {entry['level']} {power_emoji_for_level(entry['level'])}\n"
+            ),
+            color=discord.Color.purple()
+        )
+
+        embed.set_author(
+            name=target.display_name,
+            icon_url=target.display_avatar.url
+        )
+
+        await interaction.response.send_message(embed=embed)
 
 
 async def setup(bot):
