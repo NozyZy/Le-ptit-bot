@@ -28,7 +28,7 @@ from fonctions import (
     crypting,
     equal_games,
     facto,
-    finndAndReplace,
+    findAndReplace,
     is_prime,
     nbInStr,
     strToInt,
@@ -214,6 +214,35 @@ GUILD_IDS = [
     826575187721322546,
     1457146663331303568
 ]
+
+# Fruits & vegetables → corresponding emoji, loadede from database/fruit/fruits.json.
+def load_fruits_emojis():
+    try:
+        with open("database/fruit/fruits.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        logger.error(f"Impossible de charger fruits.json : {e}")
+        return {}
+
+FRUITS_LEGUMES_EMOJIS = load_fruits_emojis()
+
+
+def get_fruit_emojis(text: str, limit: int = 5) -> list:
+    """
+    Returns a list of fruit/vegetable emojis mentioned
+    """
+    found = []
+    working = text
+    for word, emoji in FRUITS_LEGUMES_EMOJIS.items():
+        pattern = r"\b" + re.escape(word) + r"s?\b"
+        if re.search(pattern, working):
+            if emoji not in found:
+                found.append(emoji)
+            working = re.sub(pattern, " ", working)
+        if len(found) >= limit:
+            break
+    return found
+
 
 # On ready message
 @bot.event
@@ -552,16 +581,16 @@ async def on_message(message):
             await channel.send(f"❌ Erreur lors du reset du nom: {e}")
         return
 
-    # begginning of reaction programs, get inspired
+    # beginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
         # Random response for the TQ user with the image allez.png
         if user.id == 756178270830985286 and message.guild.id == 1382722391117135904:
-            tq_rand = random.randint(1, 100)
-            if tq_rand <= 2:  # 2% = 1/50 (1..2)
+            tq_rand = random.randint(1, 200)
+            if tq_rand <= 2:
                 logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
                 await channel.send(file=discord.File("images/allez.png"))
-            elif tq_rand <= 4:  # 2% = 1/50 (3..4)
+            elif tq_rand <= 4:
                 logger.info(f"{user.name} - {message.guild.name} - Tristan vient d'arriver")
                 msg = await channel.send("Tristan arrive dans 7 ...")
                 for i in range(6, 0, -1):
@@ -590,7 +619,7 @@ async def on_message(message):
             or MESSAGE.startswith("savais tu")) and rdnb > 3:
             logger.info(f"{user.name} - {message.guild.name} - A demandé si on savait")
             reponses = [
-                "J'en ai vraiment rien à faire tu sais ?",
+                "J'en ai vraiment rien à faire, tu sais ?",
                 "Waaa... Je bois tes paroles",
                 "Dis moi tout bg",
                 "Balec",
@@ -711,7 +740,6 @@ async def on_message(message):
             # Save
             author = user
 
-            # If someone is mentioned, show their Pokemon instead
             if message.mentions and user not in message.mentions:
                 user = message.mentions[0]
 
@@ -786,7 +814,7 @@ async def on_message(message):
                     icon_url=message.guild.me.display_avatar.url,
                 )
 
-                embed.set_thumbnail(url=user.avatar.url)
+                embed.set_thumbnail(url=user.avatar.url if user.avatar else user.default_avatar.url)
                 embed.set_image(url=pokemon["shiny_image"] if shiny else pokemon["image"])
                 embed.set_footer(
                     text=f"Pokémon n°{pokemon['id']} | Reviens demain pour découvrir un nouveau Pokémon !"
@@ -807,7 +835,6 @@ async def on_message(message):
                     f"- Détail: ``{str(e)[:100]}``",
                     file=error_file
                 )
-
 
         if MESSAGE == "pouet":
             await channel.send("Roooooh ta gueuuuuule putaiiiiin")
@@ -880,10 +907,10 @@ async def on_message(message):
                     "T'es une personne salée toi, nan ?",
                     "Au moins avec toi on tombera pas à court de sel...",
                     "Tu viens de la mer morte pour être aussi salé ?",
-                    "Tiens, prends un peu d'eau avec tout ce sel.",
+                    "Tiens, prends un peu d'eau avec tout ce sel",
                     "Tu fais partie de l'îlot du sel ?",
                     "C'est pas bon pour la tension tout ce sel mon p'tit pote.",
-                    "T'es saunier ?"
+                    "T'es boidet ?"
                 ]
                 await channel.send(random.choice(reponses_sel))
                 logger.info(f"{user.name} - {message.guild.name} - A demandé à être salé")
@@ -942,9 +969,9 @@ async def on_message(message):
                 await channel.send(random.choice(reponses))
             else:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre avec le dico (ah)")
-                await channel.send(finndAndReplace("a", dicoLines))
+                await channel.send(findAndReplace("a", dicoLines))
 
-        if MESSAGE == "oh" and rdnb >= 2:
+        if MESSAGE == "oh" and rdnb >= 3:
             logger.info(f"{user.name} - {message.guild.name} - ")
             if rdnb >= 4:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre (oh)")
@@ -958,7 +985,7 @@ async def on_message(message):
                 await channel.send(random.choice(reponses))
             else:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre par le dico (oh)")
-                await channel.send(finndAndReplace("o", dicoLines))
+                await channel.send(findAndReplace("o", dicoLines))
 
         if MESSAGE == "eh" and rdnb >= 2:
             if rdnb >= 4:
@@ -967,11 +994,11 @@ async def on_message(message):
                 await channel.send(random.choice(reponses))
             else:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre par le dico (eh)")
-                await channel.send(finndAndReplace("é", dicoLines))
+                await channel.send(findAndReplace("é", dicoLines))
 
         if MESSAGE.startswith("merci"):
             logger.info(f"{user.name} - {message.guild.name} - A dit merci")
-            if rdnb >= 3:
+            if rdnb > 3:
                 reponses = [
                     "De rien hehe",
                     "C'est normal t'inquiète",
@@ -996,6 +1023,7 @@ async def on_message(message):
                 "dommage mon p'tit pote",
                 "balec",
                 "tant pis",
+                "ALLEZ PICORE 🫴"
             ]
             await channel.send(random.choice(reponses))
 
@@ -1218,23 +1246,25 @@ async def on_message(message):
 
         if MESSAGE == "kanye":
             url = "https://api.kanye.rest/"
-            response = requests.get(url)
-            json_p = response.content.decode('utf-8')
-            kanye_quote = json.loads(json_p)['quote']
-
-            embed = discord.Embed(
-                description="Kanye said",
-                title=kanye_quote,
-                color=0xfed400,
-                url=url
-            )
-            embed.set_author(
-                name="Kanye West",
-                url=url,
-                icon_url=message.guild.me.display_avatar.url,
-            )
-            embed.set_footer(text="provided by kanye.rest")
-            await channel.send("Kanyeah", embed=embed)
+            try:
+                response = requests.get(url, timeout=5)
+                kanye_quote = response.json()['quote']
+                embed = discord.Embed(
+                    description="Kanye said",
+                    title=kanye_quote,
+                    color=0xfed400,
+                    url=url
+                )
+                embed.set_author(
+                    name="Kanye West",
+                    url=url,
+                    icon_url=message.guild.me.display_avatar.url,
+                )
+                embed.set_footer(text="provided by kanye.rest")
+                await channel.send("Kanyeah", embed=embed)
+            except Exception as e:
+                logger.error(f"Kanye API error: {e}")
+                await channel.send("Kanye est indisponible pour l'instant 🤐")
 
         if MESSAGE == "dog":
             if int(user.id) % 10 == (int(day)**3 + 33*int(month) + 12) % 10:
@@ -1261,15 +1291,11 @@ async def on_message(message):
                     god_requests[userID] = {"date": today_str, "count": 0}
                 god_requests[userID]["count"] += 1
             else:
-                i = 0
-                for i in range(len(MESSAGE)):
-                    if MESSAGE[i] == "<" and MESSAGE[i + 1] == "@":
-                        i += 2
-                        break
-                while MESSAGE[i] != ">" and i < len(MESSAGE):
-                    userID += MESSAGE[i]
-                    i += 1
-                userID = int(userID)
+                match = re.search(r"<@!?(\d+)>", MESSAGE)
+                if not match:
+                    await bot.process_commands(message)
+                    return
+                userID = int(match.group(1))
 
             if userID == 890084641317478400 and rdnb >= 3:
                 await channel.send("Lâche l'affaire David")
@@ -1348,7 +1374,7 @@ async def on_message(message):
                     logger.info(f"{user.name} - {message.guild.name} - N'est pas dieu aujourd'hui")
                 return
             user = await message.guild.fetch_member(userID)
-            pfp = user.avatar.url
+            pfp = user.avatar.url if user.avatar else user.default_avatar.url
             gods = [
                 ['https://i.pinimg.com/originals/ae/68/50/ae68509b78c017ecba1f08d64c59c7f8.jpg', 'Amon'],
                 ['https://upload.wikimedia.org/wikipedia/commons/b/b5/Quetzalcoatl_1.jpg', 'Quetzacoalt'],
@@ -1478,6 +1504,101 @@ async def on_message(message):
                 "https://tenor.com/view/taka-money-gif-10114852",
             ]
             await channel.send(random.choice(reponses))
+
+        # React with the matching fruit/vegetable emoji
+        fruit_emojis = get_fruit_emojis(MESSAGE)
+        if fruit_emojis:
+            logger.info(f"{user.name} - {message.guild.name} - A parlé de fruits/légumes")
+            for emoji in fruit_emojis:
+                try:
+                    await message.add_reaction(emoji)
+                except discord.HTTPException:
+                    pass
+
+        # "je te baise" / "je baise ta mère"
+        baise_self = re.search(r"\bj[e']?\s*t[e']\s*baise", MESSAGE)
+        baise_mere = re.search(r"\b(ni(k|qu)(er)?|baiser?)\s+ta\s+(m[eè]re|maman|daronne|mer)\b", MESSAGE)
+        if baise_self or baise_mere:
+            logger.info(f"{user.name} - {message.guild.name} - A voulu baiser le bot ou sa daronne ಥ_ಥ")
+            if rdnb < 2:
+                embed = discord.Embed(
+                    title="💸 Tarifs prestation",
+                    color=0xE91E63,
+                )
+                embed.add_field(name="Formule débutant", value="29,99 €", inline=True)
+                embed.add_field(name="Option daronne", value="49,99 €", inline=True)
+                embed.add_field(name="Forfait week-end tout compris", value="89,99 €", inline=False)
+                embed.set_footer(text="Paiement : CB, espèces, ou en nature 😏")
+                await channel.send(
+                    random.choice([
+                        "Avec plaisir, voici la grille 👇",
+                        "Ça marche, mais c'est pas gratuit 💰",
+                        "OK mais faut raquer d'abord :",
+                    ]),
+                    embed=embed,
+                )
+            elif rdnb <= 3:
+                # Vanne sur la daronne
+                reponses = [
+                    "C'est marrant, ta daronne m'a dit exactement la même chose hier soir",
+                    "Trop tard mon grand, j'étais déjà chez ta mère cette nuit",
+                    "Demande à ta daronne ce qu'elle en pense, on en a longuement discuté",
+                    "Ta mère m'a déjà mis 5 étoiles pourtant ⭐⭐⭐⭐⭐",
+                    "Doucement, faut que je récupère, ta daronne m'a épuisé",
+                    "Tu tiens ça de ta mère, elle aussi elle parlait beaucoup au début ಥ_ಥ",
+                ]
+                await channel.send(random.choice(reponses))
+
+        # serrure / clé → locksmith ^^
+        if re.search(r"\bserrures?\b", MESSAGE) or re.search(r"\bcl[eé]f?s?\b", MESSAGE):
+            if rdnb >= 0:
+                return
+            logger.info(f"{user.name} - {message.guild.name} - A parlé de serrure/clé")
+            choix = random.choice(["coords", "grille", "commentaire"])
+            if choix == "coords":
+                await channel.send(random.choice([
+                    "🔧 **SOS Serrurier Express 24/7**\n"
+                    "Maître Clé « Bricolo »\n"
+                    "📍 3 impasse du Verrou Forcé, 75000 Trou-de-Serrure\n"
+                    "📞 06 66 06 66 06\n"
+                    "*Devis gratuit, facture salée.*",
+                    "🔧 **Allô Serrurier Arnak'Tout**\n"
+                    "📍 13 rue de la Porte Claquée, 13013 Pince-Monseigneur\n"
+                    "📞 07 00 00 00 00\n"
+                    "*On ouvre tout, surtout votre portefeuille.*",
+                ]))
+            elif choix == "grille":
+                embed = discord.Embed(
+                    title="🔐 Grille tarifaire — Serrurerie",
+                    description="Tarifs TTC, déplacement non inclus 😇",
+                    color=0xC0392B,
+                )
+                embed.add_field(name="Ouverture après claquage", value="1 200 €", inline=True)
+                embed.add_field(name="Changement de serrure (claquage)", value="1 600 €", inline=True)
+                embed.add_field(name="Déplacement (même à 200 m)", value="350 €", inline=True)
+                embed.add_field(name="Supplément nuit / week-end", value="+ 800 €", inline=True)
+                embed.add_field(name="Porte blindée à changer", value="3 900 €", inline=True)
+                embed.add_field(name="Double de clé", value="95 €", inline=True)
+                embed.set_footer(text="Paiement immédiat exigé. Aucun remboursement.")
+                await channel.send("Ah, une serrure ? Laisse-moi te faire un petit devis 👇", embed=embed)
+            else:
+                await channel.send(random.choice([
+                    "Aïe... changer cette serrure, ça va te coûter un bras 💸",
+                    "Une porte blindée à remplacer ? Prévois de vendre un rein 🩸",
+                    "Clé perdue ? Bon courage, le serrurier va te ruiner tout en douceur.",
+                    "Outch, un changement de serrure c'est jamais donné... 💀",
+                ]))
+
+            # Specific ping (rare, ~4%) on a specific server for a locksmith review
+            if message.guild and message.guild.id == 1382722391117135904 and random.random() < 0.04:
+                await channel.send(random.choice([
+                    "<@258989334537961472> tu donnes combien d'étoiles au serrurier au fait ? ⭐",
+                    "<@258989334537961472> raconte ton expérience avec le serrurier, c'était comment ?",
+                    "<@258989334537961472> sur 5 étoiles, tu mets combien à la prestation du serrurier ?",
+                ]))
+
+    if MESSAGE == "speed" and rdnb <= 3:
+        await channel.send("https://imgur.com/HZT2dyr")
 
     if MESSAGE.capitalize().startswith("Tralalero"):
         await channel.send("Tralala")
@@ -3295,31 +3416,38 @@ async def ask(ctx: discord.Interaction, text: typing.Optional[str]):
 @bot.tree.command(name="skin", description="Minecraft ?")
 async def skin(ctx: discord.Interaction):
     url = "https://mskins.net"
-    response = requests.get(url + "/en/skins/random")
-    soup = BeautifulSoup(response.text, "html.parser")
-    tag = soup.find_all("a")[62]
-    img_tag = tag.find("img")
-    img = str(img_tag["src"]) if img_tag else ""
-    author = img.split("/")[-1].split("-")[0] if img else "Unknown"
-    embed = discord.Embed(
-        description="Skin of %s" % author,
-        title="Random minecraft skin",
-        color=0xECCE8B,
-        url=url + "/en/skins/random",
-    )
-    embed.set_thumbnail(
-        url=
-        "https://imagepng.org/wp-content/uploads/2017/08/minecraft-icone-icon.png"
-    )
-    embed.set_author(
-        name=author,
-        url=tag["href"],
-        icon_url=
-        "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
-    )
-    embed.set_image(url=url + img)
-    embed.set_footer(text="%s - by mskins.net" % author)
-    await ctx.response.send_message("Get skinned", embed=embed)
+    try:
+        response = requests.get(url + "/en/skins/random", timeout=8)
+        soup = BeautifulSoup(response.text, "html.parser")
+        anchors = soup.find_all("a")
+        if len(anchors) <= 62:
+            raise ValueError(f"Page structure inattendue ({len(anchors)} ancres)")
+        tag = anchors[62]
+        img_tag = tag.find("img")
+        img = str(img_tag["src"]) if img_tag else ""
+        author = img.split("/")[-1].split("-")[0] if img else "Unknown"
+        embed = discord.Embed(
+            description="Skin of %s" % author,
+            title="Random minecraft skin",
+            color=0xECCE8B,
+            url=url + "/en/skins/random",
+        )
+        embed.set_thumbnail(
+            url=
+            "https://imagepng.org/wp-content/uploads/2017/08/minecraft-icone-icon.png"
+        )
+        embed.set_author(
+            name=author,
+            url=tag.get("href", url),
+            icon_url=
+            "https://cdn.discordapp.com/avatars/653563141002756106/5e2ef5faf8773b5216aca6b8923ea87a.png",
+        )
+        embed.set_image(url=url + img)
+        embed.set_footer(text="%s - by mskins.net" % author)
+        await ctx.response.send_message("Get skinned", embed=embed)
+    except Exception as e:
+        logger.error(f"Skin command error: {e}")
+        await ctx.response.send_message("Impossible de charger un skin pour l'instant 😔")
 
 @bot.tree.command(name="chat", description="😺")
 async def chat(ctx: discord.Interaction):
@@ -3417,8 +3545,12 @@ async def activity(ctx: discord.Interaction, participants: int):
         url += f"?participants={participants}"
 
     try:
-        response = requests.get(url)
-        activity = random.choice(response.json())
+        response = requests.get(url, timeout=6)
+        data = response.json()
+        if not isinstance(data, list) or len(data) == 0:
+            await ctx.response.send_message("Aucune activité trouvée pour ces critères 😕", ephemeral=True)
+            return
+        activity = random.choice(data)
         author = ctx.user.display_name
         embed = discord.Embed(
             title=activity['activity'],
@@ -3435,7 +3567,7 @@ async def activity(ctx: discord.Interaction, participants: int):
         )
         embed.set_footer(text="provided by bored-api.appbrewery.com")
         await ctx.response.send_message(embed=embed)
-    except json.decoder.JSONDecodeError:
+    except Exception:
         await ctx.response.send_message("Nan ca fonctionne, pas avec ces arguments à prior, c'est balo", ephemeral=True)
 
 @bot.tree.command(name="search", description="Cherche un mot dans mon dictionnaire")
@@ -3847,7 +3979,7 @@ if not TOKEN:
 async def main():
     async with bot:
         await bot.load_extension("cogs.pokemon_starter")
-        await bot.start(TOKEN)
+        await bot.start(typing.cast(str, TOKEN))
 
 
 if __name__ == "__main__":
