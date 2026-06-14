@@ -38,7 +38,7 @@ async def is_prime(nb):
     return True
 
 
-def finndAndReplace(letter, dico):
+def findAndReplace(letter, dico):
     reponse = "00"
     exceptions = ["y", "u", "n", "m", "i"]
     while reponse[0] != letter or reponse[1] in exceptions:
