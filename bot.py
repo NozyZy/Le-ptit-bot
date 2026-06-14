@@ -28,7 +28,7 @@ from fonctions import (
     crypting,
     equal_games,
     facto,
-    finndAndReplace,
+    findAndReplace,
     is_prime,
     nbInStr,
     strToInt,
@@ -581,16 +581,16 @@ async def on_message(message):
             await channel.send(f"❌ Erreur lors du reset du nom: {e}")
         return
 
-    # begginning of reaction programs, get inspired
+    # beginning of reaction programs, get inspired
     if not MESSAGE.startswith("--"):
 
         # Random response for the TQ user with the image allez.png
         if user.id == 756178270830985286 and message.guild.id == 1382722391117135904:
-            tq_rand = random.randint(1, 100)
-            if tq_rand <= 2:  # 2% = 1/50 (1..2)
+            tq_rand = random.randint(1, 200)
+            if tq_rand <= 2:
                 logger.info(f"{user.name} - {message.guild.name} - Allez image envoyée TQ")
                 await channel.send(file=discord.File("images/allez.png"))
-            elif tq_rand <= 4:  # 2% = 1/50 (3..4)
+            elif tq_rand <= 4:
                 logger.info(f"{user.name} - {message.guild.name} - Tristan vient d'arriver")
                 msg = await channel.send("Tristan arrive dans 7 ...")
                 for i in range(6, 0, -1):
@@ -619,7 +619,7 @@ async def on_message(message):
             or MESSAGE.startswith("savais tu")) and rdnb > 3:
             logger.info(f"{user.name} - {message.guild.name} - A demandé si on savait")
             reponses = [
-                "J'en ai vraiment rien à faire tu sais ?",
+                "J'en ai vraiment rien à faire, tu sais ?",
                 "Waaa... Je bois tes paroles",
                 "Dis moi tout bg",
                 "Balec",
@@ -740,7 +740,6 @@ async def on_message(message):
             # Save
             author = user
 
-            # If someone is mentioned, show their Pokemon instead
             if message.mentions and user not in message.mentions:
                 user = message.mentions[0]
 
@@ -837,7 +836,6 @@ async def on_message(message):
                     file=error_file
                 )
 
-
         if MESSAGE == "pouet":
             await channel.send("Roooooh ta gueuuuuule putaiiiiin")
 
@@ -909,10 +907,10 @@ async def on_message(message):
                     "T'es une personne salée toi, nan ?",
                     "Au moins avec toi on tombera pas à court de sel...",
                     "Tu viens de la mer morte pour être aussi salé ?",
-                    "Tiens, prends un peu d'eau avec tout ce sel.",
+                    "Tiens, prends un peu d'eau avec tout ce sel",
                     "Tu fais partie de l'îlot du sel ?",
                     "C'est pas bon pour la tension tout ce sel mon p'tit pote.",
-                    "T'es saunier ?"
+                    "T'es boidet ?"
                 ]
                 await channel.send(random.choice(reponses_sel))
                 logger.info(f"{user.name} - {message.guild.name} - A demandé à être salé")
@@ -971,9 +969,9 @@ async def on_message(message):
                 await channel.send(random.choice(reponses))
             else:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre avec le dico (ah)")
-                await channel.send(finndAndReplace("a", dicoLines))
+                await channel.send(findAndReplace("a", dicoLines))
 
-        if MESSAGE == "oh" and rdnb >= 2:
+        if MESSAGE == "oh" and rdnb >= 3:
             logger.info(f"{user.name} - {message.guild.name} - ")
             if rdnb >= 4:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre (oh)")
@@ -987,7 +985,7 @@ async def on_message(message):
                 await channel.send(random.choice(reponses))
             else:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre par le dico (oh)")
-                await channel.send(finndAndReplace("o", dicoLines))
+                await channel.send(findAndReplace("o", dicoLines))
 
         if MESSAGE == "eh" and rdnb >= 2:
             if rdnb >= 4:
@@ -996,11 +994,11 @@ async def on_message(message):
                 await channel.send(random.choice(reponses))
             else:
                 logger.info(f"{user.name} - {message.guild.name} - S'est fait répondre par le dico (eh)")
-                await channel.send(finndAndReplace("é", dicoLines))
+                await channel.send(findAndReplace("é", dicoLines))
 
         if MESSAGE.startswith("merci"):
             logger.info(f"{user.name} - {message.guild.name} - A dit merci")
-            if rdnb >= 3:
+            if rdnb > 3:
                 reponses = [
                     "De rien hehe",
                     "C'est normal t'inquiète",
@@ -1025,6 +1023,7 @@ async def on_message(message):
                 "dommage mon p'tit pote",
                 "balec",
                 "tant pis",
+                "ALLEZ PICORE 🫴"
             ]
             await channel.send(random.choice(reponses))
 
@@ -1517,12 +1516,11 @@ async def on_message(message):
                     pass
 
         # "je te baise" / "je baise ta mère"
-        baise_self = re.search(r"\bj(?:e|')\s*t(?:e|')\s*baise", MESSAGE) or re.search(r"\bjte\s+baise", MESSAGE)
-        baise_mere = re.search(r"\bbaise(?:r)?\s+ta\s+(?:m[eè]re|maman|daronne|mer)\b", MESSAGE)
+        baise_self = re.search(r"\bj[e']?\s*t[e']\s*baise", MESSAGE)
+        baise_mere = re.search(r"\b(ni(k|qu)(er)?|baiser?)\s+ta\s+(m[eè]re|maman|daronne|mer)\b", MESSAGE)
         if baise_self or baise_mere:
             logger.info(f"{user.name} - {message.guild.name} - A voulu baiser le bot ou sa daronne ಥ_ಥ")
-            if random.random() < 0.5:
-                # price list
+            if rdnb < 2:
                 embed = discord.Embed(
                     title="💸 Tarifs prestation",
                     color=0xE91E63,
@@ -1539,22 +1537,22 @@ async def on_message(message):
                     ]),
                     embed=embed,
                 )
-            else:
+            elif rdnb <= 3:
                 # Vanne sur la daronne
                 reponses = [
-                    "C'est marrant, ta daronne m'a dit exactement la même chose hier soir.",
-                    "Trop tard mon grand, j'étais déjà chez ta mère cette nuit.",
-                    "Demande à ta daronne ce qu'elle en pense, on en a longuement discuté.",
+                    "C'est marrant, ta daronne m'a dit exactement la même chose hier soir",
+                    "Trop tard mon grand, j'étais déjà chez ta mère cette nuit",
+                    "Demande à ta daronne ce qu'elle en pense, on en a longuement discuté",
                     "Ta mère m'a déjà mis 5 étoiles pourtant ⭐⭐⭐⭐⭐",
-                    "Doucement, faut que je récupère, ta daronne m'a épuisé.",
+                    "Doucement, faut que je récupère, ta daronne m'a épuisé",
                     "Tu tiens ça de ta mère, elle aussi elle parlait beaucoup au début ಥ_ಥ",
                 ]
                 await channel.send(random.choice(reponses))
 
         # serrure / clé → locksmith ^^
-        if (re.search(r"\bserrures?\b", MESSAGE)
-                or re.search(r"\bcl[eé]fs?\b", MESSAGE)
-                or re.search(r"\bcl[eé]s?\b", MESSAGE)):
+        if re.search(r"\bserrures?\b", MESSAGE) or re.search(r"\bcl[eé]f?s?\b", MESSAGE):
+            if rdnb >= 0:
+                return
             logger.info(f"{user.name} - {message.guild.name} - A parlé de serrure/clé")
             choix = random.choice(["coords", "grille", "commentaire"])
             if choix == "coords":
@@ -1598,6 +1596,9 @@ async def on_message(message):
                     "<@258989334537961472> raconte ton expérience avec le serrurier, c'était comment ?",
                     "<@258989334537961472> sur 5 étoiles, tu mets combien à la prestation du serrurier ?",
                 ]))
+
+    if MESSAGE == "speed" and rdnb <= 3:
+        await channel.send("https://imgur.com/HZT2dyr")
 
     if MESSAGE.capitalize().startswith("Tralalero"):
         await channel.send("Tralala")
