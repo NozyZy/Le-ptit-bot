@@ -365,6 +365,9 @@ async def on_message(message):
     with open("txt/bans.txt", "r+") as bansFile:
         bansLines = bansFile.read().split('\n')
 
+    with open("txt/mature.txt", "r+") as matureFile:
+        matureLines = matureFile.read().split('\n')
+
     if str(channel.id) in bansLines:  # option to ban reactions from some channels
         await bot.process_commands(message)
         return
@@ -644,6 +647,10 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if MESSAGE in sexe_words:
+            if str(channel.id) in matureLines:
+                await channel.send(
+                    "Ce salon est réservé aux personnes matures, m'enfin 🧑‍💼.\nRetournez à vos enfantillages quelque part d'autres, je vous en prie.")
+                return
             logger.info(f"{user.name} - {message.guild.name} - A parlé de bite")
 
             # if mention someone
@@ -1772,6 +1779,12 @@ async def clear(ctx, nombre: int):
 
 @bot.command()  # show the list of words that trigger the sexe reaction
 async def sexe(ctx):
+    with open("txt/mature.txt", "r+") as matureFile:
+        matureLines = matureFile.read().split('\n')
+    if str(ctx.channel.id) in matureLines:
+        await ctx.send(
+            "Ce salon est réservé aux personnes matures, m'enfin 🧑‍💼.\nRetournez à vos enfantillages quelque part d'autres, je vous en prie.")
+        return
     logger.info(f"{ctx.author.name} - A demandé la liste des mots sexe")
     await ctx.send(f"Mots déclencheurs : {', '.join(sexe_words)}")
 
@@ -1781,6 +1794,13 @@ async def sexe(ctx):
     description="Afficher tes statistiques sexe 📊"
 )
 async def sexestats(interaction: discord.Interaction):
+    with open("txt/mature.txt", "r+") as matureFile:
+        matureLines = matureFile.read().split('\n')
+    if str(interaction.channel.id) in matureLines:
+        await interaction.response.send_message(
+            "Ce salon est réservé aux personnes matures, m'enfin 🧑‍💼.\nRetournez à vos enfantillages quelque part d'autres, je vous en prie.")
+        return
+
     logger.info(f"{interaction.user.name} - A demandé ses stats sexe")
     user_id = str(interaction.user.id)
 
@@ -2415,7 +2435,7 @@ async def presentation(ctx, *base):
 @bot.tree.command(name="ban", description="Tu veux vraiment bannir mes réactions ??? Enflure...")
 async def ban(ctx: discord.Interaction):
     if not ctx.channel or not ctx.guild:
-        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur.")
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
         return
     channel_name = getattr(ctx.channel, 'name', 'DM')
     logger.info(
@@ -2444,7 +2464,7 @@ async def ban(ctx: discord.Interaction):
 @bot.tree.command(name="unban", description="OUI LIBERE-MOI")
 async def unban(ctx: discord.Interaction):
     if not ctx.channel or not ctx.guild:
-        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur.")
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
         return
     channel_name = getattr(ctx.channel, 'name', 'DM')
     logger.info(
@@ -2472,6 +2492,69 @@ async def unban(ctx: discord.Interaction):
                     logger.info("et je suis libre (oui!)")
                 else:
                     bansFile.write(id)
+
+
+@bot.tree.command(name="mature", description="Parce que tu veux que channel soit \"mature\" ??")
+async def ban(ctx: discord.Interaction):
+    if not ctx.channel or not ctx.guild:
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
+        return
+    channel_name = getattr(ctx.channel, 'name', 'DM')
+    logger.info(
+        f"{ctx.user.name} - A demandé de rendre le channel {channel_name} du serveur {ctx.guild.name} MATURE : ",
+    )
+    member = ctx.guild.get_member(ctx.user.id)
+    if not member or not member.guild_permissions.administrator:
+        await ctx.response.send_message("Hop-là t'as pas les droits")
+        logger.info("mais n'a pas les droits")
+        return
+    with open("txt/mature.txt", "r+") as matureFile:
+        matureLines = matureFile.readlines()
+    chanID = str(ctx.channel.id) + "\n"
+    if chanID in matureLines:
+        await ctx.response.send_message("Ici on est déjà mature. Enfant va, pfffff")
+        logger.info("mais c'était déjà un salon mature ici")
+    else:
+        with open("txt/mature.txt", "a+") as matureFile:
+            matureFile.write(chanID)
+        await ctx.response.send_message(
+            "D'accord, ici le salon devient un endroit mature. Plus de zizi (\*/ω＼\*)"
+        )
+        logger.info("et plus de zizi")
+
+
+@bot.tree.command(name="immature", description="eh on redevient immature")
+async def unban(ctx: discord.Interaction):
+    if not ctx.channel or not ctx.guild:
+        await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
+        return
+    channel_name = getattr(ctx.channel, 'name', 'DM')
+    logger.info(
+        f"{ctx.user.name} - A demandé de passer le channel channel {channel_name} du serveur {ctx.guild.name} en mode IMMATURE : ",
+    )
+    member = ctx.guild.get_member(ctx.user.id)
+    if not member or not member.guild_permissions.administrator:
+        await ctx.response.send_message("J'aurais adoré, mais t'as pas les droits...")
+        logger.info("mais n'a pas les droits")
+        return
+    with open("txt/mature.txt", "r+") as matureFile:
+        matureLines = matureFile.readlines()
+    chanID = str(ctx.channel.id) + "\n"
+    if chanID not in matureLines:
+        await ctx.response.send_message("D'accord, on était entre gosses, tu sais ça ?")
+        logger.info("mais j'étais pas mature")
+    else:
+        with open("txt/mature.txt", "w+") as matureFile:
+            matureFile.write("")
+        with open("txt/mature.txt", "a+") as matureFile:
+            for id in matureLines:
+                if id == chanID:
+                    matureLines.remove(id)
+                    await ctx.response.send_message(
+                        "EH ON REDEVIENT IMMATURE ! Regarde la commande \"bite\" stp d=====(￣▽￣\*)b")
+                    logger.info("et je redevnu immature")
+                else:
+                    matureFile.write(id)
 
 
 @bot.tree.command(name="invite", description="Vasy invite moi sur un autre serveur, on s'emmerde ici")
