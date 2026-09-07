@@ -367,6 +367,7 @@ async def on_message(message):
 
     with open("txt/mature.txt", "r+") as matureFile:
         matureLines = matureFile.read().split('\n')
+        matureLines = [i for i in matureLines if i != "1285144836739174420"]
 
     if str(channel.id) in bansLines:  # option to ban reactions from some channels
         await bot.process_commands(message)
@@ -1781,6 +1782,7 @@ async def clear(ctx, nombre: int):
 async def sexe(ctx):
     with open("txt/mature.txt", "r+") as matureFile:
         matureLines = matureFile.read().split('\n')
+        matureLines = [i for i in matureLines if i != "1285144836739174420"]
     if str(ctx.channel.id) in matureLines:
         await ctx.send(
             "Ce salon est réservé aux personnes matures, m'enfin 🧑‍💼.\nRetournez à vos enfantillages quelque part d'autres, je vous en prie.")
@@ -1796,6 +1798,7 @@ async def sexe(ctx):
 async def sexestats(interaction: discord.Interaction):
     with open("txt/mature.txt", "r+") as matureFile:
         matureLines = matureFile.read().split('\n')
+        matureLines = [i for i in matureLines if i != "1285144836739174420"]
     if str(interaction.channel.id) in matureLines:
         await interaction.response.send_message(
             "Ce salon est réservé aux personnes matures, m'enfin 🧑‍💼.\nRetournez à vos enfantillages quelque part d'autres, je vous en prie.")
