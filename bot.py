@@ -212,7 +212,8 @@ GUILD_IDS = [
     1193546302970146846,
     1420660433722802188,
     826575187721322546,
-    1457146663331303568
+    1457146663331303568,
+    236463158435381248
 ]
 
 # Fruits & vegetables → corresponding emoji, loadede from database/fruit/fruits.json.
@@ -954,7 +955,7 @@ async def on_message(message):
                 await channel.send(random.choice(reponses))
 
         if MESSAGE == "a" and rdnb > 2:
-            logger.info(f"{user.name} - {message.guild.name} - A commencer par a")
+            logger.info(f"{user.name} - {message.guild.name} - A commencé par a")
 
             def check_alphabet(m):
                 return m.content.lower(

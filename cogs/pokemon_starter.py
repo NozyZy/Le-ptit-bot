@@ -103,14 +103,22 @@ COMBAT_COOLDOWN = 60 * 5 if os.getenv("RUN_MODE") == "PROD" else 0
 XP_COOLDOWN = 60 if os.getenv("RUN_MODE") == "PROD" else 0
 
 BASE_HP = 15
-HP_PER_LEVEL = 1.3
+HP_PER_LEVEL = 2
 
-CRIT_CHANCE = 0.06
+CRIT_CHANCE = 0.07
 CRIT_MULTIPLIER = 1.5
-DODGE_CHANCE = 0.25
+
+LOW_HP_BONUS = 0.25
+SPECIAL_MULTIPLIER = 1.5
+DEFENSE_MULTIPLIER = 0.5
+
+DMG_MIN_RNG = 0.85
+DMG_MAX_RNG = 1.35
+
+DODGE_CHANCE = 0.35
 DODGE_TIMEOUT = 3.0
 
-XP_MIN, XP_MAX = 15, 55
+XP_MIN, XP_MAX = 15, 75
 
 POKEMON_ENTRY_DEFAULTS = {
     "starter": None,
@@ -344,7 +352,7 @@ def ensure_hp_field(entry: dict) -> None:
 
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
     damage_base = (attacker["level"] ** 0.75) * 1.3
-    rng = random.uniform(0.7, 1.4)
+    rng = random.uniform(DMG_MIN_RNG, DMG_MAX_RNG)
 
     multiplier = TYPE_MULTIPLIER.get(
         (attacker["type"], defender["type"]),
@@ -362,7 +370,7 @@ def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
 
 def compute_max_hp(entry: dict) -> int:
     ensure_hp_field(entry)
-    return BASE_HP + int(entry["level"] * HP_PER_LEVEL)
+    return BASE_HP + int((entry["level"] - 1) * HP_PER_LEVEL) + random.randint(1, 3)
 
 
 def health_bar(current: int, max_hp: int, size: int = 10) -> str:
@@ -455,14 +463,15 @@ class CombatState:
                 result["message"] = "❌ Spécial déjà utilisé !"
             else:
                 atk_state["special_used"] = True
-                result["attack_multiplier"] = 1.5
+                result["attack_multiplier"] = SPECIAL_MULTIPLIER
                 result["message"] = "✨ Attaque spéciale, dégâts augmentés !"
 
         # Low HP bonus
         hp_ratio = self.get_current_hp(attacker) / attacker["HP"]
         if int(hp_ratio * 100) <= 25:
-            result["attack_multiplier"] += 0.3
-            result["message"] += f"\n🔥 **{attacker['pokemon']} est acculé ! Puissance déchaînée (+30%)**"
+            result["attack_multiplier"] += LOW_HP_BONUS
+            result[
+                "message"] += f"\n🔥 **{attacker['pokemon']} est acculé ! Puissance déchaînée (+{int(LOW_HP_BONUS * 100)}%)**"
 
         return result
 
@@ -475,7 +484,7 @@ class CombatState:
         dmg = base_damage * attack_multiplier
 
         if defender_state["defending"]:
-            dmg *= 0.5
+            dmg *= DEFENSE_MULTIPLIER
 
         dmg *= (1 - dodge_reduction)
 
@@ -769,7 +778,7 @@ class PokemonStarterCog(commands.Cog):
         while entry["xp"] >= xp_to_next_level(entry["level"]) and entry["level"] < 100:
             entry["xp"] -= xp_to_next_level(entry["level"])
             entry["level"] += 1
-            entry["HP"] += random.randint(0, 3)
+            entry["HP"] = compute_max_hp(entry)
             leveled_up = True
 
         if not leveled_up:
@@ -1338,7 +1347,7 @@ class PokemonStarterCog(commands.Cog):
 
             msg = (
                 f"## 💥 **{p_attacker['pokemon']} attaque !**\n"
-                f"➡️ **{final_dmg} dégâts**"
+                f"➡️ ***__{final_dmg}__ dégâts***"
             )
 
             if crit and final_dmg > 0:
@@ -1369,7 +1378,7 @@ class PokemonStarterCog(commands.Cog):
         ):
             await thread.send(finishing)
 
-        base_xp = loser["level"] * 10
+        base_xp = int(loser["level"] * 5.23)
         xp_gain = max(5, base_xp + random.randint(-5, 5))
 
         winner["xp"] += xp_gain
