@@ -9,9 +9,7 @@ import os
 import random
 import re
 import time
-import time as time_module
 import typing
-from collections import defaultdict
 from datetime import date
 
 import Tyradex
@@ -60,7 +58,6 @@ args = parser.parse_args()
 
 intents = discord.Intents.all()
 intents.members = True
-client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
                    case_insensitive=True,
@@ -87,10 +84,6 @@ with open("txt/sexe.txt", "r", encoding="utf-8") as sexeFile:
 nbtg_lock = asyncio.Lock()
 nbprime_lock = asyncio.Lock()
 
-# Rate limiting system
-# Track last usage time for each user (user_id -> last_use_timestamp)
-user_cooldowns = defaultdict(float)
-
 # Tracking of "god" requests per user per day
 # Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
 god_requests = {}
@@ -102,20 +95,6 @@ sexe_requests = {}
 # List of all Pokémon names
 ALL_POKEMONS = []
 POKEMON_CACHE_FILE = "data/pokemon_cache.json"
-
-def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
-    """
-    Checks whether a user can perform an action.
-    Returns True if the action is allowed, False if it is on cooldown.
-    """
-    current_time = time_module.time()
-    last_use = user_cooldowns[user_id]
-
-    if current_time - last_use >= cooldown_seconds:
-        user_cooldowns[user_id] = current_time
-        return True
-    return False
-
 
 # Load server names from file
 def load_server_names():
@@ -370,7 +349,6 @@ async def on_app_command_error(interaction: discord.Interaction, error: discord.
 @bot.event
 async def on_message(message):
     global nbtg
-    global nbprime
     global ALL_POKEMONS
 
     channel = message.channel
@@ -2477,7 +2455,7 @@ async def unban(ctx: discord.Interaction):
 
 
 @bot.tree.command(name="mature", description="Parce que tu veux que channel soit \"mature\" ??")
-async def ban(ctx: discord.Interaction):
+async def mature(ctx: discord.Interaction):
     if not ctx.channel or not ctx.guild:
         await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
         return
@@ -2506,7 +2484,7 @@ async def ban(ctx: discord.Interaction):
 
 
 @bot.tree.command(name="immature", description="eh on redevient immature")
-async def unban(ctx: discord.Interaction):
+async def immature(ctx: discord.Interaction):
     if not ctx.channel or not ctx.guild:
         await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
         return
@@ -3531,7 +3509,7 @@ async def chat(ctx: discord.Interaction):
         embed.set_image(url=cat_url)
         embed.set_footer(text="chat - by thecatapi.com")
         await ctx.response.send_message("😺", embed=embed)
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         await ctx.response.send_message("Pas de chat, j'ai un problème... Désolé :(")
 
 @bot.command()
