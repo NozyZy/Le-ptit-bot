@@ -120,6 +120,9 @@ DODGE_TIMEOUT = 3.0
 
 XP_MIN, XP_MAX = 15, 75
 
+# The level 100 announcement pings @everyone on purpose (blocked by default bot-wide)
+LEVEL_UP_MENTIONS = discord.AllowedMentions(everyone=True)
+
 POKEMON_ENTRY_DEFAULTS = {
     "starter": None,
     "pokemon": None,
@@ -749,7 +752,7 @@ class PokemonStarterCog(commands.Cog):
         lvl_message = await self.level_up(entry, user)
 
         if lvl_message and len(lvl_message):
-            await message.reply(lvl_message)
+            await message.reply(lvl_message, allowed_mentions=LEVEL_UP_MENTIONS)
 
         await self.evolve(entry, user, message.channel)
 
@@ -1396,7 +1399,7 @@ class PokemonStarterCog(commands.Cog):
 
         message = await self.level_up(winner, winner_user)
         if message:
-            await thread.send(message)
+            await thread.send(message, allowed_mentions=LEVEL_UP_MENTIONS)
 
         await self.evolve(winner, winner_user, interaction.channel)
 
