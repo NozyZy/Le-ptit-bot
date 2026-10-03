@@ -25,6 +25,7 @@ from dotenv import load_dotenv
 
 # Local application imports
 from fonctions import (
+    IS_PRIME_LIMIT,
     crypting,
     equal_games,
     facto,
@@ -62,11 +63,16 @@ client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
                    case_insensitive=True,
-                   intents=intents)
+                   intents=intents,
+                   # Never let user-provided text ping @everyone/@here or roles
+                   allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=True,
+                                                            replied_user=True))
 
 with open("txt/tg.txt", "r+") as tgFile:
     nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
+# Last line of txt/primes.txt: no need to load the 97 MB file to know it
+BIGGEST_PRIME = 187465331
 
 with open("txt/sexe.txt", "r", encoding="utf-8") as sexeFile:
     sexe_words = sexeFile.read().split("\n")
@@ -201,6 +207,12 @@ def build_pokepedia_url(pokemon_name: str) -> str:
     return f"https://www.pokepedia.fr/" + base_name
 
 
+# Discord messages are capped at 2000 characters
+MAX_RESULT_DIGITS = 1990
+
+# Biggest network accepted by --dhcp (a /22)
+DHCP_MAX_ADDRESSES = 1024
+
 # French month names
 FRENCH_MONTHS = [
     "janvier", "février", "mars", "avril", "mai", "juin",
@@ -333,9 +345,25 @@ async def on_command_error(ctx, error):
         await ctx.send(f"❌ Argument manquant : `{error.param.name}`")
     elif isinstance(error, commands.BadArgument):
         await ctx.send(f"❌ Argument invalide. Vérifie la syntaxe de la commande.")
+    elif isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ Tu n'as pas les droits pour utiliser cette commande.")
+    elif isinstance(error, commands.NoPrivateMessage):
+        await ctx.send("❌ Cette commande ne fonctionne que dans un serveur.")
     else:
         # Log other errors without sending to user
         logger.error(f"Command error: {error}")
+
+
+# Error handler for slash commands
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+    if isinstance(error, discord.app_commands.CommandOnCooldown):
+        remaining = int(error.retry_after) + 1
+        await interaction.response.send_message(
+            f"⏳ Cette commande est en cooldown. Réessaie dans {remaining} seconde{'s' if remaining > 1 else ''}.",
+            ephemeral=True)
+    else:
+        logger.error(f"Slash command error: {error}", exc_info=error)
 
 
 # Get every message sent, stocked in 'message'
@@ -830,12 +858,11 @@ async def on_message(message):
 
                 await channel.send(text, embed=embed)
                 logger.info(
-                    f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon['image']} : {pokemon['id']}")
+                    f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {"✨" if shiny else ""} {pokemon['name']} {"✨" if shiny else ""} : {pokemon['id']}")
 
             except Exception as e:
                 logger.error(f"Pokemon error occurred : {e}")
                 error_file = discord.File("images/failled.jpg")
-                await channel.send()
                 await channel.send("C'est un flop, appelez-moi un admin immédiatement!")
                 await channel.send(
                     "C'est un flop, appelez-moi un admin immédiatement!\n"
@@ -873,7 +900,8 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if re.search(r'\bfeur\b', MESSAGE) and user.id == 302102401324679168:
-            await channel.send("@everyone ARRETEZ-TOUT, IL A DIT ***FEUR*** !!!")
+            await channel.send("@everyone ARRETEZ-TOUT, IL A DIT ***FEUR*** !!!",
+                               allowed_mentions=discord.AllowedMentions(everyone=True))
 
         if MESSAGE == "<3":
             logger.info(f"{user.name} - {message.guild.name} - A envoyé de l'amour")
@@ -1763,6 +1791,8 @@ async def on_message(message):
 
 
 @bot.command()  # delete 'nombre' messages
+@commands.guild_only()
+@commands.has_permissions(manage_messages=True)
 @commands.cooldown(1, 10, commands.BucketType.user)  # 1 use per 10 seconds per user
 async def clear(ctx, nombre: int):
     if nombre <= 0:
@@ -1773,9 +1803,7 @@ async def clear(ctx, nombre: int):
         return
     logger.info(
         f"{ctx.author.name} - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}")
-    messages = [message async for message in ctx.channel.history(limit=nombre + 1, oldest_first=False)]
-    for message in messages:
-        await message.delete()
+    await ctx.channel.purge(limit=nombre + 1)
 
 
 @bot.command()  # show the list of words that trigger the sexe reaction
@@ -2077,9 +2105,9 @@ async def calcul(ctx, *text):
     nb1 = strToInt(tab)
 
     if symb == "!":
-        if nb1 > 806:  # can't go above 806 recursion deepth
-            await ctx.send("806! maximum, désolé 🤷‍♂️")
-            logger.info("A demandé de calculer plus de 806! (erreur récursive)")
+        if nb1 > 805:  # 806! no longer fits in a 2000 characters message
+            await ctx.send("805! maximum, désolé 🤷‍♂️")
+            logger.info("A demandé de calculer plus de 805! (trop long pour Discord)")
             return
         rd = facto(nb1)
         text = str(nb1) + "! =" + str(rd)
@@ -2110,8 +2138,17 @@ async def calcul(ctx, *text):
             return
         rd = float(nb1 / nb2)
     elif symb == "^":
+        # Refuse before computing: a huge power freezes the whole bot
+        if nb1 > 1 and nb2 * math.log10(nb1) > MAX_RESULT_DIGITS:
+            await ctx.send("Le résultat est trop grand pour Discord, calcule ça chez toi 🤯")
+            logger.info(f"A demandé de calculer {nb1}^{nb2} (refusé, trop grand)")
+            return
         rd = nb1 ** nb2
     text = str(nb1) + str(symb) + str(nb2) + "=" + str(rd)
+    if len(text) > 2000:
+        await ctx.send("Le résultat est trop long pour tenir dans un message 🤷‍♂️")
+        logger.info("A demandé un calcul dont le résultat est trop long")
+        return
     logger.info(text)
     logger.info(f"A demandé de calculer {text}")
     await ctx.send(text)
@@ -2211,44 +2248,35 @@ async def prime(ctx, nb: int):
             logger.info(f"A demandé trop de prime -> {nbprime}")
             return
         nbprime += 1
-    with open("txt/primes.txt", "r+") as Fprime:
-        primes = Fprime.readlines()
-    biggest = int(primes[len(primes) - 1].replace("\n", ""))
-    text = ""
-    ratio_max = 1.02
-    n_max = int(biggest * ratio_max)
-    logger.info(nb, biggest, n_max)
+    try:
+        biggest = BIGGEST_PRIME
+        text = ""
+        ratio_max = 1.02
+        n_max = int(biggest * ratio_max)
+        logger.info(f"nb={nb}, biggest={biggest}, n_max={n_max}")
 
-    if nb > biggest:
-        if biggest % 2 == 0:
-            biggest -= 1
-        if nb <= n_max:
-            await ctx.send("Primo no")
-            return
-            # for i in range(biggest, nb + 1, 2):
-            #     if await is_prime(i):
-            #         text += str(i) + "\n"
-            # Fprime = open("txt/primes.txt", "a+")
-            # Fprime.write(text)
-            # Fprime.close()
-
-            # if nb > 14064991:  # 8Mb file limit
-            #     text = f"Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
-            #     await ctx.send(text)
+        if nb > biggest:
+            if biggest % 2 == 0:
+                biggest -= 1
+            if nb <= n_max:
+                await ctx.send("Primo no")
+                return
+            else:
+                text = f"Ca va me prendre trop de temps, on y va petit à petit, ok ? (max : {int(n_max)})"
+                await ctx.send(text)
         else:
-            text = f"Ca va me prendre trop de temps, on y va petit à petit, ok ? (max : {int(n_max)})"
-            await ctx.send(text)
-    else:
-        text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
-        await ctx.send(text, file=discord.File("txt/prime.txt"))
-    async with nbprime_lock:
-        nbprime -= 1
+            text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
+            await ctx.send(text, file=discord.File("txt/prime.txt"))
+    finally:
+        async with nbprime_lock:
+            nbprime -= 1
     logger.info(f"A demandé de calculer tous les nombres premiers juqu'à {nb}")
 
 
 @bot.tree.command(name="isprime", description="Es-tu prime ?")
+@discord.app_commands.checks.cooldown(2, 5)  # 2 uses per 5 seconds per user
 async def isPrime_slash(interaction: discord.Interaction, nb: int):
-    if nb > 99999997979797979797979777797:
+    if nb >= IS_PRIME_LIMIT:
         await interaction.response.send_message(
             "C'est trop gros, ca va tout casser, demande à papa Google :D", ephemeral=True)
         logger.info("too big")
@@ -2266,7 +2294,7 @@ async def isPrime(ctx, nb: int):
     logger.info(
         f"{ctx.author.name} - A demandé si {nb} est premier : ",
     )
-    if nb > 99999997979797979797979777797:
+    if nb >= IS_PRIME_LIMIT:
         await ctx.send(
             "C'est trop gros, ca va tout casser, demande à papa Google :D")
         logger.info("too big")
@@ -3560,11 +3588,17 @@ async def chat(ctx: discord.Interaction):
         await ctx.response.send_message("Pas de chat, j'ai un problème... Désolé :(")
 
 @bot.command()
+@commands.cooldown(1, 60, commands.BucketType.channel)  # 1 use per 60 seconds per channel
 async def dhcp(ctx, ip_range: str):
     import ipaddress
 
     try:
         network = ipaddress.IPv4Network(ip_range)
+        # Never build the full list of addresses: a /8 alone takes more than 1 GB of RAM
+        if network.num_addresses > DHCP_MAX_ADDRESSES:
+            await ctx.send(f"Doucement, {network.num_addresses} adresses c'est trop, je m'arrête à un /22 "
+                           f"({DHCP_MAX_ADDRESSES} adresses)")
+            return
         ips = [str(ip) for ip in network]
         gateway = ips.pop(0)
     except ipaddress.AddressValueError:
@@ -3617,6 +3651,9 @@ async def dhcp(ctx, ip_range: str):
         """
 
         for user in users:
+            if not ips:
+                await ctx.send("Plus d'IP disponibles pour les retardataires, désolé 🤷")
+                break
             ip = ips.pop(0)
             await user.send(text.format(ip, network.netmask, network.prefixlen, gateway))
     else:
@@ -3676,7 +3713,7 @@ def load_questions():
 def add_questions(question):
     with open("txt/nous.txt", "a+", encoding="utf-8") as f:
         questions = f.read().split("\n")
-        questions.append(question)
+        questions.append(question.strip(" ?,;.\n"))
 
         f.write("\n".join(questions))
 

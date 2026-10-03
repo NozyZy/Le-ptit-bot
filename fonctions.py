@@ -1,3 +1,4 @@
+import math
 import random
 
 
@@ -20,21 +21,35 @@ def division(a, b):
         return a / b
 
 
+# Miller-Rabin with the first 13 primes as bases is exact below this limit
+# (Sorenson & Webster, 2015)
+IS_PRIME_LIMIT = 3317044064679887385961981
+_MR_BASES = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41)
+
+
 async def is_prime(nb):
-    if nb <= 3:
-        return nb > 1
-    elif nb % 2 == 0 or nb % 3 == 0 or nb % 5 == 0:
+    if nb < 2:
         return False
+    for p in _MR_BASES:
+        if nb % p == 0:
+            return nb == p
+    if nb >= IS_PRIME_LIMIT:
+        raise ValueError("is_prime is only exact below IS_PRIME_LIMIT")
 
-    i = 5
-
-    while i * i <= nb:
-        print("i * i :", i * i)
-        print("nb % i :", nb % i)
-        print("nb % (i + 2) :", nb % (i + 2))
-        if nb % i == 0 or nb % (i + 2) == 0:
+    d, s = nb - 1, 0
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+    for a in _MR_BASES:
+        x = pow(a, d, nb)
+        if x in (1, nb - 1):
+            continue
+        for _ in range(s - 1):
+            x = pow(x, 2, nb)
+            if x == nb - 1:
+                break
+        else:
             return False
-        i = i + 6
     return True
 
 
@@ -98,9 +113,7 @@ def equal_games(liste):
 
 
 def facto(n):
-    if n == 0:
-        return 1
-    return n * facto(n - 1)
+    return math.factorial(n)
 
 
 def strToInt(list):
