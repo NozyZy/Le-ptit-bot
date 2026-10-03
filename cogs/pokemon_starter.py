@@ -110,23 +110,21 @@ XP_COOLDOWN = 60 if os.getenv("RUN_MODE") == "PROD" else 0
 BASE_HP = 15
 HP_PER_LEVEL = 2
 
-CRIT_CHANCE = 0.07
-CRIT_MULTIPLIER = 1.5
+CRIT_CHANCE = 0.15
+CRIT_MULTIPLIER = 1.75
 
 LOW_HP_BONUS = 0.25
 SPECIAL_MULTIPLIER = 1.5
 DEFENSE_MULTIPLIER = 0.5
 
-DMG_MIN_RNG = 0.85
-DMG_MAX_RNG = 1.35
+DMG_MIN_RNG = 0.70
+DMG_MAX_RNG = 1.50
 
-# Damage is a share of the defender's max HP, so fights last about as long at any level.
-# The level gap only gives a capped bonus: (attacker / defender level) ** EXPONENT,
-# kept between 1 / CAP and CAP. Tuned by simulation: the higher level wins ~52% of
-# fights at +10% level, ~69% at x2, ~87% at x5 and never more than ~92%.
+# Damage only depends on the attacker: a share of its own HP curve, so damage and HP grow
+# together and fights last about as long at any level. Balance comes from randomness
+# (damage range, crits, dodge, random first turn). Tuned by simulation: with the same
+# type, a Pokémon up to 7% below its opponent's level still wins ~37-39% of fights.
 DAMAGE_SHARE_OF_HP = 0.20
-LEVEL_RATIO_EXPONENT = 0.10
-LEVEL_RATIO_CAP = 1.20
 
 DODGE_CHANCE = 0.35
 DODGE_TIMEOUT = 3.0
@@ -360,13 +358,9 @@ def ensure_hp_field(entry: dict) -> None:
         entry["HP"] = 0
 
 
-def level_factor(attacker: dict, defender: dict) -> float:
-    ratio = max(1, attacker["level"]) / max(1, defender["level"])
-    return min(LEVEL_RATIO_CAP, max(1 / LEVEL_RATIO_CAP, ratio ** LEVEL_RATIO_EXPONENT))
-
-
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
-    damage_base = defender["HP"] * DAMAGE_SHARE_OF_HP * level_factor(attacker, defender)
+    # The defender only matters through the type matchup
+    damage_base = (BASE_HP + HP_PER_LEVEL * (attacker["level"] - 1)) * DAMAGE_SHARE_OF_HP
     rng = random.uniform(DMG_MIN_RNG, DMG_MAX_RNG)
 
     multiplier = TYPE_MULTIPLIER.get(
