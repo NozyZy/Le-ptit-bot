@@ -1759,7 +1759,6 @@ async def on_message(message):
             "**--game** pour jouer au jeu du **clap**\n"
             "**--invite** pour savoir comment m'inviter\n"
             "**--isPrime** *nb* pour tester si *nb* est premier\n"
-            "**--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
             "**--p4** pour jouer au Puissance 4 en **versus**\n"
             "**--p4 pve** pour jouer contre le bot (difficulté normale)\n"
             "**--p4 pve [facile,moyen,difficile]** pour choisir la difficulté\n"
@@ -2323,43 +2322,6 @@ async def randomWord(ctx, nb: int):
         text = text[0].upper() + text[1:]
     logger.info(text)
     await ctx.send(text)
-
-
-@bot.command()  # join the vocal channel fo the caller
-async def join(ctx):
-    channel = ctx.author.voice.channel
-    logger.info(
-        f"{ctx.author.name} - A demandé que je rejoigne le vocal {channel} du serveur {ctx.guild.name}"
-    )
-    await channel.connect()
-
-
-@bot.command()  # leaves it
-async def leave(ctx):
-    logger.info(
-        f"{ctx.author.name} - A demandé que je quitte le vocal {ctx.author.voice.channel} du serveur {ctx.guild.name}"
-    )
-    await ctx.voice_client.disconnect()
-
-
-# plays a song in the vocal channel [TO FIX]
-def playSong(clt, queue, song):
-    source = discord.PCMVolumeTransformer(
-        discord.FFmpegPCMAudio(
-            song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        ))
-
-    def next(_):
-        if len(queue) > 0:
-            newSong = queue[0]
-            del queue[0]
-            playSong(clt, queue, newSong)
-        else:
-            asyncio.run_coroutine_threadsafe(clt.disconnect(), bot.loop)
-
-    clt.play(source, after=next)
 
 
 @bot.command()
