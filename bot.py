@@ -858,12 +858,11 @@ async def on_message(message):
 
                 await channel.send(text, embed=embed)
                 logger.info(
-                    f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon['image']} : {pokemon['id']}")
+                    f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {"✨" if shiny else ""} {pokemon['name']} {"✨" if shiny else ""} : {pokemon['id']}")
 
             except Exception as e:
                 logger.error(f"Pokemon error occurred : {e}")
                 error_file = discord.File("images/failled.jpg")
-                await channel.send()
                 await channel.send("C'est un flop, appelez-moi un admin immédiatement!")
                 await channel.send(
                     "C'est un flop, appelez-moi un admin immédiatement!\n"
@@ -3714,7 +3713,7 @@ def load_questions():
 def add_questions(question):
     with open("txt/nous.txt", "a+", encoding="utf-8") as f:
         questions = f.read().split("\n")
-        questions.append(question)
+        questions.append(question.strip(" ?,;.\n"))
 
         f.write("\n".join(questions))
 
