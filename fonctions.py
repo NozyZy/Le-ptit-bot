@@ -508,8 +508,8 @@ def ecrire_case(grille, position, caractere):
     except IndexError:
         grille[int(position[1]) - 1][abscisse[position[0]]] = caractere
         # on transforme une coordonée de type A00 en [0,0], puis on écrit dans la case  correspondante la caractère du joueur
-    finally:
-        return grille
+
+    return grille
 
 
 def passe_tour(coups_possibles):  # true si oui, il passe son tour

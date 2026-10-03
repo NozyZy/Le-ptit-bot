@@ -415,7 +415,7 @@ async def on_message(message):
 
         for word in words:
             # Remove punctuation but keep apostrophes and alphabetic characters
-            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç'")
+            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç")
             clean_word = clean_word.lower().strip()
 
             # Filter valid words: length < 27
@@ -2547,7 +2547,7 @@ async def ban(ctx: discord.Interaction):
         with open("txt/mature.txt", "a+") as matureFile:
             matureFile.write(chanID)
         await ctx.response.send_message(
-            "D'accord, ici le salon devient un endroit mature. Plus de zizi (\*/ω＼\*)"
+            "D'accord, ici le salon devient un endroit mature. Plus de zizi (\\*/ω＼\\*)"
         )
         logger.info("et plus de zizi")
 
@@ -2580,7 +2580,7 @@ async def unban(ctx: discord.Interaction):
                 if id == chanID:
                     matureLines.remove(id)
                     await ctx.response.send_message(
-                        "EH ON REDEVIENT IMMATURE ! Regarde la commande \"bite\" stp d=====(￣▽￣\*)b")
+                        "EH ON REDEVIENT IMMATURE ! Regarde la commande \"bite\" stp d=====(￣▽￣\\*)b")
                     logger.info("et je redevnu immature")
                 else:
                     matureFile.write(id)
