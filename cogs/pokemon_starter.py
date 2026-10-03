@@ -18,6 +18,8 @@ from discord import app_commands
 from discord.ext import commands
 
 # Local application imports
+from storage import atomic_write_json, load_json_safely
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger()
@@ -84,13 +86,13 @@ POWER_EMOJIS: list[tuple[int, str]] = [
 POKEMON_TYPES = ["🌿", "🔥", "💧"]
 
 TYPE_MULTIPLIER = {
-    ("🔥", "🌿"): 1.25,
-    ("🌿", "💧"): 1.25,
-    ("💧", "🔥"): 1.25,
+    ("🔥", "🌿"): 1.10,
+    ("💧", "🔥"): 1.10,
+    ("🌿", "💧"): 1.10,
 
-    ("🌿", "🔥"): 0.8,
-    ("💧", "🌿"): 0.8,
-    ("🔥", "💧"): 0.8,
+    ("🌿", "🔥"): 0.90,
+    ("💧", "🌿"): 0.90,
+    ("🔥", "💧"): 0.90,
 }
 
 COLORS = {
@@ -105,20 +107,24 @@ XP_COOLDOWN = 60 if os.getenv("RUN_MODE") == "PROD" else 0
 BASE_HP = 15
 HP_PER_LEVEL = 2
 
-CRIT_CHANCE = 0.07
-CRIT_MULTIPLIER = 1.5
+CRIT_CHANCE = 0.10
+CRIT_MULTIPLIER = 1.50
 
 LOW_HP_BONUS = 0.25
 SPECIAL_MULTIPLIER = 1.5
 DEFENSE_MULTIPLIER = 0.5
 
-DMG_MIN_RNG = 0.85
-DMG_MAX_RNG = 1.35
+DMG_MIN_RNG = 0.70
+DMG_MAX_RNG = 1.50
 
-DODGE_CHANCE = 0.35
+DAMAGE_SHARE_OF_HP = 0.27
+
+DODGE_CHANCE = 0.42
 DODGE_TIMEOUT = 3.0
 
 XP_MIN, XP_MAX = 15, 75
+
+LEVEL_UP_MENTIONS = discord.AllowedMentions(everyone=True)
 
 POKEMON_ENTRY_DEFAULTS = {
     "starter": None,
@@ -163,38 +169,32 @@ def pokepedia_url(name: str) -> str:
 
 
 def load_pokemon_data() -> dict:
-    os.makedirs("data", exist_ok=True)
-    try:
-        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            for guild_id, users in list(data.items()):
-                if not isinstance(users, dict):
-                    log.error("Guild %s a une structure invalide: %r", guild_id, users)
-                    data[guild_id] = {}
-                    continue
-
-                for user_id, entry in list(users.items()):
-                    fixed = normalize_pokemon_entry(entry)
-                    if fixed is None:
-                        log.warning(
-                            "Suppression entrée Pokémon invalide | guild=%s user=%s",
-                            guild_id, user_id
-                        )
-                        del users[user_id]
-            save_pokemon_data(data)
-            return data
-    except FileNotFoundError:
+    # A corrupted file is moved aside (never overwritten) and the .bak copy is used instead
+    data = load_json_safely(POKEMON_DATA_FILE, default=None)
+    if data is None:
         logger.info(f"{POKEMON_DATA_FILE} not found, starting with empty data.")
         return {}
-    except json.JSONDecodeError as e:
-        logger.error(f"{POKEMON_DATA_FILE} is corrupted: {e}")
-        return {}
+
+    for guild_id, users in list(data.items()):
+        if not isinstance(users, dict):
+            log.error("Guild %s a une structure invalide: %r", guild_id, users)
+            data[guild_id] = {}
+            continue
+
+        for user_id, entry in list(users.items()):
+            fixed = normalize_pokemon_entry(entry)
+            if fixed is None:
+                log.warning(
+                    "Suppression entrée Pokémon invalide | guild=%s user=%s",
+                    guild_id, user_id
+                )
+                del users[user_id]
+    save_pokemon_data(data)
+    return data
 
 
 def save_pokemon_data(data: dict):
-    os.makedirs("data", exist_ok=True)
-    with open(POKEMON_DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    atomic_write_json(POKEMON_DATA_FILE, data, backup=True, ensure_ascii=False, indent=2)
 
 
 def xp_to_next_level(level: int) -> int:
@@ -351,7 +351,8 @@ def ensure_hp_field(entry: dict) -> None:
 
 
 def compute_damage(attacker: dict, defender: dict) -> tuple[int, bool]:
-    damage_base = (attacker["level"] ** 0.75) * 1.3
+    # The defender only matters through the type matchup
+    damage_base = (BASE_HP + HP_PER_LEVEL * (attacker["level"] - 1)) * DAMAGE_SHARE_OF_HP
     rng = random.uniform(DMG_MIN_RNG, DMG_MAX_RNG)
 
     multiplier = TYPE_MULTIPLIER.get(
@@ -410,15 +411,9 @@ class CombatState:
         self.hp1 = p1["HP"]
         self.hp2 = p2["HP"]
 
-        if p1["level"] > p2["level"]:
-            self.turn = 1
-            self.round = 1
-        elif p2["level"] > p1["level"]:
-            self.turn = 2
-            self.round = 0
-        else:
-            self.turn = random.choice([1, 2])
-            self.round = 1 if self.turn == 1 else 0
+        # Random first turn: playing first is worth ~15 points of win rate on its own
+        self.turn = random.choice([1, 2])
+        self.round = 1 if self.turn == 1 else 0
 
         self.p1_state = {
             "defending": False,
@@ -749,7 +744,7 @@ class PokemonStarterCog(commands.Cog):
         lvl_message = await self.level_up(entry, user)
 
         if lvl_message and len(lvl_message):
-            await message.reply(lvl_message)
+            await message.reply(lvl_message, allowed_mentions=LEVEL_UP_MENTIONS)
 
         await self.evolve(entry, user, message.channel)
 
@@ -1325,7 +1320,11 @@ class PokemonStarterCog(commands.Cog):
                 await dodge_view.wait()
 
                 reaction_time = dodge_view.reaction_time
+                if reaction_time:
+                    reaction_time += def_state["dodge_fatigue"]
                 label, dodge_reduction = dodge(reaction_time)
+                if dodge_reduction > 0.2:
+                    def_state["dodge_fatigue"] += 0.3
 
                 msg = f"{label}\n➡️ Réduction dégâts : **{int(dodge_reduction * 100)}%**"
 
@@ -1396,7 +1395,7 @@ class PokemonStarterCog(commands.Cog):
 
         message = await self.level_up(winner, winner_user)
         if message:
-            await thread.send(message)
+            await thread.send(message, allowed_mentions=LEVEL_UP_MENTIONS)
 
         await self.evolve(winner, winner_user, interaction.channel)
 

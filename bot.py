@@ -9,9 +9,7 @@ import os
 import random
 import re
 import time
-import time as time_module
 import typing
-from collections import defaultdict
 from datetime import date
 
 import Tyradex
@@ -25,6 +23,7 @@ from dotenv import load_dotenv
 
 # Local application imports
 from fonctions import (
+    IS_PRIME_LIMIT,
     crypting,
     equal_games,
     facto,
@@ -34,6 +33,7 @@ from fonctions import (
     strToInt,
     verifAlphabet,
 )
+from storage import atomic_write_json, atomic_write_text, remove_stale_temp_files
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -58,15 +58,23 @@ args = parser.parse_args()
 
 intents = discord.Intents.all()
 intents.members = True
-client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="--",
                    description="Le p'tit bot !",
                    case_insensitive=True,
-                   intents=intents)
+                   intents=intents,
+                   # Never let user-provided text ping @everyone/@here or roles
+                   allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=True,
+                                                            replied_user=True))
+
+# Leftovers of writes interrupted by a crash
+for folder in ("txt", "data"):
+    remove_stale_temp_files(folder)
 
 with open("txt/tg.txt", "r+") as tgFile:
     nbtg: int = int(tgFile.readlines()[0])
 nbprime: int = 0
+# Last line of txt/primes.txt: no need to load the 97 MB file to know it
+BIGGEST_PRIME = 187465331
 
 with open("txt/sexe.txt", "r", encoding="utf-8") as sexeFile:
     sexe_words = sexeFile.read().split("\n")
@@ -75,10 +83,6 @@ with open("txt/sexe.txt", "r", encoding="utf-8") as sexeFile:
 # Locks to protect global variables from race conditions
 nbtg_lock = asyncio.Lock()
 nbprime_lock = asyncio.Lock()
-
-# Rate limiting system
-# Track last usage time for each user (user_id -> last_use_timestamp)
-user_cooldowns = defaultdict(float)
 
 # Tracking of "god" requests per user per day
 # Format: {user_id: {"date": "YYYY-MM-DD", "count": int}}
@@ -91,20 +95,6 @@ sexe_requests = {}
 # List of all Pokémon names
 ALL_POKEMONS = []
 POKEMON_CACHE_FILE = "data/pokemon_cache.json"
-
-def check_cooldown(user_id: int, cooldown_seconds: float = 2.0) -> bool:
-    """
-    Checks whether a user can perform an action.
-    Returns True if the action is allowed, False if it is on cooldown.
-    """
-    current_time = time_module.time()
-    last_use = user_cooldowns[user_id]
-
-    if current_time - last_use >= cooldown_seconds:
-        user_cooldowns[user_id] = current_time
-        return True
-    return False
-
 
 # Load server names from file
 def load_server_names():
@@ -123,9 +113,8 @@ def load_server_names():
 
 # Save server names to file
 def save_server_names(server_names):
-    with open("txt/server_names.txt", "w") as f:
-        for server_id, name in server_names.items():
-            f.write(f"{server_id}:{name}\n")
+    atomic_write_text("txt/server_names.txt",
+                      "".join(f"{server_id}:{name}\n" for server_id, name in server_names.items()))
 
 server_names = load_server_names()
 
@@ -141,8 +130,7 @@ def load_onecops_counter():
 
 # Save OneCOPS counter to file
 def save_onecops_counter(count):
-    with open("txt/onecops_counter.txt", "w") as f:
-        f.write(str(count))
+    atomic_write_text("txt/onecops_counter.txt", str(count))
 
 
 # Load sexe stats from file
@@ -165,11 +153,10 @@ def load_sexe_stats():
 
 # Save sexe stats to file
 def save_sexe_stats(stats):
-    os.makedirs("data", exist_ok=True)
-    with open("data/sexe_stats.txt", "w") as f:
-        for user_id, entries in stats.items():
-            for entry in entries:
-                f.write(f"{user_id}:{entry['date']}:{entry['size']}\n")
+    atomic_write_text("data/sexe_stats.txt", "".join(
+        f"{user_id}:{entry['date']}:{entry['size']}\n"
+        for user_id, entries in stats.items()
+        for entry in entries))
 
 
 # Sexe stats history per user
@@ -189,9 +176,7 @@ def load_pokemon_cache():
 
 # Save Pokémon cache to file
 def save_pokemon_cache(data):
-    os.makedirs("data", exist_ok=True)
-    with open(POKEMON_CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f)
+    atomic_write_json(POKEMON_CACHE_FILE, data)
 
 
 # Build Pokepedia URL for a given Pokémon name + mega + forms handling
@@ -200,6 +185,12 @@ def build_pokepedia_url(pokemon_name: str) -> str:
 
     return f"https://www.pokepedia.fr/" + base_name
 
+
+# Discord messages are capped at 2000 characters
+MAX_RESULT_DIGITS = 1990
+
+# Biggest network accepted by --dhcp (a /22)
+DHCP_MAX_ADDRESSES = 1024
 
 # French month names
 FRENCH_MONTHS = [
@@ -333,16 +324,31 @@ async def on_command_error(ctx, error):
         await ctx.send(f"❌ Argument manquant : `{error.param.name}`")
     elif isinstance(error, commands.BadArgument):
         await ctx.send(f"❌ Argument invalide. Vérifie la syntaxe de la commande.")
+    elif isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ Tu n'as pas les droits pour utiliser cette commande.")
+    elif isinstance(error, commands.NoPrivateMessage):
+        await ctx.send("❌ Cette commande ne fonctionne que dans un serveur.")
     else:
         # Log other errors without sending to user
         logger.error(f"Command error: {error}")
+
+
+# Error handler for slash commands
+@bot.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
+    if isinstance(error, discord.app_commands.CommandOnCooldown):
+        remaining = int(error.retry_after) + 1
+        await interaction.response.send_message(
+            f"⏳ Cette commande est en cooldown. Réessaie dans {remaining} seconde{'s' if remaining > 1 else ''}.",
+            ephemeral=True)
+    else:
+        logger.error(f"Slash command error: {error}", exc_info=error)
 
 
 # Get every message sent, stocked in 'message'
 @bot.event
 async def on_message(message):
     global nbtg
-    global nbprime
     global ALL_POKEMONS
 
     channel = message.channel
@@ -387,7 +393,7 @@ async def on_message(message):
 
         for word in words:
             # Remove punctuation but keep apostrophes and alphabetic characters
-            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç'")
+            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç")
             clean_word = clean_word.lower().strip()
 
             # Filter valid words: length < 27
@@ -402,8 +408,7 @@ async def on_message(message):
     newDico = sorted(set(dicoLines))
     if len(newDico) > dicoSize:
         logger.info(f"Saving Dico.... Total words : {len(newDico)}")
-        with open("txt/dico.txt", "w+", encoding="utf-8") as dicoFile:
-            dicoFile.writelines(newDico)
+        atomic_write_text("txt/dico.txt", "".join(newDico), encoding="utf-8")
 
     # stock file full of insults (yes I know...)
     with open("txt/insultes.txt", "r+", encoding="utf-8") as fichierInsulte:
@@ -830,12 +835,11 @@ async def on_message(message):
 
                 await channel.send(text, embed=embed)
                 logger.info(
-                    f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {pokemon['image']} : {pokemon['id']}")
+                    f"{user.name} - {message.guild.name} - A demandé son Pokémon du jour {"✨" if shiny else ""} {pokemon['name']} {"✨" if shiny else ""} : {pokemon['id']}")
 
             except Exception as e:
                 logger.error(f"Pokemon error occurred : {e}")
                 error_file = discord.File("images/failled.jpg")
-                await channel.send()
                 await channel.send("C'est un flop, appelez-moi un admin immédiatement!")
                 await channel.send(
                     "C'est un flop, appelez-moi un admin immédiatement!\n"
@@ -873,7 +877,8 @@ async def on_message(message):
             await channel.send(random.choice(reponses))
 
         if re.search(r'\bfeur\b', MESSAGE) and user.id == 302102401324679168:
-            await channel.send("@everyone ARRETEZ-TOUT, IL A DIT ***FEUR*** !!!")
+            await channel.send("@everyone ARRETEZ-TOUT, IL A DIT ***FEUR*** !!!",
+                               allowed_mentions=discord.AllowedMentions(everyone=True))
 
         if MESSAGE == "<3":
             logger.info(f"{user.name} - {message.guild.name} - A envoyé de l'amour")
@@ -1126,8 +1131,7 @@ async def on_message(message):
                         and MESSAGE[i + 2] == "g" and MESSAGE[i + 3] == " "):
                     async with nbtg_lock:
                         nbtg += 1
-                        with open("txt/tg.txt", "w+") as tgFile:
-                            tgFile.write(str(nbtg))
+                        atomic_write_text("txt/tg.txt", str(nbtg))
                         activity = f"insulter {nbtg} personnes"
                         await bot.change_presence(activity=discord.Game(
                             name=activity))
@@ -1733,7 +1737,6 @@ async def on_message(message):
             "**--game** pour jouer au jeu du **clap**\n"
             "**--invite** pour savoir comment m'inviter\n"
             "**--isPrime** *nb* pour tester si *nb* est premier\n"
-            "**--join** et **--leave** pour me faire rejoindre/quitter un vocal\n"
             "**--p4** pour jouer au Puissance 4 en **versus**\n"
             "**--p4 pve** pour jouer contre le bot (difficulté normale)\n"
             "**--p4 pve [facile,moyen,difficile]** pour choisir la difficulté\n"
@@ -1763,6 +1766,8 @@ async def on_message(message):
 
 
 @bot.command()  # delete 'nombre' messages
+@commands.guild_only()
+@commands.has_permissions(manage_messages=True)
 @commands.cooldown(1, 10, commands.BucketType.user)  # 1 use per 10 seconds per user
 async def clear(ctx, nombre: int):
     if nombre <= 0:
@@ -1773,9 +1778,7 @@ async def clear(ctx, nombre: int):
         return
     logger.info(
         f"{ctx.author.name} - A demandé de clear {nombre} messages dans le channel {ctx.channel.name} du serveur {ctx.guild.name}")
-    messages = [message async for message in ctx.channel.history(limit=nombre + 1, oldest_first=False)]
-    for message in messages:
-        await message.delete()
+    await ctx.channel.purge(limit=nombre + 1)
 
 
 @bot.command()  # show the list of words that trigger the sexe reaction
@@ -2077,9 +2080,9 @@ async def calcul(ctx, *text):
     nb1 = strToInt(tab)
 
     if symb == "!":
-        if nb1 > 806:  # can't go above 806 recursion deepth
-            await ctx.send("806! maximum, désolé 🤷‍♂️")
-            logger.info("A demandé de calculer plus de 806! (erreur récursive)")
+        if nb1 > 805:  # 806! no longer fits in a 2000 characters message
+            await ctx.send("805! maximum, désolé 🤷‍♂️")
+            logger.info("A demandé de calculer plus de 805! (trop long pour Discord)")
             return
         rd = facto(nb1)
         text = str(nb1) + "! =" + str(rd)
@@ -2110,8 +2113,17 @@ async def calcul(ctx, *text):
             return
         rd = float(nb1 / nb2)
     elif symb == "^":
+        # Refuse before computing: a huge power freezes the whole bot
+        if nb1 > 1 and nb2 * math.log10(nb1) > MAX_RESULT_DIGITS:
+            await ctx.send("Le résultat est trop grand pour Discord, calcule ça chez toi 🤯")
+            logger.info(f"A demandé de calculer {nb1}^{nb2} (refusé, trop grand)")
+            return
         rd = nb1 ** nb2
     text = str(nb1) + str(symb) + str(nb2) + "=" + str(rd)
+    if len(text) > 2000:
+        await ctx.send("Le résultat est trop long pour tenir dans un message 🤷‍♂️")
+        logger.info("A demandé un calcul dont le résultat est trop long")
+        return
     logger.info(text)
     logger.info(f"A demandé de calculer {text}")
     await ctx.send(text)
@@ -2211,44 +2223,35 @@ async def prime(ctx, nb: int):
             logger.info(f"A demandé trop de prime -> {nbprime}")
             return
         nbprime += 1
-    with open("txt/primes.txt", "r+") as Fprime:
-        primes = Fprime.readlines()
-    biggest = int(primes[len(primes) - 1].replace("\n", ""))
-    text = ""
-    ratio_max = 1.02
-    n_max = int(biggest * ratio_max)
-    logger.info(nb, biggest, n_max)
+    try:
+        biggest = BIGGEST_PRIME
+        text = ""
+        ratio_max = 1.02
+        n_max = int(biggest * ratio_max)
+        logger.info(f"nb={nb}, biggest={biggest}, n_max={n_max}")
 
-    if nb > biggest:
-        if biggest % 2 == 0:
-            biggest -= 1
-        if nb <= n_max:
-            await ctx.send("Primo no")
-            return
-            # for i in range(biggest, nb + 1, 2):
-            #     if await is_prime(i):
-            #         text += str(i) + "\n"
-            # Fprime = open("txt/primes.txt", "a+")
-            # Fprime.write(text)
-            # Fprime.close()
-
-            # if nb > 14064991:  # 8Mb file limit
-            #     text = f"Je peux pas en envoyer plus que 14064991, mais tkt je l'ai calculé chez moi là"
-            #     await ctx.send(text)
+        if nb > biggest:
+            if biggest % 2 == 0:
+                biggest -= 1
+            if nb <= n_max:
+                await ctx.send("Primo no")
+                return
+            else:
+                text = f"Ca va me prendre trop de temps, on y va petit à petit, ok ? (max : {int(n_max)})"
+                await ctx.send(text)
         else:
-            text = f"Ca va me prendre trop de temps, on y va petit à petit, ok ? (max : {int(n_max)})"
-            await ctx.send(text)
-    else:
-        text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
-        await ctx.send(text, file=discord.File("txt/prime.txt"))
-    async with nbprime_lock:
-        nbprime -= 1
+            text = f"Tous les nombres premiers jusqu'a 14064991 (plus grand : {biggest})"
+            await ctx.send(text, file=discord.File("txt/prime.txt"))
+    finally:
+        async with nbprime_lock:
+            nbprime -= 1
     logger.info(f"A demandé de calculer tous les nombres premiers juqu'à {nb}")
 
 
 @bot.tree.command(name="isprime", description="Es-tu prime ?")
+@discord.app_commands.checks.cooldown(2, 5)  # 2 uses per 5 seconds per user
 async def isPrime_slash(interaction: discord.Interaction, nb: int):
-    if nb > 99999997979797979797979777797:
+    if nb >= IS_PRIME_LIMIT:
         await interaction.response.send_message(
             "C'est trop gros, ca va tout casser, demande à papa Google :D", ephemeral=True)
         logger.info("too big")
@@ -2266,7 +2269,7 @@ async def isPrime(ctx, nb: int):
     logger.info(
         f"{ctx.author.name} - A demandé si {nb} est premier : ",
     )
-    if nb > 99999997979797979797979777797:
+    if nb >= IS_PRIME_LIMIT:
         await ctx.send(
             "C'est trop gros, ca va tout casser, demande à papa Google :D")
         logger.info("too big")
@@ -2297,43 +2300,6 @@ async def randomWord(ctx, nb: int):
         text = text[0].upper() + text[1:]
     logger.info(text)
     await ctx.send(text)
-
-
-@bot.command()  # join the vocal channel fo the caller
-async def join(ctx):
-    channel = ctx.author.voice.channel
-    logger.info(
-        f"{ctx.author.name} - A demandé que je rejoigne le vocal {channel} du serveur {ctx.guild.name}"
-    )
-    await channel.connect()
-
-
-@bot.command()  # leaves it
-async def leave(ctx):
-    logger.info(
-        f"{ctx.author.name} - A demandé que je quitte le vocal {ctx.author.voice.channel} du serveur {ctx.guild.name}"
-    )
-    await ctx.voice_client.disconnect()
-
-
-# plays a song in the vocal channel [TO FIX]
-def playSong(clt, queue, song):
-    source = discord.PCMVolumeTransformer(
-        discord.FFmpegPCMAudio(
-            song.stream_url,
-            before_options=
-            "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        ))
-
-    def next(_):
-        if len(queue) > 0:
-            newSong = queue[0]
-            del queue[0]
-            playSong(clt, queue, newSong)
-        else:
-            asyncio.run_coroutine_threadsafe(clt.disconnect(), bot.loop)
-
-    clt.play(source, after=next)
 
 
 @bot.command()
@@ -2483,20 +2449,13 @@ async def unban(ctx: discord.Interaction):
         await ctx.response.send_message("D'accord, mais j'suis pas ban, hehe.")
         logger.info("mais j'étais pas ban")
     else:
-        with open("txt/bans.txt", "w+") as bansFile:
-            bansFile.write("")
-        with open("txt/bans.txt", "a+") as bansFile:
-            for id in bansLines:
-                if id == chanID:
-                    bansLines.remove(id)
-                    await ctx.response.send_message("JE SUIS LIIIIIIBRE")
-                    logger.info("et je suis libre (oui!)")
-                else:
-                    bansFile.write(id)
+        atomic_write_text("txt/bans.txt", "".join(line for line in bansLines if line != chanID))
+        await ctx.response.send_message("JE SUIS LIIIIIIBRE")
+        logger.info("et je suis libre (oui!)")
 
 
 @bot.tree.command(name="mature", description="Parce que tu veux que channel soit \"mature\" ??")
-async def ban(ctx: discord.Interaction):
+async def mature(ctx: discord.Interaction):
     if not ctx.channel or not ctx.guild:
         await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
         return
@@ -2519,13 +2478,13 @@ async def ban(ctx: discord.Interaction):
         with open("txt/mature.txt", "a+") as matureFile:
             matureFile.write(chanID)
         await ctx.response.send_message(
-            "D'accord, ici le salon devient un endroit mature. Plus de zizi (\*/ω＼\*)"
+            "D'accord, ici le salon devient un endroit mature. Plus de zizi (\\*/ω＼\\*)"
         )
         logger.info("et plus de zizi")
 
 
 @bot.tree.command(name="immature", description="eh on redevient immature")
-async def unban(ctx: discord.Interaction):
+async def immature(ctx: discord.Interaction):
     if not ctx.channel or not ctx.guild:
         await ctx.response.send_message("Cette commande ne fonctionne que dans un serveur, m'enfin.")
         return
@@ -2545,17 +2504,10 @@ async def unban(ctx: discord.Interaction):
         await ctx.response.send_message("D'accord, on était entre gosses, tu sais ça ?")
         logger.info("mais j'étais pas mature")
     else:
-        with open("txt/mature.txt", "w+") as matureFile:
-            matureFile.write("")
-        with open("txt/mature.txt", "a+") as matureFile:
-            for id in matureLines:
-                if id == chanID:
-                    matureLines.remove(id)
-                    await ctx.response.send_message(
-                        "EH ON REDEVIENT IMMATURE ! Regarde la commande \"bite\" stp d=====(￣▽￣\*)b")
-                    logger.info("et je redevnu immature")
-                else:
-                    matureFile.write(id)
+        atomic_write_text("txt/mature.txt", "".join(line for line in matureLines if line != chanID))
+        await ctx.response.send_message(
+            "EH ON REDEVIENT IMMATURE ! Regarde la commande \"bite\" stp d=====(￣▽￣\\*)b")
+        logger.info("et je redevnu immature")
 
 
 @bot.tree.command(name="invite", description="Vasy invite moi sur un autre serveur, on s'emmerde ici")
@@ -3268,12 +3220,13 @@ async def p4(ctx):
 
 
 async def updateLeaderboard(liste, filename="leaderboard.txt"):
-    with open("txt/" + filename, "w+") as file:
-        for line in liste:
-            line = "-".join(line)
-            if line[len(line) - 1] != "\n":
-                line += "\n"
-            file.write(line)
+    text = ""
+    for line in liste:
+        line = "-".join(line)
+        if line[len(line) - 1] != "\n":
+            line += "\n"
+        text += line
+    atomic_write_text("txt/" + filename, text)
 
 
 async def getScoreLeaderBoard(id, filename="leaderboard.txt"):
@@ -3556,15 +3509,21 @@ async def chat(ctx: discord.Interaction):
         embed.set_image(url=cat_url)
         embed.set_footer(text="chat - by thecatapi.com")
         await ctx.response.send_message("😺", embed=embed)
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         await ctx.response.send_message("Pas de chat, j'ai un problème... Désolé :(")
 
 @bot.command()
+@commands.cooldown(1, 60, commands.BucketType.channel)  # 1 use per 60 seconds per channel
 async def dhcp(ctx, ip_range: str):
     import ipaddress
 
     try:
         network = ipaddress.IPv4Network(ip_range)
+        # Never build the full list of addresses: a /8 alone takes more than 1 GB of RAM
+        if network.num_addresses > DHCP_MAX_ADDRESSES:
+            await ctx.send(f"Doucement, {network.num_addresses} adresses c'est trop, je m'arrête à un /22 "
+                           f"({DHCP_MAX_ADDRESSES} adresses)")
+            return
         ips = [str(ip) for ip in network]
         gateway = ips.pop(0)
     except ipaddress.AddressValueError:
@@ -3617,6 +3576,9 @@ async def dhcp(ctx, ip_range: str):
         """
 
         for user in users:
+            if not ips:
+                await ctx.send("Plus d'IP disponibles pour les retardataires, désolé 🤷")
+                break
             ip = ips.pop(0)
             await user.send(text.format(ip, network.netmask, network.prefixlen, gateway))
     else:
@@ -3676,7 +3638,7 @@ def load_questions():
 def add_questions(question):
     with open("txt/nous.txt", "a+", encoding="utf-8") as f:
         questions = f.read().split("\n")
-        questions.append(question)
+        questions.append(question.strip(" ?,;.\n"))
 
         f.write("\n".join(questions))
 

@@ -8,6 +8,10 @@ txt/ShPeu.txt
 .env
 stats.py
 data/
+# storage.py: temporary files, backups and corrupted files set aside
+.*.tmp
+*.bak
+*.corrupt-*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
