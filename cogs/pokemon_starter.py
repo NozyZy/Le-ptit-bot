@@ -85,17 +85,14 @@ POWER_EMOJIS: list[tuple[int, str]] = [
 
 POKEMON_TYPES = ["🌿", "🔥", "💧"]
 
-# Kept small on purpose: the 3 starter types form a rock-paper-scissors, and with
-# 1.25 / 0.8 the type alone decided ~92% of fights at equal level. With 1.06 / 0.94 the
-# favourable type wins ~66% of fights at equal level (simulated).
 TYPE_MULTIPLIER = {
-    ("🔥", "🌿"): 1.06,
-    ("🌿", "💧"): 1.06,
-    ("💧", "🔥"): 1.06,
+    ("🔥", "🌿"): 1.10,
+    ("💧", "🔥"): 1.10,
+    ("🌿", "💧"): 1.10,
 
-    ("🌿", "🔥"): 0.94,
-    ("💧", "🌿"): 0.94,
-    ("🔥", "💧"): 0.94,
+    ("🌿", "🔥"): 0.90,
+    ("💧", "🌿"): 0.90,
+    ("🔥", "💧"): 0.90,
 }
 
 COLORS = {
@@ -111,7 +108,7 @@ BASE_HP = 15
 HP_PER_LEVEL = 2
 
 CRIT_CHANCE = 0.15
-CRIT_MULTIPLIER = 1.75
+CRIT_MULTIPLIER = 1.50
 
 LOW_HP_BONUS = 0.25
 SPECIAL_MULTIPLIER = 1.5
@@ -120,18 +117,13 @@ DEFENSE_MULTIPLIER = 0.5
 DMG_MIN_RNG = 0.70
 DMG_MAX_RNG = 1.50
 
-# Damage only depends on the attacker: a share of its own HP curve, so damage and HP grow
-# together and fights last about as long at any level. Balance comes from randomness
-# (damage range, crits, dodge, random first turn). Tuned by simulation: with the same
-# type, a Pokémon up to 7% below its opponent's level still wins ~37-39% of fights.
-DAMAGE_SHARE_OF_HP = 0.20
+DAMAGE_SHARE_OF_HP = 0.27
 
-DODGE_CHANCE = 0.35
+DODGE_CHANCE = 0.42
 DODGE_TIMEOUT = 3.0
 
 XP_MIN, XP_MAX = 15, 75
 
-# The level 100 announcement pings @everyone on purpose (blocked by default bot-wide)
 LEVEL_UP_MENTIONS = discord.AllowedMentions(everyone=True)
 
 POKEMON_ENTRY_DEFAULTS = {
@@ -425,12 +417,14 @@ class CombatState:
 
         self.p1_state = {
             "defending": False,
-            "special_used": False
+            "special_used": False,
+            "dodge_fatigue": 0.0
         }
 
         self.p2_state = {
             "defending": False,
-            "special_used": False
+            "special_used": False,
+            "dodge_fatigue": 0.0
         }
 
     def attacker(self):
@@ -1326,7 +1320,11 @@ class PokemonStarterCog(commands.Cog):
                 await dodge_view.wait()
 
                 reaction_time = dodge_view.reaction_time
+                if reaction_time:
+                    reaction_time += def_state["dodge_fatigue"]
                 label, dodge_reduction = dodge(reaction_time)
+                if dodge_reduction > 0.2:
+                    def_state["dodge_fatigue"] += 0.3
 
                 msg = f"{label}\n➡️ Réduction dégâts : **{int(dodge_reduction * 100)}%**"
 
