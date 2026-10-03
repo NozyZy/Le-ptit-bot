@@ -35,6 +35,7 @@ from fonctions import (
     strToInt,
     verifAlphabet,
 )
+from storage import atomic_write_json, atomic_write_text, remove_stale_temp_files
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -67,6 +68,10 @@ bot = commands.Bot(command_prefix="--",
                    # Never let user-provided text ping @everyone/@here or roles
                    allowed_mentions=discord.AllowedMentions(everyone=False, roles=False, users=True,
                                                             replied_user=True))
+
+# Leftovers of writes interrupted by a crash
+for folder in ("txt", "data"):
+    remove_stale_temp_files(folder)
 
 with open("txt/tg.txt", "r+") as tgFile:
     nbtg: int = int(tgFile.readlines()[0])
@@ -129,9 +134,8 @@ def load_server_names():
 
 # Save server names to file
 def save_server_names(server_names):
-    with open("txt/server_names.txt", "w") as f:
-        for server_id, name in server_names.items():
-            f.write(f"{server_id}:{name}\n")
+    atomic_write_text("txt/server_names.txt",
+                      "".join(f"{server_id}:{name}\n" for server_id, name in server_names.items()))
 
 server_names = load_server_names()
 
@@ -147,8 +151,7 @@ def load_onecops_counter():
 
 # Save OneCOPS counter to file
 def save_onecops_counter(count):
-    with open("txt/onecops_counter.txt", "w") as f:
-        f.write(str(count))
+    atomic_write_text("txt/onecops_counter.txt", str(count))
 
 
 # Load sexe stats from file
@@ -171,11 +174,10 @@ def load_sexe_stats():
 
 # Save sexe stats to file
 def save_sexe_stats(stats):
-    os.makedirs("data", exist_ok=True)
-    with open("data/sexe_stats.txt", "w") as f:
-        for user_id, entries in stats.items():
-            for entry in entries:
-                f.write(f"{user_id}:{entry['date']}:{entry['size']}\n")
+    atomic_write_text("data/sexe_stats.txt", "".join(
+        f"{user_id}:{entry['date']}:{entry['size']}\n"
+        for user_id, entries in stats.items()
+        for entry in entries))
 
 
 # Sexe stats history per user
@@ -195,9 +197,7 @@ def load_pokemon_cache():
 
 # Save Pokémon cache to file
 def save_pokemon_cache(data):
-    os.makedirs("data", exist_ok=True)
-    with open(POKEMON_CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f)
+    atomic_write_json(POKEMON_CACHE_FILE, data)
 
 
 # Build Pokepedia URL for a given Pokémon name + mega + forms handling
@@ -430,8 +430,7 @@ async def on_message(message):
     newDico = sorted(set(dicoLines))
     if len(newDico) > dicoSize:
         logger.info(f"Saving Dico.... Total words : {len(newDico)}")
-        with open("txt/dico.txt", "w+", encoding="utf-8") as dicoFile:
-            dicoFile.writelines(newDico)
+        atomic_write_text("txt/dico.txt", "".join(newDico), encoding="utf-8")
 
     # stock file full of insults (yes I know...)
     with open("txt/insultes.txt", "r+", encoding="utf-8") as fichierInsulte:
@@ -1154,8 +1153,7 @@ async def on_message(message):
                         and MESSAGE[i + 2] == "g" and MESSAGE[i + 3] == " "):
                     async with nbtg_lock:
                         nbtg += 1
-                        with open("txt/tg.txt", "w+") as tgFile:
-                            tgFile.write(str(nbtg))
+                        atomic_write_text("txt/tg.txt", str(nbtg))
                         activity = f"insulter {nbtg} personnes"
                         await bot.change_presence(activity=discord.Game(
                             name=activity))
@@ -2511,16 +2509,9 @@ async def unban(ctx: discord.Interaction):
         await ctx.response.send_message("D'accord, mais j'suis pas ban, hehe.")
         logger.info("mais j'étais pas ban")
     else:
-        with open("txt/bans.txt", "w+") as bansFile:
-            bansFile.write("")
-        with open("txt/bans.txt", "a+") as bansFile:
-            for id in bansLines:
-                if id == chanID:
-                    bansLines.remove(id)
-                    await ctx.response.send_message("JE SUIS LIIIIIIBRE")
-                    logger.info("et je suis libre (oui!)")
-                else:
-                    bansFile.write(id)
+        atomic_write_text("txt/bans.txt", "".join(line for line in bansLines if line != chanID))
+        await ctx.response.send_message("JE SUIS LIIIIIIBRE")
+        logger.info("et je suis libre (oui!)")
 
 
 @bot.tree.command(name="mature", description="Parce que tu veux que channel soit \"mature\" ??")
@@ -2573,17 +2564,10 @@ async def unban(ctx: discord.Interaction):
         await ctx.response.send_message("D'accord, on était entre gosses, tu sais ça ?")
         logger.info("mais j'étais pas mature")
     else:
-        with open("txt/mature.txt", "w+") as matureFile:
-            matureFile.write("")
-        with open("txt/mature.txt", "a+") as matureFile:
-            for id in matureLines:
-                if id == chanID:
-                    matureLines.remove(id)
-                    await ctx.response.send_message(
-                        "EH ON REDEVIENT IMMATURE ! Regarde la commande \"bite\" stp d=====(￣▽￣\*)b")
-                    logger.info("et je redevnu immature")
-                else:
-                    matureFile.write(id)
+        atomic_write_text("txt/mature.txt", "".join(line for line in matureLines if line != chanID))
+        await ctx.response.send_message(
+            "EH ON REDEVIENT IMMATURE ! Regarde la commande \"bite\" stp d=====(￣▽￣\*)b")
+        logger.info("et je redevnu immature")
 
 
 @bot.tree.command(name="invite", description="Vasy invite moi sur un autre serveur, on s'emmerde ici")
@@ -3296,12 +3280,13 @@ async def p4(ctx):
 
 
 async def updateLeaderboard(liste, filename="leaderboard.txt"):
-    with open("txt/" + filename, "w+") as file:
-        for line in liste:
-            line = "-".join(line)
-            if line[len(line) - 1] != "\n":
-                line += "\n"
-            file.write(line)
+    text = ""
+    for line in liste:
+        line = "-".join(line)
+        if line[len(line) - 1] != "\n":
+            line += "\n"
+        text += line
+    atomic_write_text("txt/" + filename, text)
 
 
 async def getScoreLeaderBoard(id, filename="leaderboard.txt"):

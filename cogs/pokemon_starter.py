@@ -18,6 +18,8 @@ from discord import app_commands
 from discord.ext import commands
 
 # Local application imports
+from storage import atomic_write_json, load_json_safely
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logger = logging.getLogger()
@@ -166,38 +168,32 @@ def pokepedia_url(name: str) -> str:
 
 
 def load_pokemon_data() -> dict:
-    os.makedirs("data", exist_ok=True)
-    try:
-        with open(POKEMON_DATA_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            for guild_id, users in list(data.items()):
-                if not isinstance(users, dict):
-                    log.error("Guild %s a une structure invalide: %r", guild_id, users)
-                    data[guild_id] = {}
-                    continue
-
-                for user_id, entry in list(users.items()):
-                    fixed = normalize_pokemon_entry(entry)
-                    if fixed is None:
-                        log.warning(
-                            "Suppression entrée Pokémon invalide | guild=%s user=%s",
-                            guild_id, user_id
-                        )
-                        del users[user_id]
-            save_pokemon_data(data)
-            return data
-    except FileNotFoundError:
+    # A corrupted file is moved aside (never overwritten) and the .bak copy is used instead
+    data = load_json_safely(POKEMON_DATA_FILE, default=None)
+    if data is None:
         logger.info(f"{POKEMON_DATA_FILE} not found, starting with empty data.")
         return {}
-    except json.JSONDecodeError as e:
-        logger.error(f"{POKEMON_DATA_FILE} is corrupted: {e}")
-        return {}
+
+    for guild_id, users in list(data.items()):
+        if not isinstance(users, dict):
+            log.error("Guild %s a une structure invalide: %r", guild_id, users)
+            data[guild_id] = {}
+            continue
+
+        for user_id, entry in list(users.items()):
+            fixed = normalize_pokemon_entry(entry)
+            if fixed is None:
+                log.warning(
+                    "Suppression entrée Pokémon invalide | guild=%s user=%s",
+                    guild_id, user_id
+                )
+                del users[user_id]
+    save_pokemon_data(data)
+    return data
 
 
 def save_pokemon_data(data: dict):
-    os.makedirs("data", exist_ok=True)
-    with open(POKEMON_DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    atomic_write_json(POKEMON_DATA_FILE, data, backup=True, ensure_ascii=False, indent=2)
 
 
 def xp_to_next_level(level: int) -> int:
