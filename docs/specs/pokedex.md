@@ -1,6 +1,6 @@
 # Spec : Pokédex — « Attrapez-les tous »
 
-Statut : **v2, décisions intégrées, catalogue de badges à valider avant dev**
+Statut : **validée, implémentée**
 
 ## 1. Contexte
 
@@ -53,8 +53,8 @@ Uniquement pour son propre Pokémon :
 
 - `membre` : défaut = soi. `filtre` : `tous` (défaut), `capturés`, `manquants`, `shiny`.
 - En-tête : `Pokédex de X — 42/1025 (4,1 %) · ✨ 1 · 🏅 12/96`
-- Page : **20 entrées, 2 champs d'embed inline de 10 lignes** (`#025 Pikachu ✨` ; manquant :
-  `#026 ???`). Avec ~1025 Pokémon, ça fait 52 pages en filtre `tous`.
+- Page : **20 entrées, 2 champs d'embed inline de 10 lignes** (`#0025 Pikachu ✨` ; manquant :
+  `#0026 ???`). Avec ~1025 Pokémon, ça fait 52 pages en filtre `tous`.
 - Boutons ⏮️ ◀️ ▶️ ⏭️, timeout 2 min, seul l'auteur de la commande peut paginer
   (même style que les `discord.ui.View` de `cogs/pokemon_starter.py`).
 
@@ -121,20 +121,20 @@ backup=True)` / `load_json_safely`, comme `data/pokemon_starters.json`.
   l'attribue rétroactivement au prochain tirage de chaque joueur (sans annonce de masse :
   annoncé au prochain tirage, comme les autres).
 
-## 5. Implémentation proposée
+## 5. Implémentation
 
-- Nouveau cog `cogs/pokedex.py`, chargé dans `main()` à côté de `cogs.pokemon_starter` :
-  stockage, `/pokedex`, `/badges`, Views de pagination.
-- `cogs/pokedex_badges.py` (ou un module `pokedex/badges.py`) : catalogue déclaratif, chaque
-  badge = `id`, nom, description, catégorie, rareté, `secret`, et une fonction
-  `check(state, ctx) -> bool` + optionnellement `progress(state) -> (n, total)`.
-- `bot.py` : extraire le tirage dans une fonction pure `daily_pokemon(user_id, today)` ;
-  le handler appelle `register_daily(user_id, guild, pokemon_id, shiny, today)` qui renvoie
-  `is_new`, `count`, `total`, `new_badges`.
-- Enregistrement dans un `try/except` : si le Pokédex plante, le Pokémon du jour s'affiche
-  quand même (log d'erreur).
-- Pas de nouvelle dépendance. Tests unitaires sur le tirage, l'enregistrement (idempotence
-  sur la journée) et chaque `check` de badge.
+- `pokedex_logic.py` (sans dépendance à discord, testable seul) : référentiel des espèces,
+  stockage, catalogue déclaratif des badges (`id`, nom, description, catégorie, rareté,
+  `secret`, `check(ctx)`, `progress(entry, caught)` optionnel) et `register_daily(...)` qui
+  renvoie `is_new`, `count`, `total_caught`, `total_badges`, `new_badges`.
+- `cogs/pokedex.py`, chargé dans `main()` après `cogs.pokemon_starter` : `/pokedex`,
+  `/badges`, View de pagination, et `register(...)` appelé par le handler de `bot.py`.
+- `bot.py` : le handler du Pokémon du jour appelle le cog uniquement pour son propre tirage,
+  dans un `try/except` (si le Pokédex plante, le Pokémon du jour s'affiche quand même).
+  Le tirage lui-même n'a pas été extrait de `bot.py` (pas nécessaire pour la feature).
+- `scripts/build_species.py` régénère `database/pokemon/species.json`.
+- Tests : `python -m unittest discover -s tests` (référentiel, idempotence sur la journée,
+  série, badges d'évolution, secrets, Jumeaux, progression). Pas de nouvelle dépendance.
 
 ## 6. Catalogue de badges
 
@@ -275,13 +275,13 @@ Notes :
 - **R4 — Stabilité de la graine.** Vérifié : `hash()` d'un tuple d'entiers ne dépend pas de
   `PYTHONHASHSEED`, le tirage est stable entre redémarrages.
 
-## 8. Questions restantes
+## 8. Questions (tranchées)
 
 | # | Question | Proposition |
 |---|----------|-------------|
-| Q1 | Le catalogue de badges (§6) te va ? Noms, paliers, nombre ? | — |
-| Q2 | `species.json` généré depuis PokeAPI (§4.1) plutôt qu'étendre le cache Tyradex ? | Oui |
-| Q3 | Les badges 🌟/💎 méritent-ils un message plus visible (ex. ping du serveur) ? | Non, juste la ligne dans l'embed |
+| Q1 | Le catalogue de badges (§6) te va ? Noms, paliers, nombre ? | Validé |
+| Q2 | `species.json` généré depuis PokeAPI (§4.1) plutôt qu'étendre le cache Tyradex ? | Validé |
+| Q3 | Les badges 🌟/💎 méritent-ils un message plus visible (ex. ping du serveur) ? | Non, juste la ligne dans l'embed (validé) |
 
 ## 9. Critères d'acceptation
 
