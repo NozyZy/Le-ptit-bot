@@ -5,17 +5,39 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from cogs.pokemon_starter import STARTER_CHAINS
-from pokedex_logic import (BADGES, CATEGORIES, SPECIES, TOTAL_BADGES, TOTAL_SPECIES, RollResult, caught_ids,
-                           get_entry, load_pokedex_data, register_daily, save_pokedex_data)
+from cogs.pokemon_starter import STARTER_CHAINS, pokepedia_url
+from pokedex_logic import (
+    BADGES,
+    BADGES_BY_ID,
+    RARITY_EMOJIS,
+    CATEGORIES,
+    SPECIES,
+    TOTAL_BADGES,
+    TOTAL_SPECIES,
+    RollResult,
+    caught_ids,
+    get_entry,
+    load_pokedex_data,
+    register_daily,
+    save_pokedex_data
+)
 
 logger = logging.getLogger(__name__)
 
 POKEDEX_PAGE_SIZE = 20
 POKEDEX_COLUMN_SIZE = 10
-# Embed descriptions are capped at 4096 characters
+
 BADGE_PAGE_MAX_CHARS = 3900
 PAGINATION_TIMEOUT = 120
+
+RARITY_SCORES = {
+    "bronze": 1,
+    "silver": 2,
+    "gold": 3,
+    "diamond": 4,
+    "legend": 5,
+}
+LEADERBOARD_PAGE_SIZE = 20
 
 FILTER_CHOICES = [
     app_commands.Choice(name="Tous", value="all"),
@@ -33,7 +55,7 @@ def dex_line(pid: int, entry: dict) -> str:
     caught = entry["caught"].get(str(pid))
     if not caught:
         return f"`#{pid:04d}` ???"
-    return f"`#{pid:04d}` {SPECIES[pid]['name']}{' ✨' if caught['shiny'] else ''}"
+    return f"`#{pid:04d}` [{SPECIES[pid]['name']}{' ✨' if caught['shiny'] else ''}]({pokepedia_url(SPECIES[pid]['name'])})"
 
 
 def badge_line(badge, entry: dict, caught: set[int]) -> str:
@@ -72,7 +94,7 @@ class PagedView(discord.ui.View):
 
     @discord.ui.button(emoji="⏮️", style=discord.ButtonStyle.secondary)
     async def first(self, interaction: discord.Interaction, _):
-        await self.show(interaction, 0)
+        await self.show(interaction, min(0, self.index - 10))
 
     @discord.ui.button(emoji="◀️", style=discord.ButtonStyle.primary)
     async def previous(self, interaction: discord.Interaction, _):
@@ -84,7 +106,7 @@ class PagedView(discord.ui.View):
 
     @discord.ui.button(emoji="⏭️", style=discord.ButtonStyle.secondary)
     async def last(self, interaction: discord.Interaction, _):
-        await self.show(interaction, len(self.pages) - 1)
+        await self.show(interaction, min(len(self.pages) - 1, self.index + 10))
 
     async def on_timeout(self):
         if self.message:
@@ -143,14 +165,18 @@ class PokedexCog(commands.Cog):
         entry = get_entry({}, "") if str(member.id) not in self.data else get_entry(self.data, str(member.id))
         caught = caught_ids(entry)
         shinies = {pid for pid in caught if entry["caught"][str(pid)]["shiny"]}
+        color = discord.Color.ash_theme()
 
         ids = sorted(SPECIES)
         if mode == "caught":
             ids = sorted(caught)
+            color = discord.Color.green()
         elif mode == "missing":
             ids = [pid for pid in ids if pid not in caught]
+            color = discord.Color.red()
         elif mode == "shiny":
             ids = sorted(shinies)
+            color = discord.Color.gold()
 
         header = (
             f"**{len(caught)}/{TOTAL_SPECIES}** ({len(caught) / TOTAL_SPECIES * 100:.1f} %)"
@@ -163,7 +189,7 @@ class PokedexCog(commands.Cog):
         pages = []
         chunks = [ids[i:i + POKEDEX_PAGE_SIZE] for i in range(0, len(ids), POKEDEX_PAGE_SIZE)] or [[]]
         for number, chunk in enumerate(chunks, start=1):
-            embed = discord.Embed(title=title, description=header, color=discord.Color.red())
+            embed = discord.Embed(title=title, description=header, color=color)
             embed.set_thumbnail(url=member.display_avatar.url)
             if not chunk:
                 embed.add_field(name="​", value="Rien ici… pour l'instant. Écris `pokémon` pour tirer ton Pokémon du jour !")
@@ -216,6 +242,112 @@ class PokedexCog(commands.Cog):
             embed.set_footer(text=f"Page {number}/{len(pages)} · 🥉 🥈 🥇 💎 🌟 du plus courant au plus rare")
 
         await send_pages(interaction, pages, start)
+
+    @app_commands.command(
+        name="badge_leaderboard",
+        description="Classement des dresseurs par badges"
+    )
+    async def badge_leaderboard(self, interaction: discord.Interaction):
+        guild = interaction.guild
+
+        if guild is None:
+            await interaction.response.send_message(
+                "Cette commande doit être utilisée dans un serveur.",
+                ephemeral=True,
+            )
+            return
+
+        leaderboard = []
+
+        # Score only members of this Discord server.
+        for member in guild.members:
+            if member.bot:
+                continue
+
+            entry = get_entry(self.data, str(member.id))
+            earned_badges = entry["badges"]
+
+            rarity_counts = {rarity: 0 for rarity in RARITY_SCORES}
+            score = 0
+
+            for badge_id in earned_badges:
+                badge = BADGES_BY_ID.get(badge_id)
+                if badge is None:
+                    continue
+
+                rarity = badge.rarity
+                points = RARITY_SCORES.get(rarity, 0)
+
+                score += points
+                if rarity in rarity_counts:
+                    rarity_counts[rarity] += 1
+
+            if score > 0:
+                leaderboard.append({
+                    "member": member,
+                    "score": score,
+                    "rarity_counts": rarity_counts,
+                    "total_badges": sum(rarity_counts.values()),
+                })
+
+        # Highest score first; break ties by total number of badges.
+        leaderboard.sort(
+            key=lambda item: (item["score"], item["total_badges"]),
+            reverse=True,
+        )
+
+        embed = discord.Embed(
+            title=f"🏆 Classement des dresseurs — {guild.name}",
+            description=(
+                "Chaque badge rapporte des points selon sa rareté.\n"
+                "🥉 1 pt · 🥈 2 pts · 🥇 3 pts · 💎 4 pts · 🌟 5 pts"
+            ),
+            color=discord.Color.gold(),
+        )
+
+        if not leaderboard:
+            embed.description += "\n\nAucun badge obtenu pour le moment !"
+        else:
+            lines = []
+
+            for rank, item in enumerate(
+                    leaderboard[:LEADERBOARD_PAGE_SIZE], start=1
+            ):
+                member = item["member"]
+                score = item["score"]
+                counts = item["rarity_counts"]
+
+                rank_emoji = {
+                    1: "🥇",
+                    2: "🥈",
+                    3: "🥉",
+                }.get(rank, f"`#{rank}`")
+
+                rarity_summary = " · ".join(
+                    f"{RARITY_EMOJIS[rarity]} {count}"
+                    for rarity, count in counts.items()
+                    if count > 0
+                )
+
+                lines.append(
+                    f"{rank_emoji} {member.mention} — **{score} pts**\n"
+                    f"　{rarity_summary}"
+                )
+
+            embed.add_field(
+                name="Classement",
+                value="\n".join(lines),
+                inline=False,
+            )
+
+            embed.set_footer(
+                text=(
+                    f"Top {min(len(leaderboard), LEADERBOARD_PAGE_SIZE)}"
+                    f" / {len(leaderboard)} membres classés"
+                )
+            )
+
+        await interaction.response.send_message(embed=embed)
 
 
 async def setup(bot):
