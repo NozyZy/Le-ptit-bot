@@ -33,8 +33,8 @@ from fonctions import (
     strToInt,
     verifAlphabet,
 )
-from storage import atomic_write_json, atomic_write_text, remove_stale_temp_files
 from pokedex_logic import TOTAL_BADGES, TOTAL_SPECIES
+from storage import atomic_write_json, atomic_write_text, remove_stale_temp_files
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -394,8 +394,7 @@ async def on_message(message):
 
         for word in words:
             # Remove punctuation but keep apostrophes and alphabetic characters
-            clean_word = ''.join(c for c in word if c.isalpha() or c in "éèàïøâñîûç")
-            clean_word = clean_word.lower().strip()
+            clean_word = word.lower().strip()
 
             # Filter valid words: length < 27
             # Note: verifAlphabet will reject words with apostrophes, so we skip it for words with apostrophes
