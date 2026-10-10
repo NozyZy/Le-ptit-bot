@@ -34,6 +34,7 @@ from fonctions import (
     verifAlphabet,
 )
 from storage import atomic_write_json, atomic_write_text, remove_stale_temp_files
+from pokedex_logic import TOTAL_BADGES, TOTAL_SPECIES
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -829,9 +830,34 @@ async def on_message(message):
 
                 embed.set_thumbnail(url=user.avatar.url if user.avatar else user.default_avatar.url)
                 embed.set_image(url=pokemon["shiny_image"] if shiny else pokemon["image"])
-                embed.set_footer(
-                    text=f"Pokémon n°{pokemon['id']} | Reviens demain pour découvrir un nouveau Pokémon !"
-                )
+                footer = f"Pokémon n°{pokemon['id']} | Reviens demain pour découvrir un nouveau Pokémon !"
+
+                # Only your own roll goes into your Pokédex
+                if user == author:
+                    pokedex_result = None
+                    pokedex_cog = bot.get_cog("PokedexCog")
+                    try:
+                        if pokedex_cog:
+                            pokedex_result = pokedex_cog.register(user, message.guild, pokemon["id"], shiny, today)
+                    except Exception as e:
+                        logger.error(f"Pokedex error occurred : {e}", exc_info=e)
+
+                    if pokedex_result:
+                        if pokedex_result.is_new:
+                            embed.description += "\n\n🆕 Nouveau ! Ajouté à ton Pokédex."
+                        elif pokedex_result.count:
+                            embed.description += f"\n\nDéjà capturé ({pokedex_result.count} fois)"
+                        if pokedex_result.new_badges:
+                            embed.add_field(
+                                name="🏅 Badge débloqué" + ("s" if len(pokedex_result.new_badges) > 1 else ""),
+                                value="\n".join(f"{b.emoji} **{b.name}** — {b.description}"
+                                                 for b in pokedex_result.new_badges)[:1024],
+                                inline=False
+                            )
+                        footer = (f"Pokédex : {pokedex_result.total_caught}/{TOTAL_SPECIES}"
+                                  f" · 🏅 {pokedex_result.total_badges}/{TOTAL_BADGES} | {footer}")
+
+                embed.set_footer(text=footer)
 
                 await channel.send(text, embed=embed)
                 logger.info(
@@ -4025,6 +4051,7 @@ if not TOKEN:
 async def main():
     async with bot:
         await bot.load_extension("cogs.pokemon_starter")
+        await bot.load_extension("cogs.pokedex")
         await bot.start(typing.cast(str, TOKEN))
 
 
