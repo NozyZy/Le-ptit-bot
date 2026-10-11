@@ -94,7 +94,7 @@ class PagedView(discord.ui.View):
 
     @discord.ui.button(emoji="⏮️", style=discord.ButtonStyle.secondary)
     async def first(self, interaction: discord.Interaction, _):
-        await self.show(interaction, min(0, self.index - 10))
+        await self.show(interaction, max(0, self.index - 10))
 
     @discord.ui.button(emoji="◀️", style=discord.ButtonStyle.primary)
     async def previous(self, interaction: discord.Interaction, _):
@@ -206,7 +206,7 @@ class PokedexCog(commands.Cog):
     @app_commands.describe(
         membre="Les badges de qui ?",
         categorie="Catégorie à ouvrir",
-        obtenus="Afficher uniquement les badges obtenus"
+        obtenus="Afficher uniquement les badges obtenus",
     )
     @app_commands.choices(
         categorie=[app_commands.Choice(name=c, value=c) for c in CATEGORIES]
@@ -218,50 +218,163 @@ class PokedexCog(commands.Cog):
             categorie: app_commands.Choice[str] | None = None,
             obtenus: bool = False,
     ):
+        import textwrap
+
+        BADGE_DISPLAY_LINES = 3
+        BADGE_DETAIL_WIDTH = 34
+
+        def badge_cell(text: str) -> str:
+            """Limite une cellule à exactement 3 lignes explicites."""
+            text = " ".join(text.split())
+
+            lines = textwrap.wrap(
+                text,
+                width=BADGE_DETAIL_WIDTH,
+                break_long_words=True,
+                break_on_hyphens=False
+            ) or [""]
+
+            if len(lines) > BADGE_DISPLAY_LINES:
+                lines = lines[:BADGE_DISPLAY_LINES]
+
+                lines[-1] = lines[-1][:max(0, BADGE_DETAIL_WIDTH - 1)] + "…"
+
+            lines.extend([""] * (BADGE_DISPLAY_LINES - len(lines)))
+            return "\n".join(lines)
+
         member = membre or interaction.user
-        entry = get_entry(self.data, str(member.id)) if str(member.id) in self.data else get_entry({}, "")
+        user_id = str(member.id)
+        entry = get_entry(self.data, user_id) if user_id in self.data else get_entry({}, "")
         caught = caught_ids(entry)
 
         badges = [
-            badge for badge in BADGES
+            badge
+            for badge in BADGES
             if not obtenus or entry["badges"].get(badge.id)
         ]
-
         header = f"🏅 **{len(entry['badges'])}/{TOTAL_BADGES}** badges"
 
+        rows = []
+        for category in CATEGORIES:
+            for badge in badges:
+                if badge.category != category:
+                    continue
+
+                earned_date = entry["badges"].get(badge.id)
+                if earned_date:
+                    name_cell = f"{badge.emoji} **{badge.name}**"
+                    detail_cell = (
+                        f"{badge.description}\n📅 {format_date(earned_date)}"
+                    )
+                elif badge.secret:
+                    name_cell = "🔒 **???**"
+                    detail_cell = "Badge secret"
+                else:
+                    name_cell = f"🔒 **{badge.name}**"
+                    detail_cell = badge.description
+                    if badge.progress:
+                        done, target = badge.progress(entry, caught)
+                        detail_cell += f" ({done}/{target})"
+
+                rows.append((category, name_cell, detail_cell))
+
+        FIELD_MAX_CHARS = 256
+        ROW_SEPARATOR = "\n"
+
+        chunks = []
+        current_rows = []
+        name_length = 0
+        detail_length = 0
+
+        for row in rows:
+            _, name_cell, detail_cell = row
+
+            next_name_length = name_length + len(name_cell)
+            next_detail_length = detail_length + len(detail_cell)
+
+            if current_rows:
+                next_name_length += len(ROW_SEPARATOR)
+                next_detail_length += len(ROW_SEPARATOR)
+
+            if current_rows and (
+                    next_name_length > FIELD_MAX_CHARS
+                    or next_detail_length > FIELD_MAX_CHARS
+            ):
+                chunks.append(current_rows)
+                current_rows = []
+                next_name_length = len(name_cell)
+                next_detail_length = len(detail_cell)
+
+            current_rows.append(row)
+            name_length = next_name_length
+            detail_length = next_detail_length
+
+        if current_rows:
+            chunks.append(current_rows)
+
         pages = []
+        category_pages = {}
         start = 0
 
-        for category in CATEGORIES:
-            if categorie and category == categorie.value:
-                start = len(pages)
+        for page_rows in chunks:
+            categories = list(dict.fromkeys(row[0] for row in page_rows))
+            title_category = " · ".join(categories)
 
-            lines = [
-                badge_line(badge, entry, caught)
-                for badge in badges
-                if badge.category == category
+            category_badges = [
+                badge for badge in BADGES if badge.category in categories
             ]
-            chunk: list[str] = []
-            chunks = []
-            for line in lines:
-                if chunk and len("\n".join(chunk + [line])) > BADGE_PAGE_MAX_CHARS:
-                    chunks.append(chunk)
-                    chunk = []
-                chunk.append(line)
-            chunks.append(chunk)
-            for part, chunk in enumerate(chunks, start=1):
-                suffix = f" ({part}/{len(chunks)})" if len(chunks) > 1 else ""
-                earned = sum(1 for b in BADGES if b.category == category and b.id in entry["badges"])
-                total = sum(1 for b in BADGES if b.category == category)
-                embed = discord.Embed(
-                    title=f"Badges de {member.display_name} — {category}{suffix}",
-                    description=f"{header} · {category} : {earned}/{total}\n\n" + "\n".join(chunk),
-                    color=discord.Color.gold(),
-                )
-                embed.set_thumbnail(url=member.display_avatar.url)
-                pages.append(embed)
+            earned = sum(
+                1 for badge in category_badges
+                if entry["badges"].get(badge.id)
+            )
+            total = len(category_badges)
+
+            embed = discord.Embed(
+                title=f"Badges de {member.display_name} — {title_category}",
+                description=(
+                    f"{header} · {earned}/{total} badges obtenus "
+                    "dans ces catégories"
+                ),
+                color=discord.Color.gold(),
+            )
+            embed.set_thumbnail(url=member.display_avatar.url)
+
+            embed.add_field(
+                name="Badge",
+                value="\n".join(badge_cell(row[1]) for row in page_rows),
+                inline=True,
+            )
+            embed.add_field(
+                name="Description et obtention",
+                value="\n".join(badge_cell(row[2]) for row in page_rows),
+                inline=True,
+            )
+
+            page_index = len(pages)
+            for category in categories:
+                category_pages.setdefault(category, page_index)
+
+            pages.append(embed)
+
+        if categorie:
+            start = category_pages.get(categorie.value, 0)
+
+        if not pages:
+            embed = discord.Embed(
+                title=f"Badges de {member.display_name}",
+                description=f"{header}\n\nAucun badge à afficher.",
+                color=discord.Color.gold(),
+            )
+            embed.set_thumbnail(url=member.display_avatar.url)
+            pages.append(embed)
+
         for number, embed in enumerate(pages, start=1):
-            embed.set_footer(text=f"Page {number}/{len(pages)} · 🥉 🥈 🥇 💎 🌟 du plus courant au plus rare")
+            embed.set_footer(
+                text=(
+                    f"Page {number}/{len(pages)} · "
+                    "🥉 🥈 🥇 💎 🌟 du plus courant au plus rare"
+                )
+            )
 
         await send_pages(interaction, pages, start)
 
