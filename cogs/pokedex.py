@@ -203,22 +203,44 @@ class PokedexCog(commands.Cog):
 
     # ───────── /badges ─────────
     @app_commands.command(name="badges", description="Affiche les badges du Pokédex")
-    @app_commands.describe(membre="Les badges de qui ?", categorie="Catégorie à ouvrir")
-    @app_commands.choices(categorie=[app_commands.Choice(name=c, value=c) for c in CATEGORIES])
-    async def badges(self, interaction: discord.Interaction, membre: discord.Member | None = None,
-                     categorie: app_commands.Choice[str] | None = None):
+    @app_commands.describe(
+        membre="Les badges de qui ?",
+        categorie="Catégorie à ouvrir",
+        obtenus="Afficher uniquement les badges obtenus"
+    )
+    @app_commands.choices(
+        categorie=[app_commands.Choice(name=c, value=c) for c in CATEGORIES]
+    )
+    async def badges(
+            self,
+            interaction: discord.Interaction,
+            membre: discord.Member | None = None,
+            categorie: app_commands.Choice[str] | None = None,
+            obtenus: bool = False,
+    ):
         member = membre or interaction.user
-        entry = get_entry({}, "") if str(member.id) not in self.data else get_entry(self.data, str(member.id))
+        entry = get_entry(self.data, str(member.id)) if str(member.id) in self.data else get_entry({}, "")
         caught = caught_ids(entry)
+
+        badges = [
+            badge for badge in BADGES
+            if not obtenus or entry["badges"].get(badge.id)
+        ]
+
         header = f"🏅 **{len(entry['badges'])}/{TOTAL_BADGES}** badges"
 
         pages = []
         start = 0
+
         for category in CATEGORIES:
             if categorie and category == categorie.value:
                 start = len(pages)
-            lines = [badge_line(b, entry, caught) for b in BADGES if b.category == category]
-            # Long categories (Régions) are split to fit in an embed
+
+            lines = [
+                badge_line(badge, entry, caught)
+                for badge in badges
+                if badge.category == category
+            ]
             chunk: list[str] = []
             chunks = []
             for line in lines:
@@ -308,19 +330,18 @@ class PokedexCog(commands.Cog):
         if not leaderboard:
             embed.description += "\n\nAucun badge obtenu pour le moment !"
         else:
+            ranked = leaderboard[:LEADERBOARD_PAGE_SIZE]
             lines = []
 
-            for rank, item in enumerate(
-                    leaderboard[:LEADERBOARD_PAGE_SIZE], start=1
-            ):
+            for rank, item in enumerate(ranked, start=1):
                 member = item["member"]
                 score = item["score"]
                 counts = item["rarity_counts"]
 
                 rank_emoji = {
-                    1: "🥇",
-                    2: "🥈",
-                    3: "🥉",
+                    1: "👑",
+                    2: "🏆",
+                    3: "🎖️",
                 }.get(rank, f"`#{rank}`")
 
                 rarity_summary = " · ".join(
@@ -334,15 +355,30 @@ class PokedexCog(commands.Cog):
                     f"　{rarity_summary}"
                 )
 
-            embed.add_field(
-                name="Classement",
-                value="\n".join(lines),
-                inline=False,
-            )
+            if len(ranked) > 10:
+                # Deux colonnes, réparties aussi équitablement que possible.
+                mid = (len(lines) + 1) // 2
+
+                embed.add_field(
+                    name="Classement",
+                    value="\n".join(lines[:mid]),
+                    inline=True,
+                )
+                embed.add_field(
+                    name="Classement (suite)",
+                    value="\n".join(lines[mid:]),
+                    inline=True,
+                )
+            else:
+                embed.add_field(
+                    name="Classement",
+                    value="\n".join(lines),
+                    inline=False,
+                )
 
             embed.set_footer(
                 text=(
-                    f"Top {min(len(leaderboard), LEADERBOARD_PAGE_SIZE)}"
+                    f"Top {len(ranked)}"
                     f" / {len(leaderboard)} membres classés"
                 )
             )
