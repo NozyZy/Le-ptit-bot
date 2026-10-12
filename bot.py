@@ -18,6 +18,7 @@ import discord
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from bs4 import BeautifulSoup
+from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -3823,7 +3824,7 @@ class QuiDeNousView(discord.ui.View):
 
         # Mise à jour du message du tour
         await self.update_embed_on_current_message()
-        await interaction.response.send_message("Vote enregistré ! ✅", ephemeral=True)
+        await interaction.response.send_message("✅ Vote enregistré !", ephemeral=True)
 
     async def refresh_vote_select(self, interaction: discord.Interaction):
         """
@@ -3930,11 +3931,9 @@ class QuiDeNousView(discord.ui.View):
                     if elapsed >= duration:
                         await self.timeout_turn_on_message(message)
                         break
-                    remaining = duration - elapsed
                     bar = self.progress_bar(elapsed, duration)
-                    time_txt = self.format_time(remaining)
                     embed = message.embeds[0]
-                    embed.set_footer(text=f"{bar} ⏱️ {time_txt}")
+                    embed.set_footer(text=f"{bar} ⏱️")
                     await message.edit(embed=embed)
                     await asyncio.sleep(5)
             except asyncio.CancelledError:
@@ -4002,7 +4001,6 @@ async def quidenous(interaction: discord.Interaction):
     await asyncio.sleep(game.open_duration)
     await open_phase_timeout()
 
-
 @bot.tree.command(name="addquidenous", description="Ajoute une question au jeu \"Qui d'entre nous ?\"")
 async def addquidenous(interaction: discord.Interaction, question: str):
     logger.info(f"{interaction.user.name} - {interaction.guild.name if interaction.guild else 'DM'} - A demandé à ajouter la question \"{question}\"")
@@ -4022,6 +4020,1232 @@ async def addquidenous(interaction: discord.Interaction, question: str):
     await interaction.response.send_message(
         f"La question suivante a bien été ajoutée : Qui d'entre nous {final_question}\n\nJ'espère qu'elle vaut le coup...",
         ephemeral=True)
+
+
+AMITIE_MODES = {
+    "description": (
+        "📝 Description",
+        [
+            (
+                "📝",
+                "Description",
+                "Décris brièvement cette personne en quelques lignes, en toute honnêteté.",
+            ),
+        ],
+    ),
+    "qualite_defaut": (
+        "💖 Qualité / Défaut ⚠️",
+        [
+            (
+                "💖",
+                "Qualité",
+                "Donne une qualité qui caractérise cette personne.",
+            ),
+            (
+                "⚠️",
+                "Défaut",
+                "Donne un défaut de cette personne.",
+            ),
+        ],
+    ),
+    "green_red_flag": (
+        "🟢 Green flag / Red flag 🔴",
+        [
+            (
+                "🟢",
+                "Green flag",
+                "Donne un green flag de cette personne dans le cadre de relations amoureuses.",
+            ),
+            (
+                "🔴",
+                "Red flag",
+                "Donne un red flag de cette personne dans le cadre de relations amoureuses.",
+            ),
+        ],
+    ),
+}
+
+AMITIE_DEV_ANSWERS = {
+    "description": {
+        "📝": (
+            "Elle est spontanée, sait mettre les autres à l'aise "
+            "et apporte souvent une touche d'humour aux moments simples."
+        ),
+    },
+    "qualite_defaut": {
+        "💖": "Elle est à l'écoute et sait se montrer attentionnée.",
+        "⚠️": "Elle peut parfois trop réfléchir avant de prendre une décision.",
+    },
+    "green_red_flag": {
+        "🟢": (
+            "Elle communique clairement et fait preuve d'attention "
+            "dans ses relations amoureuses."
+        ),
+        "🔴": (
+            "Elle peut parfois avoir du mal à exprimer ce qu'elle ressent "
+            "et laisser les choses s'accumuler."
+        ),
+    },
+}
+
+
+def ajouter_champs_groupes(
+        embed: discord.Embed,
+        titre: str,
+        lignes: list[str],
+        limite: int = 950,
+) -> None:
+    """Découpe une liste de lignes pour respecter les limites des embeds Discord."""
+    groupes = []
+    groupe_actuel = []
+    longueur = 0
+
+    for ligne in lignes:
+        if len(ligne) > limite:
+            ligne = ligne[: limite - 3] + "..."
+
+        longueur_ligne = len(ligne) + (1 if groupe_actuel else 0)
+
+        if groupe_actuel and longueur + longueur_ligne > limite:
+            groupes.append(groupe_actuel)
+            groupe_actuel = []
+            longueur = 0
+            longueur_ligne = len(ligne)
+
+        groupe_actuel.append(ligne)
+        longueur += longueur_ligne
+
+    if groupe_actuel:
+        groupes.append(groupe_actuel)
+
+    for index, groupe in enumerate(groupes):
+        nom = titre if len(groupes) == 1 else f"{titre} ({index + 1}/{len(groupes)})"
+        embed.add_field(
+            name=nom,
+            value="\n".join(groupe),
+            inline=False,
+        )
+
+
+class AmitieGame:
+    def __init__(
+            self,
+            host: discord.Member | discord.User,
+            channel,
+            mode: str,
+    ):
+        self.message_edit_lock = asyncio.Lock()
+        self.host = host
+        self.channel = channel
+        self.mode = mode
+
+        self.mode_title, self.questions = AMITIE_MODES[mode]
+
+        self.max_players = 25
+        self.players: dict[int, discord.Member | discord.User] = {}
+        self.dev_bot_id: int | None = None
+
+        # Une cible différente du répondant, avec une correspondance
+        # un-à-un entre les répondants et les personnes décrites.
+        self.assignments: dict[int, int] = {}
+        self.target_order: list[int] = []
+
+        # Les réponses sont indexées par personne ciblée.
+        self.answers_by_target: dict[int, dict[str, str]] = {}
+        self.respondent_by_target: dict[int, int] = {}
+        self.answered_respondents: set[int] = set()
+        self.prompt_views: dict[int, discord.ui.View] = {}
+        self.dm_failures: set[int] = set()
+
+        # Vote : identifiant du votant -> identifiant de la personne choisie.
+        self.votes: dict[int, int] = {}
+
+        # Score : nombre de bonnes réponses devinées.
+        self.scores: dict[int, int] = {}
+
+        self.current_index = 0
+        self.completed_rounds = 0
+
+        self.phase = "registration"
+        self.ended = False
+
+        self.phase_started_at: float | None = None
+        self.phase_duration: int = 0
+        self.phase_deadline: int | None = None
+
+        self.open_duration = 60
+        self.response_duration = 5 * 60
+        self.vote_duration = 5 * 60
+        self.results_duration = 60
+
+        self.timer_task: asyncio.Task | None = None
+        self.message: discord.Message | None = None
+        self.public_view: discord.ui.View | None = None
+
+    # --------------------------------------------------
+    # Utilitaires
+    # --------------------------------------------------
+
+    def apply_timer_display(self, embed: discord.Embed) -> None:
+        if (
+                self.phase_deadline is None
+                or self.phase_started_at is None
+                or self.phase_duration <= 0
+        ):
+            return
+
+        elapsed = min(
+            self.phase_duration,
+            max(0, time.monotonic() - self.phase_started_at),
+        )
+
+        # Timestamp natif Discord : se met à jour côté client.
+        timer_text = (
+            f"⏳ **Fin de la phase :** "
+            f"<t:{self.phase_deadline}:R>"
+        )
+
+        embed.description = (
+            f"{embed.description or ''}\n\n{timer_text}"
+        )
+
+        embed.set_footer(text=f"{self.progress_bar(elapsed, self.phase_duration)} ⏱️")
+
+    def creer_embed(
+            self,
+            titre: str,
+            description: str = "",
+            couleur: discord.Color = discord.Color.blurple(),
+    ) -> discord.Embed:
+        embed = discord.Embed(
+            title=titre,
+            description=description,
+            color=couleur,
+        )
+        embed.set_author(
+            name=self.host.display_name,
+            icon_url=self.host.display_avatar.url,
+        )
+        return embed
+
+    def cast_dev_vote(self) -> None:
+        if (
+                os.getenv("RUN_MODE") != "DEV"
+                or self.dev_bot_id is None
+                or self.dev_bot_id not in self.players
+        ):
+            return
+
+        first_player_id = next(iter(self.players), None)
+
+        if first_player_id is not None:
+            self.votes[self.dev_bot_id] = first_player_id
+
+    @staticmethod
+    def nom_affichage(member: discord.Member | discord.User) -> str:
+        return discord.utils.escape_markdown(member.display_name)
+
+    @staticmethod
+    def progress_bar(elapsed: float, total: int, size: int = 10) -> str:
+        progression = min(1.0, max(0.0, elapsed / total))
+        remplis = int(size * progression)
+        return "🟩" * remplis + "⬜" * (size - remplis)
+
+    def cancel_timer(self) -> None:
+        task = self.timer_task
+
+        if task is not None and task is not asyncio.current_task():
+            task.cancel()
+
+        self.timer_task = None
+
+    def start_timer(self, phase: str, duration: int) -> None:
+        self.cancel_timer()
+
+        self.phase_duration = duration
+        self.phase_started_at = time.monotonic()
+        self.phase_deadline = int(time.time()) + duration
+
+        self.timer_task = asyncio.create_task(self._phase_timer(phase, duration))
+
+    async def _phase_timer(self, phase: str, duration: int) -> None:
+        debut = time.monotonic()
+
+        try:
+            while self.phase == phase and not self.ended:
+                ecoule = time.monotonic() - debut
+                restant = duration - ecoule
+
+                if restant <= 0:
+                    break
+
+                if self.message:
+                    async with self.message_edit_lock:
+                        if self.ended or self.phase != phase:
+                            return
+
+                        embed = self.build_embed()
+                        self.apply_timer_display(embed)
+
+                        try:
+                            await self.message.edit(
+                                embed=embed,
+                                view=self.public_view,
+                            )
+                        except discord.HTTPException:
+                            pass
+
+                await asyncio.sleep(min(5, restant))
+
+        except asyncio.CancelledError:
+            return
+
+        if self.ended or self.phase != phase:
+            return
+
+        if phase == "registration":
+            if len(self.players) >= 2:
+                await self.start_game()
+            else:
+                await self.abort_registration()
+
+        elif phase == "responses":
+            await self.begin_voting()
+
+        elif phase == "voting":
+            await self.reveal_results()
+
+        elif phase == "results":
+            await self.next_round()
+
+    async def refresh_public(self) -> None:
+        if self.message is None:
+            return
+
+        async with self.message_edit_lock:
+            if self.message is None:
+                return
+
+            if self.public_view is None:
+                self.public_view = AmitieView(self, self.phase)
+
+            embed = self.build_embed()
+            self.apply_timer_display(embed)
+
+            try:
+                await self.message.edit(
+                    embed=embed,
+                    view=self.public_view,
+                )
+            except discord.HTTPException:
+                pass
+
+    # --------------------------------------------------
+    # Construction des embeds
+    # --------------------------------------------------
+
+    def build_embed(self) -> discord.Embed:
+        if self.phase == "registration":
+            embed = self.creer_embed(
+                "Le jeu de l'amitié 🎭",
+                (
+                    f"**Mode :** {self.mode_title}\n\n"
+                    "Clique sur **Rejoindre** pour participer.\n"
+                    "Les inscriptions durent **1 minute**.\n\n"
+                    "Lors des réponses, formule tes phrases **au féminin**, "
+                    "comme si tu parlais de « la personne », et ne donne "
+                    "aucun indice permettant de l'identifier directement."
+                ),
+            )
+
+            joueurs = [
+                f"• {self.nom_affichage(member)}"
+                for member in self.players.values()
+            ]
+
+            ajouter_champs_groupes(
+                embed,
+                f"Joueurs inscrits ({len(self.players)}/{self.max_players})",
+                joueurs or ["Personne pour le moment."],
+            )
+            return embed
+
+        if self.phase == "responses":
+            embed = self.creer_embed(
+                "Le jeu de l'amitié — Réponses ✍️",
+                (
+                    f"**Mode :** {self.mode_title}\n\n"
+                    "Les joueurs répondent actuellement aux questions "
+                    "qu'ils ont reçues en **message privé**.\n\n"
+                    "Chaque joueur a une personne cible. "
+                    "Les réponses resteront anonymes pendant les votes.\n\n"
+                    "**Rappel :** réponds au féminin et ne révèle pas "
+                    "directement l'identité de ta cible."
+                ),
+                discord.Color.gold(),
+            )
+
+            if self.dm_failures:
+                noms = [
+                    self.nom_affichage(self.players[uid])
+                    for uid in self.dm_failures
+                    if uid in self.players
+                ]
+                ajouter_champs_groupes(
+                    embed,
+                    "Messages privés inaccessibles",
+                    noms or ["Certains joueurs n'ont pas pu être contactés."],
+                )
+
+            return embed
+
+        if self.phase in ("voting", "results"):
+            if not self.target_order:
+                return self.creer_embed("Le jeu de l'amitié")
+
+            target_id = self.target_order[self.current_index]
+            numero = self.current_index + 1
+            total = len(self.target_order)
+
+            if self.phase == "voting":
+                embed = self.creer_embed(
+                    f"Qui est-ce ? 👀 — {numero}/{total}",
+                    (
+                        "Lis les réponses ci-dessous puis vote pour la "
+                        "personne qui, selon toi, est décrite.\n"
+                        "La personne ayant répondu reste anonyme."
+                    ),
+                    discord.Color.blurple(),
+                )
+
+                self.ajouter_reponses(embed, target_id)
+
+                embed.add_field(
+                    name="🗳️ Vote",
+                    value="Ton vote reste secret et peut être modifié tant que les votes sont ouverts.",
+                    inline=False,
+                )
+
+                return embed
+
+            cible = self.players[target_id]
+            repondant_id = self.respondent_by_target.get(target_id)
+
+            if repondant_id is not None and repondant_id in self.players:
+                repondant = self.players[repondant_id]
+                repondant_texte = self.nom_affichage(repondant)
+            else:
+                repondant_texte = "Aucune réponse reçue"
+
+            embed = self.creer_embed(
+                f"Résultats — {numero}/{total} 🏆",
+                "Voici les votes de cette manche !",
+                discord.Color.green(),
+            )
+
+            self.ajouter_reponses(embed, target_id)
+
+            lignes_personnes = [
+                f"🎯 **Personne ciblée :** {self.nom_affichage(cible)}",
+                f"🙊 **Personne ayant répondu :** {repondant_texte}"
+            ]
+
+            votes_data = []
+
+            for voter_id, member in self.players.items():
+                choix_id = self.votes.get(voter_id)
+                nom_votant = self.nom_affichage(member)
+
+                if choix_id is None:
+                    votes_data.append(
+                        ("➖", nom_votant, "Aucun vote, nul")
+                    )
+                    continue
+
+                choix = self.players.get(choix_id)
+                if choix is None:
+                    continue
+
+                exact = choix_id == target_id
+                symbole = "✅" if exact else "❌"
+
+                votes_data.append(
+                    (symbole, nom_votant, self.nom_affichage(choix))
+                )
+
+            largeur_max = max(
+                (len(nom_votant) for _, nom_votant, _ in votes_data),
+                default=0,
+            )
+
+            lignes_votes = [
+                "```text",
+                *[
+                    f"{symbole} {nom_votant:<{largeur_max}}  → {nom_choisi}"
+                    for symbole, nom_votant, nom_choisi in votes_data
+                ],
+                "```",
+            ]
+
+            ajouter_champs_groupes(
+                embed,
+                "Qui ça ?",
+                lignes_personnes or [
+                    "Bah personne lol. J'pense ça bug, faudrait check."
+                ],
+            )
+
+            ajouter_champs_groupes(
+                embed,
+                "Votes",
+                lignes_votes or ["Aucun vote enregistré."],
+            )
+
+            return embed
+
+        return self.creer_embed("Le jeu de l'amitié")
+
+    def ajouter_reponses(
+            self,
+            embed: discord.Embed,
+            target_id: int,
+    ) -> None:
+        reponses = self.answers_by_target.get(target_id, {})
+
+        for emoji, label, question in self.questions:
+            reponse = reponses.get(emoji)
+
+            if reponse:
+                texte = discord.utils.escape_mentions(reponse)
+            else:
+                texte = "*(Aucune réponse reçue. Malaise.)*"
+
+            embed.add_field(
+                name=f"{emoji} {label}",
+                value=f"__{texte[:1024]}__",
+                inline=False,
+            )
+
+    def build_final_embed(self) -> discord.Embed:
+        embed = self.creer_embed(
+            "Fin du jeu de l'amitié 🎉",
+            (
+                f"La partie est terminée après "
+                f"**{self.completed_rounds} manche{"s" if self.completed_rounds > 1 else ""}** révélée{"s" if self.completed_rounds > 1 else ""}.\n\n"
+                "Chaque bonne identification rapporte **1 point**."
+            ),
+            discord.Color.gold(),
+        )
+
+        classement = sorted(
+            self.players.items(),
+            key=lambda item: (
+                -self.scores.get(item[0], 0),
+                item[1].display_name.casefold(),
+            ),
+        )
+
+        if not classement:
+            embed.description += "\n\nAucun joueur n'a participé."
+            return embed
+
+        medailles = ["🥇", "🥈", "🥉", "🏅", "🏅"]
+
+        top_lignes = [
+            (
+                f"{medailles[index]} **{self.nom_affichage(member)}** "
+                f"— {self.scores.get(uid, 0)} point{"s" if self.scores.get(uid, 0) > 1 else ""}"
+            )
+            for index, (uid, member) in enumerate(classement[:5])
+        ]
+
+        ajouter_champs_groupes(embed, "Top 5", top_lignes)
+
+        return embed
+
+    # --------------------------------------------------
+    # Inscription et démarrage
+    # --------------------------------------------------
+
+    async def abort_registration(self) -> None:
+        if self.ended or self.phase != "registration":
+            return
+
+        self.ended = True
+        self.phase = "finished"
+        self.cancel_timer()
+
+        if self.message:
+            embed = self.creer_embed(
+                "Partie annulée",
+                "Les inscriptions sont terminées, mais il faut au moins **2 joueurs** pour commencer.",
+                discord.Color.red(),
+            )
+
+            try:
+                await self.message.edit(embed=embed, view=None)
+            except discord.HTTPException:
+                pass
+
+    async def start_game(self) -> None:
+        if self.ended or self.phase != "registration":
+            return
+
+        if len(self.players) < 2:
+            return
+
+        self.cancel_timer()
+
+        self.phase = "responses"
+        self.scores = {uid: 0 for uid in self.players}
+        self.answers_by_target.clear()
+        self.respondent_by_target.clear()
+        self.answered_respondents.clear()
+        self.prompt_views.clear()
+        self.dm_failures.clear()
+        self.votes.clear()
+        self.completed_rounds = 0
+        self.current_index = 0
+
+        # Crée un dérangement aléatoire : personne ne reçoit sa propre
+        # identité comme cible, et chaque joueur est ciblé une seule fois.
+        player_ids = list(self.players.keys())
+        random.shuffle(player_ids)
+        target_ids = player_ids.copy()
+
+        while any(
+                player_id == target_id
+                for player_id, target_id in zip(player_ids, target_ids)
+        ):
+            random.shuffle(target_ids)
+
+        self.assignments = dict(zip(player_ids, target_ids))
+
+        if os.getenv("RUN_MODE") == "DEV" and self.dev_bot_id is not None and self.dev_bot_id in self.assignments:
+            bot_target_id = self.assignments[self.dev_bot_id]
+            dev_answers = AMITIE_DEV_ANSWERS[self.mode]
+
+            self.answers_by_target[bot_target_id] = {
+                emoji: dev_answers[emoji]
+                for emoji, _, _ in self.questions
+            }
+
+            self.respondent_by_target[bot_target_id] = self.dev_bot_id
+            self.answered_respondents.add(self.dev_bot_id)
+
+        self.target_order = player_ids.copy()
+        random.shuffle(self.target_order)
+
+        self.public_view = AmitieView(self, "responses")
+        await self.refresh_public()
+
+        # Envoi des questions en privé.
+        for respondent_id, target_id in self.assignments.items():
+            if self.ended or self.phase != "responses":
+                break
+
+            if respondent_id == self.dev_bot_id:
+                continue
+
+            respondent = self.players[respondent_id]
+            target = self.players[target_id]
+
+            instructions = "\n\n".join(
+                f"{emoji} **{label}**\n{question}"
+                for emoji, label, question in self.questions
+            )
+
+            embed = self.creer_embed(
+                "Le jeu de l'amitié — Tes questions ✍️",
+                (
+                    f"**Ta personne cible :** "
+                    f"{self.nom_affichage(target)}\n\n"
+                    f"{instructions}\n\n"
+                    "**Consignes importantes :**\n"
+                    "• Formule tes réponses au féminin, comme si tu "
+                    "parlais de « la personne ».\n"
+                    "• Ne donne pas son nom, son pseudo ou un indice "
+                    "permettant de l'identifier directement.\n"
+                    "• Réponds à toutes les questions avant de valider."
+                ),
+                discord.Color.blurple(),
+            )
+
+            prompt_view = AmitiePromptView(self, respondent_id)
+
+            try:
+                prompt_message = await respondent.send(
+                    embed=embed,
+                    view=prompt_view,
+                )
+                prompt_view.prompt_message = prompt_message
+                self.prompt_views[respondent_id] = prompt_view
+
+            except (discord.Forbidden, discord.HTTPException):
+                self.dm_failures.add(respondent_id)
+
+        if self.ended or self.phase != "responses":
+            return
+
+        self.start_timer("responses", self.response_duration)
+        await self.refresh_public()
+
+    # --------------------------------------------------
+    # Réponses
+    # --------------------------------------------------
+
+    async def begin_voting(self) -> None:
+        if self.ended or self.phase != "responses":
+            return
+
+        self.cancel_timer()
+
+        self.phase = "voting"
+        self.current_index = 0
+        self.votes.clear()
+
+        self.cast_dev_vote()
+        self.public_view = AmitieView(self, "voting")
+
+        self.start_timer("voting", self.vote_duration)
+        await self.refresh_public()
+
+    # --------------------------------------------------
+    # Résultats et manches suivantes
+    # --------------------------------------------------
+
+    async def reveal_results(self) -> None:
+        if self.ended or self.phase != "voting":
+            return
+
+        self.cancel_timer()
+
+        self.phase_deadline = None
+        self.phase_started_at = None
+        self.phase_duration = 0
+
+        target_id = self.target_order[self.current_index]
+
+        for voter_id, choix_id in self.votes.items():
+            if choix_id == target_id:
+                self.scores[voter_id] = self.scores.get(voter_id, 0) + 1
+
+        self.completed_rounds += 1
+        self.phase = "results"
+
+        self.public_view = AmitieView(self, "results")
+
+        self.start_timer("results", self.results_duration)
+        await self.refresh_public()
+
+    async def next_round(self) -> None:
+        if self.ended or self.phase != "results":
+            return
+
+        if self.current_index + 1 >= len(self.target_order):
+            await self.finish_game()
+            return
+
+        self.current_index += 1
+        self.votes.clear()
+        self.cast_dev_vote()
+        self.phase = "voting"
+
+        self.public_view = AmitieView(self, "voting")
+
+        self.start_timer("voting", self.vote_duration)
+        await self.refresh_public()
+
+    # --------------------------------------------------
+    # Fin de partie
+    # --------------------------------------------------
+
+    async def finish_game(self) -> None:
+        if self.ended:
+            return
+
+        self.ended = True
+        self.phase = "finished"
+        self.cancel_timer()
+
+        if self.message:
+            try:
+                await self.message.edit(
+                    embed=self.build_final_embed(),
+                    view=None,
+                )
+            except discord.HTTPException:
+                pass
+
+
+# ======================================================
+# Interface publique : inscription, votes et commandes
+# réservées au maître du jeu
+# ======================================================
+
+class AmitieJoinButton(discord.ui.Button):
+    def __init__(self, game: AmitieGame):
+        super().__init__(
+            label="Rejoindre",
+            style=discord.ButtonStyle.primary,
+        )
+        self.game = game
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if game.ended or game.phase != "registration":
+            await interaction.response.send_message(
+                "Les inscriptions sont fermées.",
+                ephemeral=True,
+            )
+            return
+
+        if interaction.user.bot:
+            await interaction.response.send_message(
+                "Les bots ne peuvent pas participer.",
+                ephemeral=True,
+            )
+            return
+
+        if interaction.user.id in game.players:
+            await interaction.response.send_message(
+                "Tu es déjà inscrit.",
+                ephemeral=True,
+            )
+            return
+
+        if len(game.players) >= game.max_players:
+            await interaction.response.send_message(
+                f"La partie est complète : {game.max_players} joueurs maximum.",
+                ephemeral=True,
+            )
+            return
+
+        game.players[interaction.user.id] = interaction.user
+
+        if os.getenv("RUN_MODE") == "DEV":
+            bot_user = interaction.guild.me if interaction.guild is not None else None
+
+            if bot_user is not None and bot_user.id not in game.players:
+                game.dev_bot_id = bot_user.id
+                game.players[bot_user.id] = bot_user
+
+        await interaction.response.send_message(
+            "✅ Tu as rejoint la partie !",
+            ephemeral=True,
+        )
+
+        await game.refresh_public()
+
+
+class AmitieStartButton(discord.ui.Button):
+    def __init__(self, game: AmitieGame):
+        super().__init__(
+            label="Démarrer",
+            style=discord.ButtonStyle.success,
+        )
+        self.game = game
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if interaction.user.id != game.host.id:
+            await interaction.response.send_message(
+                "Seul le maître du jeu peut démarrer la partie.",
+                ephemeral=True,
+            )
+            return
+
+        if game.ended or game.phase != "registration":
+            await interaction.response.send_message(
+                "La partie a déjà commencé ou est terminée.",
+                ephemeral=True,
+            )
+            return
+
+        if len(game.players) < 2:
+            await interaction.response.send_message(
+                "Il faut au moins 2 joueurs inscrits.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        await game.start_game()
+
+
+class AmitieEndButton(discord.ui.Button):
+    def __init__(self, game: AmitieGame):
+        super().__init__(
+            label="Fin de jeu",
+            style=discord.ButtonStyle.danger,
+        )
+        self.game = game
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if interaction.user.id != game.host.id:
+            await interaction.response.send_message(
+                "Seul le maître du jeu peut terminer la partie.",
+                ephemeral=True,
+            )
+            return
+
+        if game.ended:
+            await interaction.response.send_message(
+                "La partie est déjà terminée.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.send_message(
+            "La partie est terminée.",
+            ephemeral=True,
+        )
+
+        await game.finish_game()
+
+
+class AmitieRevealButton(discord.ui.Button):
+    def __init__(self, game: AmitieGame):
+        super().__init__(
+            label="Révéler les résultats",
+            style=discord.ButtonStyle.success,
+        )
+        self.game = game
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if interaction.user.id != game.host.id:
+            await interaction.response.send_message(
+                "Seul le maître du jeu peut fermer les votes.",
+                ephemeral=True,
+            )
+            return
+
+        if game.ended or game.phase != "voting":
+            await interaction.response.send_message(
+                "Les votes ne sont pas ouverts.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        await game.reveal_results()
+
+
+class AmitieNextButton(discord.ui.Button):
+    def __init__(self, game: AmitieGame):
+        super().__init__(
+            label="Suivant",
+            style=discord.ButtonStyle.primary,
+        )
+        self.game = game
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if interaction.user.id != game.host.id:
+            await interaction.response.send_message(
+                "Seul le maître du jeu peut passer à la suite.",
+                ephemeral=True,
+            )
+            return
+
+        if game.ended or game.phase != "results":
+            await interaction.response.send_message(
+                "Les résultats de cette manche ne sont pas disponibles.",
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        await game.next_round()
+
+
+class AmitieVoteSelect(discord.ui.Select):
+    def __init__(self, game: AmitieGame):
+        self.game = game
+
+        options = [
+            discord.SelectOption(
+                label=member.display_name[:100] or "Joueur",
+                value=str(player_id),
+            )
+            for player_id, member in game.players.items()
+        ]
+
+        super().__init__(
+            placeholder="Qui est la personne décrite ?",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if game.ended or game.phase != "voting":
+            await interaction.response.send_message(
+                "Les votes sont fermés.",
+                ephemeral=True,
+            )
+            return
+
+        if interaction.user.id not in game.players:
+            await interaction.response.send_message(
+                "Tu dois être inscrit pour voter.",
+                ephemeral=True,
+            )
+            return
+
+        if not self.values:
+            await interaction.response.send_message(
+                "Choisis une personne dans la liste.",
+                ephemeral=True,
+            )
+            return
+
+        choix_id = int(self.values[0])
+
+        if choix_id not in game.players:
+            await interaction.response.send_message(
+                "Ce choix n'est plus disponible.",
+                ephemeral=True,
+            )
+            return
+
+        game.votes[interaction.user.id] = choix_id
+
+        await interaction.response.send_message(
+            f"✅ Tu as voté pour **{game.players.get(choix_id).display_name[:100]}** !\nTu peux modifier ton vote si besoin.",
+            ephemeral=True,
+        )
+
+
+class AmitieView(discord.ui.View):
+    def __init__(self, game: AmitieGame, phase: str):
+        super().__init__(timeout=None)
+        self.game = game
+
+        if phase == "registration":
+            self.add_item(AmitieJoinButton(game))
+            self.add_item(AmitieStartButton(game))
+            self.add_item(AmitieEndButton(game))
+
+        elif phase == "responses":
+            self.add_item(AmitieEndButton(game))
+
+        elif phase == "voting":
+            self.add_item(AmitieVoteSelect(game))
+            self.add_item(AmitieRevealButton(game))
+            self.add_item(AmitieEndButton(game))
+
+        elif phase == "results":
+            self.add_item(AmitieNextButton(game))
+            self.add_item(AmitieEndButton(game))
+
+
+# ======================================================
+# Interface privée : formulaire de réponses en DM
+# ======================================================
+
+class AmitieRespondButton(discord.ui.Button):
+    def __init__(self, game: AmitieGame, respondent_id: int):
+        super().__init__(
+            label="Répondre aux questions",
+            style=discord.ButtonStyle.primary,
+        )
+        self.game = game
+        self.respondent_id = respondent_id
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if interaction.user.id != self.respondent_id:
+            await interaction.response.send_message(
+                "Ce formulaire ne t'est pas destiné."
+            )
+            return
+
+        if game.ended or game.phase != "responses":
+            await interaction.response.send_message(
+                "La phase de réponses est terminée."
+            )
+            return
+
+        if self.respondent_id in game.answered_respondents:
+            await interaction.response.send_message(
+                "Tu as déjà envoyé tes réponses."
+            )
+            return
+
+        await interaction.response.send_modal(
+            AmitieResponseModal(game, self.respondent_id)
+        )
+
+
+class AmitiePromptView(discord.ui.View):
+    def __init__(self, game: AmitieGame, respondent_id: int):
+        super().__init__(timeout=None)
+
+        self.game = game
+        self.respondent_id = respondent_id
+        self.prompt_message: discord.Message | None = None
+
+        self.add_item(AmitieRespondButton(game, respondent_id))
+
+    async def mark_done(self) -> None:
+        for item in self.children:
+            item.disabled = True
+
+        if self.prompt_message is None:
+            return
+
+        try:
+            embed = self.prompt_message.embeds[0]
+            embed.set_footer(text="✅ Réponses envoyées")
+
+            await self.prompt_message.edit(
+                embed=embed,
+                view=self,
+            )
+        except (discord.HTTPException, IndexError):
+            pass
+
+
+class AmitieResponseModal(discord.ui.Modal):
+    def __init__(self, game: AmitieGame, respondent_id: int):
+        super().__init__(
+            title="Tes réponses — Jeu de l'amitié",
+            timeout=300,
+        )
+
+        self.game = game
+        self.respondent_id = respondent_id
+
+        self.fields_by_emoji: list[
+            tuple[str, discord.ui.TextInput]
+        ] = []
+
+        for emoji, label, question in game.questions:
+            champ = discord.ui.TextInput(
+                label=f"{emoji} {label}"[:45],
+                style=discord.TextStyle.paragraph,
+                placeholder=question[:100],
+                required=True,
+                min_length=1,
+                max_length=500,
+            )
+
+            self.fields_by_emoji.append((emoji, champ))
+            self.add_item(champ)
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        game = self.game
+
+        if interaction.user.id != self.respondent_id:
+            await interaction.response.send_message(
+                "Ce formulaire ne t'est pas destiné."
+            )
+            return
+
+        if game.ended or game.phase != "responses":
+            await interaction.response.send_message(
+                "La phase de réponses est terminée."
+            )
+            return
+
+        if self.respondent_id in game.answered_respondents:
+            await interaction.response.send_message(
+                "Tes réponses ont déjà été enregistrées."
+            )
+            return
+
+        reponses = {
+            emoji: champ.value.strip()
+            for emoji, champ in self.fields_by_emoji
+        }
+
+        if any(not texte for texte in reponses.values()):
+            await interaction.response.send_message(
+                "Tous les champs doivent contenir une réponse."
+            )
+            return
+
+        target_id = game.assignments.get(self.respondent_id)
+
+        if target_id is None:
+            await interaction.response.send_message(
+                "Impossible de retrouver ta personne cible."
+            )
+            return
+
+        game.answers_by_target[target_id] = reponses
+        game.respondent_by_target[target_id] = self.respondent_id
+        game.answered_respondents.add(self.respondent_id)
+
+        await interaction.response.send_message(
+            "✅ Tes réponses ont été enregistrées !"
+        )
+
+        prompt_view = game.prompt_views.get(self.respondent_id)
+
+        if isinstance(prompt_view, AmitiePromptView):
+            await prompt_view.mark_done()
+
+        # Si tous les participants ont répondu, les votes commencent tout de suite.
+        if game.phase == "responses" and len(game.answered_respondents) >= len(game.assignments):
+            await game.begin_voting()
+
+
+# ======================================================
+# Commande Discord
+# ======================================================
+
+@bot.tree.command(
+    name="amitie",
+    description="Lance une partie du jeu de l'amitié.",
+)
+@app_commands.choices(
+    mode=[app_commands.Choice(name=v[0], value=k) for (k, v) in AMITIE_MODES.items()]
+)
+async def amitie(
+        interaction: discord.Interaction,
+        mode: app_commands.Choice[str],
+):
+    if interaction.guild is None or interaction.channel is None:
+        await interaction.response.send_message(
+            "Cette commande doit être utilisée dans un serveur Discord.",
+            ephemeral=True,
+        )
+        return
+
+    amitie_game = AmitieGame(
+        host=interaction.user,
+        channel=interaction.channel,
+        mode=mode.value,
+    )
+
+    view = AmitieView(amitie_game, "registration")
+    amitie_game.public_view = view
+
+    amitie_game.start_timer("registration", amitie_game.open_duration)
+
+    embed = amitie_game.build_embed()
+    amitie_game.apply_timer_display(embed)
+
+    await interaction.response.send_message(
+        embed=embed,
+        view=view,
+    )
+
+    amitie_game.message = await interaction.original_response()
+
+    amitie_game.start_timer("registration", amitie_game.open_duration)
 
 
 @bot.command()
