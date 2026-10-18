@@ -4063,6 +4063,21 @@ AMITIE_MODES = {
             ),
         ],
     ),
+    "collegue": (
+        "🤵 Bon collègue / Mauvais collègue 🙅",
+        [
+            (
+                "🤵",
+                "Bon collègue",
+                "Donne une raison qui fait que cette personne est (ou serait) un bon collègue.",
+            ),
+            (
+                "🙅",
+                "Mauvais collègue",
+                "Donne une raison qui fait que cette personne est (ou serait) un mauvais collègue.",
+            ),
+        ],
+    ),
 }
 
 AMITIE_DEV_ANSWERS = {
@@ -4085,6 +4100,10 @@ AMITIE_DEV_ANSWERS = {
             "Elle peut parfois avoir du mal à exprimer ce qu'elle ressent "
             "et laisser les choses s'accumuler."
         ),
+    },
+    "collegue": {
+        "🤵": "Elle est sérieuse dans ses porojets, et avance à temps.",
+        "🙅": "Elle passerait son temps au café, et jamais en meeting.",
     },
 }
 
