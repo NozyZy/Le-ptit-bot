@@ -4078,6 +4078,16 @@ AMITIE_MODES = {
             ),
         ],
     ),
+    "anecdote": (
+        "💡 Anecdote",
+        [
+            (
+                "💡",
+                "Anecdote",
+                "Raconte une anecdote courte en lien avec cette personne.",
+            ),
+        ],
+    ),
 }
 
 AMITIE_DEV_ANSWERS = {
@@ -4104,6 +4114,9 @@ AMITIE_DEV_ANSWERS = {
     "collegue": {
         "🤵": "Elle est sérieuse dans ses porojets, et avance à temps.",
         "🙅": "Elle passerait son temps au café, et jamais en meeting.",
+    },
+    "anecdote": {
+        "💡": "Elle porte le même prénom que mon père.",
     },
 }
 
