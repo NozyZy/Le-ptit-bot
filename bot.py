@@ -4683,8 +4683,13 @@ class AmitieGame:
             target = self.players[target_id]
 
             instructions = "\n\n".join(
-                f"{emoji} **{label}**\n{question}"
+                f"### {emoji} **{label}**\n{question}"
                 for emoji, label, question in self.questions
+            )
+
+            exemples = "\n".join(
+                f"{emoji} : {answer}"
+                for emoji, answer in AMITIE_DEV_ANSWERS[self.mode].items()
             )
 
             embed = self.creer_embed(
@@ -4693,6 +4698,7 @@ class AmitieGame:
                     f"**Ta personne cible :** "
                     f"{self.nom_affichage(target)}\n\n"
                     f"{instructions}\n\n"
+                    f"Exemple : \n{exemples}\n\n"
                     "**Consignes importantes :**\n"
                     "• Formule tes réponses au féminin, comme si tu "
                     "parlais de « la personne ».\n"
