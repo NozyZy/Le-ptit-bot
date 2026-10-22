@@ -763,7 +763,7 @@ async def on_message(message):
             day_of_year = today.timetuple().tm_yday
             seed = hash((user.id, day_of_year, today.year))
             rng = random.Random(seed)
-            shiny = rng.randint(0, 8192) == 0
+            shiny = rng.randint(0, 4096) == 1
             pokemon = rng.choice(ALL_POKEMONS)
 
             text = rng.choice([
