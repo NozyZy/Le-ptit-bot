@@ -4686,7 +4686,7 @@ class AmitieGame:
         # Le tirage des manches se fera après les réponses : N cartes parmi 2N.
         self.target_order = []
 
-        self.public_view = AmitieView(self, "responses")        self.public_view = AmitieView(self, "responses")
+        self.public_view = AmitieView(self, "responses")
         await self.refresh_public()
 
         # Envoi de deux formulaires privés, un par cible distincte.
