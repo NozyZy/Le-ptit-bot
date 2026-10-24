@@ -4177,16 +4177,16 @@ class AmitieGame:
         self.players: dict[int, discord.Member | discord.User] = {}
         self.dev_bot_id: int | None = None
 
-        # Une cible différente du répondant, avec une correspondance
-        # un-à-un entre les répondants et les personnes décrites.
-        self.assignments: dict[int, int] = {}
-        self.target_order: list[int] = []
+        # Chaque répondant décrit deux cibles distinctes, jamais lui-même.
+        self.assignments: dict[int, list[int]] = {}
+        # Chaque manche est une paire (répondant, cible) tirée au sort.
+        self.target_order: list[tuple[int, int]] = []
 
-        # Les réponses sont indexées par personne ciblée.
-        self.answers_by_target: dict[int, dict[str, str]] = {}
-        self.respondent_by_target: dict[int, int] = {}
+        # Réponses indexées par paire (répondant, cible).
+        self.answers_by_response: dict[tuple[int, int], dict[str, str]] = {}
+        self.answered_response_pairs: set[tuple[int, int]] = set()
         self.answered_respondents: set[int] = set()
-        self.prompt_views: dict[int, discord.ui.View] = {}
+        self.prompt_views: dict[tuple[int, int], discord.ui.View] = {}
         self.dm_failures: set[int] = set()
 
         # Vote : identifiant du votant -> identifiant de la personne choisie.
@@ -4336,7 +4336,7 @@ class AmitieGame:
             return
 
         if phase == "registration":
-            if len(self.players) >= 2:
+            if len(self.players) >= 3:
                 await self.start_game()
             else:
                 await self.abort_registration()
@@ -4409,8 +4409,9 @@ class AmitieGame:
                     f"**Mode :** {self.mode_title}\n\n"
                     "Les joueurs répondent actuellement aux questions "
                     "qu'ils ont reçues en **message privé**.\n\n"
-                    "Chaque joueur a une personne cible. "
-                    "Les réponses resteront anonymes pendant les votes.\n\n"
+                    "Chaque joueur décrit deux personnes différentes en message privé. "
+                    "Un tirage aléatoire sélectionnera ensuite autant de réponses que de joueurs "
+                    "pour les votes, afin de préserver le doute.\n\n"
                     "**Rappel :** réponds au féminin et ne révèle pas "
                     "directement l'identité de ta cible."
                 ),
@@ -4435,7 +4436,8 @@ class AmitieGame:
             if not self.target_order:
                 return self.creer_embed("Le jeu de l'amitié")
 
-            target_id = self.target_order[self.current_index]
+            respondent_id, target_id = self.target_order[self.current_index]
+            response_key = (respondent_id, target_id)
             numero = self.current_index + 1
             total = len(self.target_order)
 
@@ -4450,7 +4452,7 @@ class AmitieGame:
                     discord.Color.blurple(),
                 )
 
-                self.ajouter_reponses(embed, target_id)
+                self.ajouter_reponses(embed, response_key)
 
                 embed.add_field(
                     name="🗳️ Participation",
@@ -4466,10 +4468,9 @@ class AmitieGame:
                 return embed
 
             cible = self.players[target_id]
-            repondant_id = self.respondent_by_target.get(target_id)
 
-            if repondant_id is not None and repondant_id in self.players:
-                repondant = self.players[repondant_id]
+            if response_key in self.answered_response_pairs and respondent_id in self.players:
+                repondant = self.players[respondent_id]
                 repondant_texte = self.nom_affichage(repondant)
             else:
                 repondant_texte = "Aucune réponse reçue"
@@ -4480,7 +4481,7 @@ class AmitieGame:
                 discord.Color.green(),
             )
 
-            self.ajouter_reponses(embed, target_id)
+            self.ajouter_reponses(embed, response_key)
 
             lignes_personnes = [
                 f"🎯 **Personne ciblée :** {self.nom_affichage(cible)}",
@@ -4545,9 +4546,9 @@ class AmitieGame:
     def ajouter_reponses(
             self,
             embed: discord.Embed,
-            target_id: int,
+            response_key: tuple[int, int],
     ) -> None:
-        reponses = self.answers_by_target.get(target_id, {})
+        reponses = self.answers_by_response.get(response_key, {})
 
         for emoji, label, question in self.questions:
             reponse = reponses.get(emoji)
@@ -4615,7 +4616,7 @@ class AmitieGame:
         if self.message:
             embed = self.creer_embed(
                 "Partie annulée",
-                "Les inscriptions sont terminées, mais il faut au moins **2 joueurs** pour commencer.",
+                "Les inscriptions sont terminées, mais il faut au moins **3 joueurs** pour commencer.",
                 discord.Color.red(),
             )
 
@@ -4628,15 +4629,15 @@ class AmitieGame:
         if self.ended or self.phase != "registration":
             return
 
-        if len(self.players) < 2:
+        if len(self.players) < 3:
             return
 
         self.cancel_timer()
 
         self.phase = "responses"
         self.scores = {uid: 0 for uid in self.players}
-        self.answers_by_target.clear()
-        self.respondent_by_target.clear()
+        self.answers_by_response.clear()
+        self.answered_response_pairs.clear()
         self.answered_respondents.clear()
         self.prompt_views.clear()
         self.dm_failures.clear()
@@ -4644,40 +4645,52 @@ class AmitieGame:
         self.completed_rounds = 0
         self.current_index = 0
 
-        # Crée un dérangement aléatoire : personne ne reçoit sa propre
-        # identité comme cible, et chaque joueur est ciblé une seule fois.
+        # Deux décalages cycliques distincts garantissent que chaque répondant
+        # reçoit deux cibles différentes, jamais lui-même, et que chaque cible
+        # dispose exactement de deux séries de réponses.
         player_ids = list(self.players.keys())
         random.shuffle(player_ids)
-        target_ids = player_ids.copy()
+        nombre_joueurs = len(player_ids)
+        decalages = random.sample(range(1, nombre_joueurs), k=2)
 
-        while any(
-                player_id == target_id
-                for player_id, target_id in zip(player_ids, target_ids)
+        self.assignments = {
+            respondent_id: [
+                player_ids[(index + decalage) % nombre_joueurs]
+                for decalage in decalages
+            ]
+            for index, respondent_id in enumerate(player_ids)
+        }
+
+        # Précrée les deux emplacements de réponses de chaque joueur.
+        # Ainsi, une absence en DM ne réduit pas le nombre de manches.
+        for respondent_id, target_ids in self.assignments.items():
+            for target_id in target_ids:
+                self.answers_by_response[(respondent_id, target_id)] = {}
+
+        if (
+            os.getenv("RUN_MODE") == "DEV"
+            and self.dev_bot_id is not None
+            and self.dev_bot_id in self.assignments
         ):
-            random.shuffle(target_ids)
-
-        self.assignments = dict(zip(player_ids, target_ids))
-
-        if os.getenv("RUN_MODE") == "DEV" and self.dev_bot_id is not None and self.dev_bot_id in self.assignments:
-            bot_target_id = self.assignments[self.dev_bot_id]
             dev_answers = AMITIE_DEV_ANSWERS[self.mode]
+            for bot_target_id in self.assignments[self.dev_bot_id]:
+                response_key = (self.dev_bot_id, bot_target_id)
+                self.answers_by_response[response_key] = {
+                    emoji: dev_answers[emoji]
+                    for emoji, _, _ in self.questions
+                }
+                self.answered_response_pairs.add(response_key)
 
-            self.answers_by_target[bot_target_id] = {
-                emoji: dev_answers[emoji]
-                for emoji, _, _ in self.questions
-            }
-
-            self.respondent_by_target[bot_target_id] = self.dev_bot_id
             self.answered_respondents.add(self.dev_bot_id)
 
-        self.target_order = player_ids.copy()
-        random.shuffle(self.target_order)
+        # Le tirage des manches se fera après les réponses : N cartes parmi 2N.
+        self.target_order = []
 
-        self.public_view = AmitieView(self, "responses")
+        self.public_view = AmitieView(self, "responses")        self.public_view = AmitieView(self, "responses")
         await self.refresh_public()
 
-        # Envoi des questions en privé.
-        for respondent_id, target_id in self.assignments.items():
+        # Envoi de deux formulaires privés, un par cible distincte.
+        for respondent_id, target_ids in self.assignments.items():
             if self.ended or self.phase != "responses":
                 break
 
@@ -4685,47 +4698,52 @@ class AmitieGame:
                 continue
 
             respondent = self.players[respondent_id]
-            target = self.players[target_id]
+            for numero_cible, target_id in enumerate(target_ids, start=1):
+                if self.ended or self.phase != "responses":
+                    break
 
-            instructions = "\n\n".join(
-                f"### {emoji} **{label}**\n{question}"
-                for emoji, label, question in self.questions
-            )
+                target = self.players[target_id]
 
-            exemples = "\n".join(
-                f"{emoji} : {answer}"
-                for emoji, answer in AMITIE_DEV_ANSWERS[self.mode].items()
-            )
-
-            embed = self.creer_embed(
-                "Le jeu de l'amitié — Tes questions ✍️",
-                (
-                    f"**Ta personne cible :** "
-                    f"{self.nom_affichage(target)}\n\n"
-                    f"{instructions}\n\n"
-                    f"Exemple : \n{exemples}\n\n"
-                    "**Consignes importantes :**\n"
-                    "• Formule tes réponses au féminin, comme si tu "
-                    "parlais de « la personne ».\n"
-                    "• Ne donne pas son nom, son pseudo ou un indice "
-                    "permettant de l'identifier directement.\n"
-                    "• Réponds à toutes les questions avant de valider."
-                ),
-                discord.Color.blurple(),
-            )
-
-            prompt_view = AmitiePromptView(self, respondent_id)
-
-            try:
-                prompt_message = await respondent.send(
-                    embed=embed,
-                    view=prompt_view,
+                instructions = "\n\n".join(
+                    f"### {emoji} **{label}**\n{question}"
+                    for emoji, label, question in self.questions
                 )
-                prompt_view.prompt_message = prompt_message
-                self.prompt_views[respondent_id] = prompt_view
 
-            except (discord.Forbidden, discord.HTTPException):
-                self.dm_failures.add(respondent_id)
+                exemples = "\n".join(
+                    f"{emoji} : {answer}"
+                    for emoji, answer in AMITIE_DEV_ANSWERS[self.mode].items()
+                )
+
+                embed = self.creer_embed(
+                    f"Le jeu de l'amitié — Tes questions ({numero_cible}/2) ✍️",
+                    (
+                        f"**Ta personne cible :** "
+                        f"{self.nom_affichage(target)}\n\n"
+                        f"{instructions}\n\n"
+                        f"Exemple : \n{exemples}\n\n"
+                        "**Consignes importantes :**\n"
+                        "• Formule tes réponses au féminin, comme si tu "
+                        "parlais de « la personne ».\n"
+                        "• Ne donne pas son nom, son pseudo ou un indice "
+                        "permettant de l'identifier directement.\n"
+                        "• Réponds à toutes les questions avant de valider."
+                    ),
+                    discord.Color.blurple(),
+                )
+
+                response_key = (respondent_id, target_id)
+                prompt_view = AmitiePromptView(self, respondent_id, target_id)
+
+                try:
+                    prompt_message = await respondent.send(
+                        embed=embed,
+                        view=prompt_view,
+                    )
+                    prompt_view.prompt_message = prompt_message
+                    self.prompt_views[response_key] = prompt_view
+
+                except (discord.Forbidden, discord.HTTPException):
+                    self.dm_failures.add(respondent_id)
 
         if self.ended or self.phase != "responses":
             return
@@ -4747,6 +4765,13 @@ class AmitieGame:
         self.current_index = 0
         self.votes.clear()
 
+        available_responses = list(self.answers_by_response.keys())
+        nombre_manches = min(len(self.players), len(available_responses))
+        self.target_order = random.sample(
+            available_responses,
+            k=nombre_manches,
+        )
+
         self.cast_dev_vote()
         self.public_view = AmitieView(self, "voting")
 
@@ -4767,7 +4792,7 @@ class AmitieGame:
         self.phase_started_at = None
         self.phase_duration = 0
 
-        target_id = self.target_order[self.current_index]
+        _, target_id = self.target_order[self.current_index]
 
         for voter_id, choix_id in self.votes.items():
             if choix_id == target_id:
@@ -4907,9 +4932,9 @@ class AmitieStartButton(discord.ui.Button):
             )
             return
 
-        if len(game.players) < 2:
+        if len(game.players) < 3:
             await interaction.response.send_message(
-                "Il faut au moins 2 joueurs inscrits.",
+                "Il faut au moins 3 joueurs inscrits.",
                 ephemeral=True,
             )
             return
@@ -5100,13 +5125,14 @@ class AmitieView(discord.ui.View):
 # ======================================================
 
 class AmitieRespondButton(discord.ui.Button):
-    def __init__(self, game: AmitieGame, respondent_id: int):
+    def __init__(self, game: AmitieGame, respondent_id: int, target_id: int):
         super().__init__(
             label="Répondre aux questions",
             style=discord.ButtonStyle.primary,
         )
         self.game = game
         self.respondent_id = respondent_id
+        self.target_id = target_id
 
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.game
@@ -5123,26 +5149,34 @@ class AmitieRespondButton(discord.ui.Button):
             )
             return
 
-        if self.respondent_id in game.answered_respondents:
+        response_key = (self.respondent_id, self.target_id)
+        if response_key in game.answered_response_pairs:
             await interaction.response.send_message(
-                "Tu as déjà envoyé tes réponses."
+                "Tu as déjà envoyé tes réponses pour cette personne."
+            )
+            return
+
+        if self.target_id not in game.assignments.get(self.respondent_id, []):
+            await interaction.response.send_message(
+                "Cette cible ne correspond pas à tes questions."
             )
             return
 
         await interaction.response.send_modal(
-            AmitieResponseModal(game, self.respondent_id)
+            AmitieResponseModal(game, self.respondent_id, self.target_id)
         )
 
 
 class AmitiePromptView(discord.ui.View):
-    def __init__(self, game: AmitieGame, respondent_id: int):
+    def __init__(self, game: AmitieGame, respondent_id: int, target_id: int):
         super().__init__(timeout=None)
 
         self.game = game
         self.respondent_id = respondent_id
+        self.target_id = target_id
         self.prompt_message: discord.Message | None = None
 
-        self.add_item(AmitieRespondButton(game, respondent_id))
+        self.add_item(AmitieRespondButton(game, respondent_id, target_id))
 
     async def mark_done(self) -> None:
         for item in self.children:
@@ -5164,7 +5198,7 @@ class AmitiePromptView(discord.ui.View):
 
 
 class AmitieResponseModal(discord.ui.Modal):
-    def __init__(self, game: AmitieGame, respondent_id: int):
+    def __init__(self, game: AmitieGame, respondent_id: int, target_id: int):
         super().__init__(
             title="Tes réponses — Jeu de l'amitié",
             timeout=300,
@@ -5172,6 +5206,7 @@ class AmitieResponseModal(discord.ui.Modal):
 
         self.game = game
         self.respondent_id = respondent_id
+        self.target_id = target_id
 
         self.fields_by_emoji: list[
             tuple[str, discord.ui.TextInput]
@@ -5205,9 +5240,16 @@ class AmitieResponseModal(discord.ui.Modal):
             )
             return
 
-        if self.respondent_id in game.answered_respondents:
+        response_key = (self.respondent_id, self.target_id)
+        if response_key in game.answered_response_pairs:
             await interaction.response.send_message(
-                "Tes réponses ont déjà été enregistrées."
+                "Tes réponses pour cette personne ont déjà été enregistrées."
+            )
+            return
+
+        if self.target_id not in game.assignments.get(self.respondent_id, []):
+            await interaction.response.send_message(
+                "Impossible de retrouver cette personne cible."
             )
             return
 
@@ -5222,28 +5264,28 @@ class AmitieResponseModal(discord.ui.Modal):
             )
             return
 
-        target_id = game.assignments.get(self.respondent_id)
+        target_id = self.target_id
+        response_key = (self.respondent_id, target_id)
+        game.answers_by_response[response_key] = reponses
+        game.answered_response_pairs.add(response_key)
 
-        if target_id is None:
-            await interaction.response.send_message(
-                "Impossible de retrouver ta personne cible."
-            )
-            return
-
-        game.answers_by_target[target_id] = reponses
-        game.respondent_by_target[target_id] = self.respondent_id
-        game.answered_respondents.add(self.respondent_id)
+        assigned_targets = game.assignments.get(self.respondent_id, [])
+        if assigned_targets and all(
+            (self.respondent_id, assigned_target) in game.answered_response_pairs
+            for assigned_target in assigned_targets
+        ):
+            game.answered_respondents.add(self.respondent_id)
 
         await interaction.response.send_message(
-            "✅ Tes réponses ont été enregistrées !"
+            f"✅ Tes réponses pour **{game.nom_affichage(game.players[target_id])}** ont été enregistrées."
         )
 
-        prompt_view = game.prompt_views.get(self.respondent_id)
+        prompt_view = game.prompt_views.get(response_key)
 
         if isinstance(prompt_view, AmitiePromptView):
             await prompt_view.mark_done()
 
-        # Si tous les participants ont répondu, les votes commencent tout de suite.
+        # Les votes commencent dès que chaque joueur a répondu pour ses deux cibles.
         if game.phase == "responses" and len(game.answered_respondents) >= len(game.assignments):
             await game.begin_voting()
 
