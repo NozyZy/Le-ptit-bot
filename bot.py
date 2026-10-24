@@ -4453,7 +4453,12 @@ class AmitieGame:
                 self.ajouter_reponses(embed, target_id)
 
                 embed.add_field(
-                    name="🗳️ Vote",
+                    name="🗳️ Participation",
+                    value=f"**{len(self.votes)} / {len(self.players)}** personnes ont voté.",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Vote",
                     value="Ton vote reste secret et peut être modifié tant que les votes sont ouverts.",
                     inline=False,
                 )
@@ -5062,6 +5067,9 @@ class AmitieVoteSelect(discord.ui.Select):
             f"✅ Tu as voté pour **{game.players.get(choix_id).display_name[:100]}** !\nTu peux modifier ton vote si besoin.",
             ephemeral=True,
         )
+
+        # Met à jour immédiatement le compteur public de votes.
+        await game.refresh_public()
 
 
 class AmitieView(discord.ui.View):
